@@ -15,6 +15,7 @@ import '../../features/invoices/presentation/create_invoice_screen.dart';
 import '../../features/invoices/presentation/invoice_detail_screen.dart';
 import '../../features/settings/presentation/settings_screen.dart';
 import '../../features/settings/presentation/premium_screen.dart';
+import '../../features/settings/presentation/profile_screen.dart';
 import '../supabase/supabase_client.dart';
 
 final _rootNavigatorKey = GlobalKey<NavigatorState>();
@@ -253,6 +254,25 @@ GoRouter createRouter() {
         pageBuilder: (context, state) => CustomTransitionPage(
           key: state.pageKey,
           child: const SettingsScreen(),
+          transitionsBuilder: (context, animation, secondaryAnimation, child) {
+            return SlideTransition(
+              position:
+                  Tween<Offset>(
+                    begin: const Offset(1, 0),
+                    end: Offset.zero,
+                  ).animate(
+                    CurveTween(curve: Curves.easeOutCubic).animate(animation),
+                  ),
+              child: child,
+            );
+          },
+        ),
+      ),
+      GoRoute(
+        path: '/profile',
+        pageBuilder: (context, state) => CustomTransitionPage(
+          key: state.pageKey,
+          child: const ProfileScreen(),
           transitionsBuilder: (context, animation, secondaryAnimation, child) {
             return SlideTransition(
               position:

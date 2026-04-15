@@ -20,4 +20,8 @@ class HapticUtils {
   static void vibrate() {
     HapticFeedback.vibrate();
   }
+
+  static void success() {
+    HapticFeedback.mediumImpact();
+  }
 }

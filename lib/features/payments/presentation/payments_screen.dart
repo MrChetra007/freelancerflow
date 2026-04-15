@@ -3,6 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/utils/currency_formatter.dart';
+import '../../../../core/widgets/animated_list_item.dart';
+import '../../../../core/utils/haptic_utils.dart';
 import '../data/payments_provider.dart';
 import '../domain/payment.dart';
 import 'widgets/payment_tile.dart';
@@ -91,13 +93,19 @@ class PaymentsScreen extends ConsumerWidget {
                     itemCount: list.length,
                     itemBuilder: (context, index) {
                       final payment = list[index];
-                      return Padding(
-                        padding: const EdgeInsets.only(bottom: 12),
-                        child: PaymentTile(
-                          payment: payment,
-                          onTap: () =>
-                              context.push('/payments/add', extra: payment.id),
-                          onDelete: () => _confirmDelete(context, ref, payment),
+                      return AnimatedListItem(
+                        index: index,
+                        child: Padding(
+                          padding: const EdgeInsets.only(bottom: 12),
+                          child: PaymentTile(
+                            payment: payment,
+                            onTap: () {
+                              HapticUtils.lightImpact();
+                              context.push('/payments/add', extra: payment.id);
+                            },
+                            onDelete: () =>
+                                _confirmDelete(context, ref, payment),
+                          ),
                         ),
                       );
                     },
@@ -111,7 +119,10 @@ class PaymentsScreen extends ConsumerWidget {
         ],
       ),
       floatingActionButton: FloatingActionButton.extended(
-        onPressed: () => context.push('/payments/add'),
+        onPressed: () {
+          HapticUtils.mediumImpact();
+          context.push('/payments/add');
+        },
         icon: const Icon(Icons.add),
         label: const Text('Add Payment'),
       ),

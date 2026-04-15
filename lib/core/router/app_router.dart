@@ -14,12 +14,13 @@ import '../../features/invoices/presentation/invoices_screen.dart';
 import '../../features/invoices/presentation/create_invoice_screen.dart';
 import '../../features/invoices/presentation/invoice_detail_screen.dart';
 import '../../features/settings/presentation/settings_screen.dart';
+import '../../features/settings/presentation/premium_screen.dart';
 import '../supabase/supabase_client.dart';
 
 final _rootNavigatorKey = GlobalKey<NavigatorState>();
 final _shellNavigatorKey = GlobalKey<NavigatorState>();
 
-final routerProvider = Provider<GoRouter>((ref) {
+GoRouter createRouter() {
   return GoRouter(
     navigatorKey: _rootNavigatorKey,
     initialLocation: '/splash',
@@ -41,9 +42,24 @@ final routerProvider = Provider<GoRouter>((ref) {
     routes: [
       GoRoute(
         path: '/splash',
-        builder: (context, state) => const SplashScreen(),
+        pageBuilder: (context, state) => CustomTransitionPage(
+          key: state.pageKey,
+          child: const SplashScreen(),
+          transitionsBuilder: (context, animation, secondaryAnimation, child) {
+            return FadeTransition(opacity: animation, child: child);
+          },
+        ),
       ),
-      GoRoute(path: '/login', builder: (context, state) => const LoginScreen()),
+      GoRoute(
+        path: '/login',
+        pageBuilder: (context, state) => CustomTransitionPage(
+          key: state.pageKey,
+          child: const LoginScreen(),
+          transitionsBuilder: (context, animation, secondaryAnimation, child) {
+            return FadeTransition(opacity: animation, child: child);
+          },
+        ),
+      ),
       ShellRoute(
         navigatorKey: _shellNavigatorKey,
         builder: (context, state, child) => MainShell(child: child),
@@ -77,50 +93,205 @@ final routerProvider = Provider<GoRouter>((ref) {
       ),
       GoRoute(
         path: '/clients/add',
-        builder: (context, state) => const AddClientScreen(),
+        pageBuilder: (context, state) => CustomTransitionPage(
+          key: state.pageKey,
+          child: const AddClientScreen(),
+          transitionsBuilder: (context, animation, secondaryAnimation, child) {
+            return SlideTransition(
+              position:
+                  Tween<Offset>(
+                    begin: const Offset(0, 1),
+                    end: Offset.zero,
+                  ).animate(
+                    CurveTween(curve: Curves.easeOutCubic).animate(animation),
+                  ),
+              child: child,
+            );
+          },
+        ),
       ),
       GoRoute(
         path: '/clients/:id',
-        builder: (context, state) {
+        pageBuilder: (context, state) {
           final id = state.pathParameters['id']!;
-          return AddClientScreen(clientId: id);
+          return CustomTransitionPage(
+            key: state.pageKey,
+            child: AddClientScreen(clientId: id),
+            transitionsBuilder:
+                (context, animation, secondaryAnimation, child) {
+                  return SlideTransition(
+                    position:
+                        Tween<Offset>(
+                          begin: const Offset(1, 0),
+                          end: Offset.zero,
+                        ).animate(
+                          CurveTween(
+                            curve: Curves.easeOutCubic,
+                          ).animate(animation),
+                        ),
+                    child: child,
+                  );
+                },
+          );
         },
       ),
       GoRoute(
         path: '/projects/add',
-        builder: (context, state) => const AddProjectScreen(),
+        pageBuilder: (context, state) => CustomTransitionPage(
+          key: state.pageKey,
+          child: const AddProjectScreen(),
+          transitionsBuilder: (context, animation, secondaryAnimation, child) {
+            return SlideTransition(
+              position:
+                  Tween<Offset>(
+                    begin: const Offset(0, 1),
+                    end: Offset.zero,
+                  ).animate(
+                    CurveTween(curve: Curves.easeOutCubic).animate(animation),
+                  ),
+              child: child,
+            );
+          },
+        ),
       ),
       GoRoute(
         path: '/projects/:id',
-        builder: (context, state) {
+        pageBuilder: (context, state) {
           final id = state.pathParameters['id']!;
-          return AddProjectScreen(projectId: id);
+          return CustomTransitionPage(
+            key: state.pageKey,
+            child: AddProjectScreen(projectId: id),
+            transitionsBuilder:
+                (context, animation, secondaryAnimation, child) {
+                  return SlideTransition(
+                    position:
+                        Tween<Offset>(
+                          begin: const Offset(1, 0),
+                          end: Offset.zero,
+                        ).animate(
+                          CurveTween(
+                            curve: Curves.easeOutCubic,
+                          ).animate(animation),
+                        ),
+                    child: child,
+                  );
+                },
+          );
         },
       ),
       GoRoute(
         path: '/payments/add',
-        builder: (context, state) {
+        pageBuilder: (context, state) {
           final paymentId = state.extra as String?;
-          return AddPaymentScreen(paymentId: paymentId);
+          return CustomTransitionPage(
+            key: state.pageKey,
+            child: AddPaymentScreen(paymentId: paymentId),
+            transitionsBuilder:
+                (context, animation, secondaryAnimation, child) {
+                  return SlideTransition(
+                    position:
+                        Tween<Offset>(
+                          begin: const Offset(0, 1),
+                          end: Offset.zero,
+                        ).animate(
+                          CurveTween(
+                            curve: Curves.easeOutCubic,
+                          ).animate(animation),
+                        ),
+                    child: child,
+                  );
+                },
+          );
         },
       ),
       GoRoute(
         path: '/invoices/create',
-        builder: (context, state) => const CreateInvoiceScreen(),
+        pageBuilder: (context, state) => CustomTransitionPage(
+          key: state.pageKey,
+          child: const CreateInvoiceScreen(),
+          transitionsBuilder: (context, animation, secondaryAnimation, child) {
+            return SlideTransition(
+              position:
+                  Tween<Offset>(
+                    begin: const Offset(0, 1),
+                    end: Offset.zero,
+                  ).animate(
+                    CurveTween(curve: Curves.easeOutCubic).animate(animation),
+                  ),
+              child: child,
+            );
+          },
+        ),
       ),
       GoRoute(
         path: '/invoices/:id',
-        builder: (context, state) {
+        pageBuilder: (context, state) {
           final id = state.pathParameters['id']!;
-          return InvoiceDetailScreen(invoiceId: id);
+          return CustomTransitionPage(
+            key: state.pageKey,
+            child: InvoiceDetailScreen(invoiceId: id),
+            transitionsBuilder:
+                (context, animation, secondaryAnimation, child) {
+                  return SlideTransition(
+                    position:
+                        Tween<Offset>(
+                          begin: const Offset(1, 0),
+                          end: Offset.zero,
+                        ).animate(
+                          CurveTween(
+                            curve: Curves.easeOutCubic,
+                          ).animate(animation),
+                        ),
+                    child: child,
+                  );
+                },
+          );
         },
       ),
       GoRoute(
         path: '/settings',
-        builder: (context, state) => const SettingsScreen(),
+        pageBuilder: (context, state) => CustomTransitionPage(
+          key: state.pageKey,
+          child: const SettingsScreen(),
+          transitionsBuilder: (context, animation, secondaryAnimation, child) {
+            return SlideTransition(
+              position:
+                  Tween<Offset>(
+                    begin: const Offset(1, 0),
+                    end: Offset.zero,
+                  ).animate(
+                    CurveTween(curve: Curves.easeOutCubic).animate(animation),
+                  ),
+              child: child,
+            );
+          },
+        ),
+      ),
+      GoRoute(
+        path: '/premium',
+        pageBuilder: (context, state) => CustomTransitionPage(
+          key: state.pageKey,
+          child: const PremiumScreen(),
+          transitionsBuilder: (context, animation, secondaryAnimation, child) {
+            return SlideTransition(
+              position:
+                  Tween<Offset>(
+                    begin: const Offset(0, 1),
+                    end: Offset.zero,
+                  ).animate(
+                    CurveTween(curve: Curves.easeOutCubic).animate(animation),
+                  ),
+              child: child,
+            );
+          },
+        ),
       ),
     ],
   );
+}
+
+final routerProvider = Provider<GoRouter>((ref) {
+  return createRouter();
 });
 
 class MainShell extends StatefulWidget {

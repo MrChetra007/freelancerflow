@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/theme/app_colors.dart';
+import '../../../../core/widgets/animated_list_item.dart';
+import '../../../../core/utils/haptic_utils.dart';
 import '../data/invoices_provider.dart';
 import '../domain/invoice.dart';
 import 'widgets/invoice_card.dart';
@@ -55,12 +57,19 @@ class InvoicesScreen extends ConsumerWidget {
                     itemCount: list.length,
                     itemBuilder: (context, index) {
                       final invoice = list[index];
-                      return Padding(
-                        padding: const EdgeInsets.only(bottom: 12),
-                        child: InvoiceCard(
-                          invoice: invoice,
-                          onTap: () => context.push('/invoices/${invoice.id}'),
-                          onDelete: () => _confirmDelete(context, ref, invoice),
+                      return AnimatedListItem(
+                        index: index,
+                        child: Padding(
+                          padding: const EdgeInsets.only(bottom: 12),
+                          child: InvoiceCard(
+                            invoice: invoice,
+                            onTap: () {
+                              HapticUtils.lightImpact();
+                              context.push('/invoices/${invoice.id}');
+                            },
+                            onDelete: () =>
+                                _confirmDelete(context, ref, invoice),
+                          ),
                         ),
                       );
                     },
@@ -74,7 +83,10 @@ class InvoicesScreen extends ConsumerWidget {
         ],
       ),
       floatingActionButton: FloatingActionButton.extended(
-        onPressed: () => context.push('/invoices/create'),
+        onPressed: () {
+          HapticUtils.mediumImpact();
+          context.push('/invoices/create');
+        },
         icon: const Icon(Icons.add),
         label: const Text('Create Invoice'),
       ),

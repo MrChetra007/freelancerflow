@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/theme/app_colors.dart';
+import '../../../../core/widgets/animated_list_item.dart';
+import '../../../../core/utils/haptic_utils.dart';
 import '../data/projects_provider.dart';
 import '../domain/project.dart';
 import 'widgets/project_card.dart';
@@ -55,12 +57,19 @@ class ProjectsScreen extends ConsumerWidget {
                     itemCount: list.length,
                     itemBuilder: (context, index) {
                       final project = list[index];
-                      return Padding(
-                        padding: const EdgeInsets.only(bottom: 12),
-                        child: ProjectCard(
-                          project: project,
-                          onTap: () => context.push('/projects/${project.id}'),
-                          onDelete: () => _confirmDelete(context, ref, project),
+                      return AnimatedListItem(
+                        index: index,
+                        child: Padding(
+                          padding: const EdgeInsets.only(bottom: 12),
+                          child: ProjectCard(
+                            project: project,
+                            onTap: () {
+                              HapticUtils.lightImpact();
+                              context.push('/projects/${project.id}');
+                            },
+                            onDelete: () =>
+                                _confirmDelete(context, ref, project),
+                          ),
                         ),
                       );
                     },
@@ -74,7 +83,10 @@ class ProjectsScreen extends ConsumerWidget {
         ],
       ),
       floatingActionButton: FloatingActionButton.extended(
-        onPressed: () => context.push('/projects/add'),
+        onPressed: () {
+          HapticUtils.mediumImpact();
+          context.push('/projects/add');
+        },
         icon: const Icon(Icons.add),
         label: const Text('Add Project'),
       ),

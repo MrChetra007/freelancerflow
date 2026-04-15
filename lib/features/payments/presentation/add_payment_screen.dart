@@ -3,7 +3,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/supabase/supabase_client.dart';
 import '../../../../core/theme/app_colors.dart';
+import '../../../../core/services/notification_service.dart';
 import '../../clients/data/clients_provider.dart';
+import '../../settings/presentation/settings_screen.dart';
 import '../data/payments_provider.dart';
 import '../domain/payment.dart';
 
@@ -156,6 +158,20 @@ class _AddPaymentScreenState extends ConsumerState<AddPaymentScreen> {
           createdAt: DateTime.now(),
         );
         await ref.read(paymentsProvider.notifier).addPayment(newPayment);
+
+        if (_dueDate != null) {
+          final prefs = ref.read(notificationPrefsProvider);
+          if (prefs.paymentReminders) {
+            final clients = await ref.read(clientsProvider.future);
+            final client = clients.firstWhere((c) => c.id == _selectedClientId);
+            await NotificationService.instance.schedulePaymentReminder(
+              paymentId: DateTime.now().millisecondsSinceEpoch.toString(),
+              clientName: client.name,
+              amount: double.tryParse(_amountController.text) ?? 0,
+              dueDate: _dueDate!,
+            );
+          }
+        }
       }
 
       if (mounted) {

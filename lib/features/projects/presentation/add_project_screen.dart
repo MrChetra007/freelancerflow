@@ -3,7 +3,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/supabase/supabase_client.dart';
 import '../../../../core/theme/app_colors.dart';
+import '../../../../core/services/notification_service.dart';
 import 'package:client_manager/features/clients/data/clients_provider.dart';
+import 'package:client_manager/features/settings/presentation/settings_screen.dart';
 import '../data/projects_provider.dart';
 import '../domain/project.dart';
 
@@ -126,6 +128,20 @@ class _AddProjectScreenState extends ConsumerState<AddProjectScreen> {
           createdAt: DateTime.now(),
         );
         await ref.read(projectsProvider.notifier).addProject(newProject);
+
+        if (_deadline != null) {
+          final prefs = ref.read(notificationPrefsProvider);
+          if (prefs.projectReminders) {
+            final clients = await ref.read(clientsProvider.future);
+            final client = clients.firstWhere((c) => c.id == _selectedClientId);
+            await NotificationService.instance.scheduleProjectDeadlineReminder(
+              projectId: DateTime.now().millisecondsSinceEpoch.toString(),
+              projectTitle: _titleController.text.trim(),
+              clientName: client.name,
+              deadline: _deadline!,
+            );
+          }
+        }
       }
 
       if (mounted) {

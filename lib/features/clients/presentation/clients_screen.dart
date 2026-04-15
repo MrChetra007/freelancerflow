@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/theme/app_colors.dart';
+import '../../../../core/widgets/animated_list_item.dart';
+import '../../../../core/utils/haptic_utils.dart';
 import '../data/clients_provider.dart';
 import '../domain/client.dart';
 import 'widgets/client_card.dart';
@@ -57,12 +59,19 @@ class ClientsScreen extends ConsumerWidget {
                     itemCount: list.length,
                     itemBuilder: (context, index) {
                       final client = list[index];
-                      return Padding(
-                        padding: const EdgeInsets.only(bottom: 12),
-                        child: ClientCard(
-                          client: client,
-                          onTap: () => context.push('/clients/${client.id}'),
-                          onDelete: () => _confirmDelete(context, ref, client),
+                      return AnimatedListItem(
+                        index: index,
+                        child: Padding(
+                          padding: const EdgeInsets.only(bottom: 12),
+                          child: ClientCard(
+                            client: client,
+                            onTap: () {
+                              HapticUtils.lightImpact();
+                              context.push('/clients/${client.id}');
+                            },
+                            onDelete: () =>
+                                _confirmDelete(context, ref, client),
+                          ),
                         ),
                       );
                     },
@@ -76,7 +85,10 @@ class ClientsScreen extends ConsumerWidget {
         ],
       ),
       floatingActionButton: FloatingActionButton.extended(
-        onPressed: () => context.push('/clients/add'),
+        onPressed: () {
+          HapticUtils.mediumImpact();
+          context.push('/clients/add');
+        },
         icon: const Icon(Icons.add),
         label: const Text('Add Client'),
       ),

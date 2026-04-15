@@ -3,7 +3,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/supabase/supabase_client.dart';
 import '../../../../core/theme/app_colors.dart';
+import '../../../../core/services/notification_service.dart';
 import 'package:client_manager/features/clients/data/clients_provider.dart';
+import 'package:client_manager/features/settings/presentation/settings_screen.dart';
 import '../data/invoices_provider.dart';
 import '../domain/invoice.dart';
 import '../domain/invoice_item.dart';
@@ -182,6 +184,21 @@ class _CreateInvoiceScreenState extends ConsumerState<CreateInvoiceScreen> {
           createdAt: DateTime.now(),
         );
         await repo.createInvoiceItem(invoiceItem);
+      }
+
+      if (_dueDate != null) {
+        final prefs = ref.read(notificationPrefsProvider);
+        if (prefs.invoiceReminders) {
+          final clients = await ref.read(clientsProvider.future);
+          final client = clients.firstWhere((c) => c.id == _selectedClientId);
+          await NotificationService.instance.scheduleInvoiceReminder(
+            invoiceId: invoice.id!,
+            invoiceNumber: invoice.invoiceNumber,
+            clientName: client.name,
+            dueDate: _dueDate!,
+            total: _total,
+          );
+        }
       }
 
       if (mounted) {

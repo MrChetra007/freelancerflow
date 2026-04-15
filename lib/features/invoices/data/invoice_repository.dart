@@ -37,7 +37,6 @@ class InvoiceRepository {
     final response = await _client
         .from('invoices')
         .insert({
-          'id': invoice.id,
           'user_id': invoice.userId,
           'client_id': invoice.clientId,
           'project_id': invoice.projectId,
@@ -83,7 +82,7 @@ class InvoiceRepository {
           'sent_at': invoice.sentAt?.toIso8601String(),
           'paid_at': invoice.paidAt?.toIso8601String(),
         })
-        .eq('id', invoice.id)
+        .eq('id', invoice.id!)
         .select()
         .single();
     return _invoiceFromDb(response);
@@ -130,7 +129,7 @@ class InvoiceRepository {
           'total': item.total,
           'sort_order': item.sortOrder,
         })
-        .eq('id', item.id)
+        .eq('id', item.id!)
         .select()
         .single();
     return _itemFromDb(response);

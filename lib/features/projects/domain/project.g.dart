@@ -8,7 +8,7 @@ part of 'project.dart';
 
 _$ProjectImpl _$$ProjectImplFromJson(Map<String, dynamic> json) =>
     _$ProjectImpl(
-      id: json['id'] as String,
+      id: json['id'] as String?,
       userId: json['userId'] as String,
       clientId: json['clientId'] as String,
       title: json['title'] as String,

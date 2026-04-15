@@ -6,7 +6,7 @@ part 'milestone.g.dart';
 @freezed
 class Milestone with _$Milestone {
   const factory Milestone({
-    required String id,
+    String? id,
     required String projectId,
     required String userId,
     required String title,

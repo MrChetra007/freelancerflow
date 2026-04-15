@@ -39,7 +39,6 @@ class ProjectRepository {
     final response = await _client
         .from('projects')
         .insert({
-          'id': project.id,
           'user_id': project.userId,
           'client_id': project.clientId,
           'title': project.title,
@@ -70,7 +69,7 @@ class ProjectRepository {
           'is_archived': project.isArchived,
           'completed_at': project.completedAt?.toIso8601String(),
         })
-        .eq('id', project.id)
+        .eq('id', project.id!)
         .select()
         .single();
     return _projectFromDb(response);
@@ -93,7 +92,6 @@ class ProjectRepository {
     final response = await _client
         .from('milestones')
         .insert({
-          'id': milestone.id,
           'project_id': milestone.projectId,
           'user_id': milestone.userId,
           'title': milestone.title,
@@ -116,7 +114,7 @@ class ProjectRepository {
           'sort_order': milestone.sortOrder,
           'completed_at': milestone.completedAt?.toIso8601String(),
         })
-        .eq('id', milestone.id)
+        .eq('id', milestone.id!)
         .select()
         .single();
     return _milestoneFromDb(response);

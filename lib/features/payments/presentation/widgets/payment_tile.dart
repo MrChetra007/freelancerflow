@@ -19,7 +19,7 @@ class PaymentTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Dismissible(
-      key: Key(payment.id),
+      key: Key(payment.id!),
       direction: DismissDirection.endToStart,
       background: Container(
         alignment: Alignment.centerRight,

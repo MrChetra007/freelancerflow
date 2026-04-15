@@ -230,7 +230,7 @@ class PaymentsScreen extends ConsumerWidget {
           ),
           TextButton(
             onPressed: () {
-              ref.read(paymentsProvider.notifier).deletePayment(payment.id);
+              ref.read(paymentsProvider.notifier).deletePayment(payment.id!);
               Navigator.pop(context);
             },
             child: const Text(

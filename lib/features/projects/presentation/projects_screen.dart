@@ -187,7 +187,7 @@ class ProjectsScreen extends ConsumerWidget {
           ),
           TextButton(
             onPressed: () {
-              ref.read(projectsProvider.notifier).deleteProject(project.id);
+              ref.read(projectsProvider.notifier).deleteProject(project.id!);
               Navigator.pop(context);
             },
             child: const Text(

@@ -193,7 +193,7 @@ class InvoicesScreen extends ConsumerWidget {
           ),
           TextButton(
             onPressed: () {
-              ref.read(invoicesProvider.notifier).deleteInvoice(invoice.id);
+              ref.read(invoicesProvider.notifier).deleteInvoice(invoice.id!);
               Navigator.pop(context);
             },
             child: const Text(

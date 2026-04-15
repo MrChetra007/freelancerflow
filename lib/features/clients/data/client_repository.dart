@@ -28,7 +28,6 @@ class ClientRepository {
     final response = await _client
         .from('clients')
         .insert({
-          'id': client.id,
           'user_id': client.userId,
           'name': client.name,
           'email': client.email,
@@ -59,7 +58,7 @@ class ClientRepository {
           'avatar_color': client.avatarColor,
           'is_archived': client.isArchived,
         })
-        .eq('id', client.id)
+        .eq('id', client.id!)
         .select()
         .single();
     return _fromDb(response);

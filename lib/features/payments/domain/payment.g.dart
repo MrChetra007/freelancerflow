@@ -8,7 +8,7 @@ part of 'payment.dart';
 
 _$PaymentImpl _$$PaymentImplFromJson(Map<String, dynamic> json) =>
     _$PaymentImpl(
-      id: json['id'] as String,
+      id: json['id'] as String?,
       userId: json['userId'] as String,
       clientId: json['clientId'] as String,
       projectId: json['projectId'] as String?,

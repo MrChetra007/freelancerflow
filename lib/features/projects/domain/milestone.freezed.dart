@@ -21,7 +21,7 @@ Milestone _$MilestoneFromJson(Map<String, dynamic> json) {
 
 /// @nodoc
 mixin _$Milestone {
-  String get id => throw _privateConstructorUsedError;
+  String? get id => throw _privateConstructorUsedError;
   String get projectId => throw _privateConstructorUsedError;
   String get userId => throw _privateConstructorUsedError;
   String get title => throw _privateConstructorUsedError;
@@ -48,7 +48,7 @@ abstract class $MilestoneCopyWith<$Res> {
       _$MilestoneCopyWithImpl<$Res, Milestone>;
   @useResult
   $Res call({
-    String id,
+    String? id,
     String projectId,
     String userId,
     String title,
@@ -76,7 +76,7 @@ class _$MilestoneCopyWithImpl<$Res, $Val extends Milestone>
   @pragma('vm:prefer-inline')
   @override
   $Res call({
-    Object? id = null,
+    Object? id = freezed,
     Object? projectId = null,
     Object? userId = null,
     Object? title = null,
@@ -89,10 +89,10 @@ class _$MilestoneCopyWithImpl<$Res, $Val extends Milestone>
   }) {
     return _then(
       _value.copyWith(
-            id: null == id
+            id: freezed == id
                 ? _value.id
                 : id // ignore: cast_nullable_to_non_nullable
-                      as String,
+                      as String?,
             projectId: null == projectId
                 ? _value.projectId
                 : projectId // ignore: cast_nullable_to_non_nullable
@@ -145,7 +145,7 @@ abstract class _$$MilestoneImplCopyWith<$Res>
   @override
   @useResult
   $Res call({
-    String id,
+    String? id,
     String projectId,
     String userId,
     String title,
@@ -172,7 +172,7 @@ class __$$MilestoneImplCopyWithImpl<$Res>
   @pragma('vm:prefer-inline')
   @override
   $Res call({
-    Object? id = null,
+    Object? id = freezed,
     Object? projectId = null,
     Object? userId = null,
     Object? title = null,
@@ -185,10 +185,10 @@ class __$$MilestoneImplCopyWithImpl<$Res>
   }) {
     return _then(
       _$MilestoneImpl(
-        id: null == id
+        id: freezed == id
             ? _value.id
             : id // ignore: cast_nullable_to_non_nullable
-                  as String,
+                  as String?,
         projectId: null == projectId
             ? _value.projectId
             : projectId // ignore: cast_nullable_to_non_nullable
@@ -234,7 +234,7 @@ class __$$MilestoneImplCopyWithImpl<$Res>
 @JsonSerializable()
 class _$MilestoneImpl implements _Milestone {
   const _$MilestoneImpl({
-    required this.id,
+    this.id,
     required this.projectId,
     required this.userId,
     required this.title,
@@ -250,7 +250,7 @@ class _$MilestoneImpl implements _Milestone {
       _$$MilestoneImplFromJson(json);
 
   @override
-  final String id;
+  final String? id;
   @override
   final String projectId;
   @override
@@ -332,7 +332,7 @@ class _$MilestoneImpl implements _Milestone {
 
 abstract class _Milestone implements Milestone {
   const factory _Milestone({
-    required final String id,
+    final String? id,
     required final String projectId,
     required final String userId,
     required final String title,
@@ -348,7 +348,7 @@ abstract class _Milestone implements Milestone {
       _$MilestoneImpl.fromJson;
 
   @override
-  String get id;
+  String? get id;
   @override
   String get projectId;
   @override

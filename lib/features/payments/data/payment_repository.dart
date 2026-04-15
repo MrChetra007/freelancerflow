@@ -45,7 +45,6 @@ class PaymentRepository {
     final response = await _client
         .from('payments')
         .insert({
-          'id': payment.id,
           'user_id': payment.userId,
           'client_id': payment.clientId,
           'project_id': payment.projectId,
@@ -82,7 +81,7 @@ class PaymentRepository {
           'reference_no': payment.referenceNo,
           'notes': payment.notes,
         })
-        .eq('id', payment.id)
+        .eq('id', payment.id!)
         .select()
         .single();
     return _fromDb(response);

@@ -6,7 +6,7 @@ part 'invoice_item.g.dart';
 @freezed
 class InvoiceItem with _$InvoiceItem {
   const factory InvoiceItem({
-    required String id,
+    String? id,
     required String invoiceId,
     required String userId,
     required String description,

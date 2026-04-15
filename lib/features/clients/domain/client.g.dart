@@ -7,7 +7,7 @@ part of 'client.dart';
 // **************************************************************************
 
 _$ClientImpl _$$ClientImplFromJson(Map<String, dynamic> json) => _$ClientImpl(
-  id: json['id'] as String,
+  id: json['id'] as String?,
   userId: json['userId'] as String,
   name: json['name'] as String,
   email: json['email'] as String?,

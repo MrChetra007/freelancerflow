@@ -134,7 +134,7 @@ class _CreateInvoiceScreenState extends ConsumerState<CreateInvoiceScreen> {
         invoiceNumber = await repo.getNextInvoiceNumber(userId);
       }
 
-      final invoice = Invoice(
+      late Invoice invoice = Invoice(
         id: _existingInvoice?.id ?? '',
         userId: userId,
         clientId: _selectedClientId!,
@@ -161,10 +161,10 @@ class _CreateInvoiceScreenState extends ConsumerState<CreateInvoiceScreen> {
       if (isEditing) {
         await repo.updateInvoice(invoice);
         for (var item in _existingItems) {
-          await repo.deleteInvoiceItem(item.id);
+          await repo.deleteInvoiceItem(item.id!);
         }
       } else {
-        await repo.createInvoice(invoice);
+        invoice = await repo.createInvoice(invoice);
       }
 
       for (int i = 0; i < _lineItems.length; i++) {
@@ -172,8 +172,7 @@ class _CreateInvoiceScreenState extends ConsumerState<CreateInvoiceScreen> {
         if (item.descriptionController.text.trim().isEmpty) continue;
 
         final invoiceItem = InvoiceItem(
-          id: '',
-          invoiceId: invoice.id,
+          invoiceId: invoice.id!,
           userId: userId,
           description: item.descriptionController.text.trim(),
           quantity: item.quantity,

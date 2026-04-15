@@ -25,7 +25,7 @@ class ClientCard extends StatelessWidget {
     final avatarColor = _parseColor(client.avatarColor);
 
     return Dismissible(
-      key: Key(client.id),
+      key: Key(client.id!),
       direction: DismissDirection.endToStart,
       background: Container(
         alignment: Alignment.centerRight,

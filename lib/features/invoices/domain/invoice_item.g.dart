@@ -8,7 +8,7 @@ part of 'invoice_item.dart';
 
 _$InvoiceItemImpl _$$InvoiceItemImplFromJson(Map<String, dynamic> json) =>
     _$InvoiceItemImpl(
-      id: json['id'] as String,
+      id: json['id'] as String?,
       invoiceId: json['invoiceId'] as String,
       userId: json['userId'] as String,
       description: json['description'] as String,

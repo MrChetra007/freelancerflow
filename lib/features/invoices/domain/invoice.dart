@@ -19,7 +19,7 @@ enum InvoiceStatus {
 @freezed
 class Invoice with _$Invoice {
   const factory Invoice({
-    required String id,
+    String? id,
     required String userId,
     required String clientId,
     String? projectId,

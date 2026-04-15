@@ -21,7 +21,7 @@ Project _$ProjectFromJson(Map<String, dynamic> json) {
 
 /// @nodoc
 mixin _$Project {
-  String get id => throw _privateConstructorUsedError;
+  String? get id => throw _privateConstructorUsedError;
   String get userId => throw _privateConstructorUsedError;
   String get clientId => throw _privateConstructorUsedError;
   String get title => throw _privateConstructorUsedError;
@@ -51,7 +51,7 @@ abstract class $ProjectCopyWith<$Res> {
       _$ProjectCopyWithImpl<$Res, Project>;
   @useResult
   $Res call({
-    String id,
+    String? id,
     String userId,
     String clientId,
     String title,
@@ -83,7 +83,7 @@ class _$ProjectCopyWithImpl<$Res, $Val extends Project>
   @pragma('vm:prefer-inline')
   @override
   $Res call({
-    Object? id = null,
+    Object? id = freezed,
     Object? userId = null,
     Object? clientId = null,
     Object? title = null,
@@ -100,10 +100,10 @@ class _$ProjectCopyWithImpl<$Res, $Val extends Project>
   }) {
     return _then(
       _value.copyWith(
-            id: null == id
+            id: freezed == id
                 ? _value.id
                 : id // ignore: cast_nullable_to_non_nullable
-                      as String,
+                      as String?,
             userId: null == userId
                 ? _value.userId
                 : userId // ignore: cast_nullable_to_non_nullable
@@ -171,7 +171,7 @@ abstract class _$$ProjectImplCopyWith<$Res> implements $ProjectCopyWith<$Res> {
   @override
   @useResult
   $Res call({
-    String id,
+    String? id,
     String userId,
     String clientId,
     String title,
@@ -202,7 +202,7 @@ class __$$ProjectImplCopyWithImpl<$Res>
   @pragma('vm:prefer-inline')
   @override
   $Res call({
-    Object? id = null,
+    Object? id = freezed,
     Object? userId = null,
     Object? clientId = null,
     Object? title = null,
@@ -219,10 +219,10 @@ class __$$ProjectImplCopyWithImpl<$Res>
   }) {
     return _then(
       _$ProjectImpl(
-        id: null == id
+        id: freezed == id
             ? _value.id
             : id // ignore: cast_nullable_to_non_nullable
-                  as String,
+                  as String?,
         userId: null == userId
             ? _value.userId
             : userId // ignore: cast_nullable_to_non_nullable
@@ -284,7 +284,7 @@ class __$$ProjectImplCopyWithImpl<$Res>
 @JsonSerializable()
 class _$ProjectImpl implements _Project {
   const _$ProjectImpl({
-    required this.id,
+    this.id,
     required this.userId,
     required this.clientId,
     required this.title,
@@ -304,7 +304,7 @@ class _$ProjectImpl implements _Project {
       _$$ProjectImplFromJson(json);
 
   @override
-  final String id;
+  final String? id;
   @override
   final String userId;
   @override
@@ -407,7 +407,7 @@ class _$ProjectImpl implements _Project {
 
 abstract class _Project implements Project {
   const factory _Project({
-    required final String id,
+    final String? id,
     required final String userId,
     required final String clientId,
     required final String title,
@@ -426,7 +426,7 @@ abstract class _Project implements Project {
   factory _Project.fromJson(Map<String, dynamic> json) = _$ProjectImpl.fromJson;
 
   @override
-  String get id;
+  String? get id;
   @override
   String get userId;
   @override

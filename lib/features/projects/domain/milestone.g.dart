@@ -8,7 +8,7 @@ part of 'milestone.dart';
 
 _$MilestoneImpl _$$MilestoneImplFromJson(Map<String, dynamic> json) =>
     _$MilestoneImpl(
-      id: json['id'] as String,
+      id: json['id'] as String?,
       projectId: json['projectId'] as String,
       userId: json['userId'] as String,
       title: json['title'] as String,

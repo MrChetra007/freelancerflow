@@ -21,7 +21,7 @@ Invoice _$InvoiceFromJson(Map<String, dynamic> json) {
 
 /// @nodoc
 mixin _$Invoice {
-  String get id => throw _privateConstructorUsedError;
+  String? get id => throw _privateConstructorUsedError;
   String get userId => throw _privateConstructorUsedError;
   String get clientId => throw _privateConstructorUsedError;
   String? get projectId => throw _privateConstructorUsedError;
@@ -59,7 +59,7 @@ abstract class $InvoiceCopyWith<$Res> {
       _$InvoiceCopyWithImpl<$Res, Invoice>;
   @useResult
   $Res call({
-    String id,
+    String? id,
     String userId,
     String clientId,
     String? projectId,
@@ -99,7 +99,7 @@ class _$InvoiceCopyWithImpl<$Res, $Val extends Invoice>
   @pragma('vm:prefer-inline')
   @override
   $Res call({
-    Object? id = null,
+    Object? id = freezed,
     Object? userId = null,
     Object? clientId = null,
     Object? projectId = freezed,
@@ -124,10 +124,10 @@ class _$InvoiceCopyWithImpl<$Res, $Val extends Invoice>
   }) {
     return _then(
       _value.copyWith(
-            id: null == id
+            id: freezed == id
                 ? _value.id
                 : id // ignore: cast_nullable_to_non_nullable
-                      as String,
+                      as String?,
             userId: null == userId
                 ? _value.userId
                 : userId // ignore: cast_nullable_to_non_nullable
@@ -227,7 +227,7 @@ abstract class _$$InvoiceImplCopyWith<$Res> implements $InvoiceCopyWith<$Res> {
   @override
   @useResult
   $Res call({
-    String id,
+    String? id,
     String userId,
     String clientId,
     String? projectId,
@@ -266,7 +266,7 @@ class __$$InvoiceImplCopyWithImpl<$Res>
   @pragma('vm:prefer-inline')
   @override
   $Res call({
-    Object? id = null,
+    Object? id = freezed,
     Object? userId = null,
     Object? clientId = null,
     Object? projectId = freezed,
@@ -291,10 +291,10 @@ class __$$InvoiceImplCopyWithImpl<$Res>
   }) {
     return _then(
       _$InvoiceImpl(
-        id: null == id
+        id: freezed == id
             ? _value.id
             : id // ignore: cast_nullable_to_non_nullable
-                  as String,
+                  as String?,
         userId: null == userId
             ? _value.userId
             : userId // ignore: cast_nullable_to_non_nullable
@@ -388,7 +388,7 @@ class __$$InvoiceImplCopyWithImpl<$Res>
 @JsonSerializable()
 class _$InvoiceImpl implements _Invoice {
   const _$InvoiceImpl({
-    required this.id,
+    this.id,
     required this.userId,
     required this.clientId,
     this.projectId,
@@ -416,7 +416,7 @@ class _$InvoiceImpl implements _Invoice {
       _$$InvoiceImplFromJson(json);
 
   @override
-  final String id;
+  final String? id;
   @override
   final String userId;
   @override
@@ -559,7 +559,7 @@ class _$InvoiceImpl implements _Invoice {
 
 abstract class _Invoice implements Invoice {
   const factory _Invoice({
-    required final String id,
+    final String? id,
     required final String userId,
     required final String clientId,
     final String? projectId,
@@ -586,7 +586,7 @@ abstract class _Invoice implements Invoice {
   factory _Invoice.fromJson(Map<String, dynamic> json) = _$InvoiceImpl.fromJson;
 
   @override
-  String get id;
+  String? get id;
   @override
   String get userId;
   @override

@@ -36,7 +36,7 @@ enum PaymentMethod {
 @freezed
 class Payment with _$Payment {
   const factory Payment({
-    required String id,
+    String? id,
     required String userId,
     required String clientId,
     String? projectId,

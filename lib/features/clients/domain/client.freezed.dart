@@ -21,7 +21,7 @@ Client _$ClientFromJson(Map<String, dynamic> json) {
 
 /// @nodoc
 mixin _$Client {
-  String get id => throw _privateConstructorUsedError;
+  String? get id => throw _privateConstructorUsedError;
   String get userId => throw _privateConstructorUsedError;
   String get name => throw _privateConstructorUsedError;
   String? get email => throw _privateConstructorUsedError;
@@ -50,7 +50,7 @@ abstract class $ClientCopyWith<$Res> {
       _$ClientCopyWithImpl<$Res, Client>;
   @useResult
   $Res call({
-    String id,
+    String? id,
     String userId,
     String name,
     String? email,
@@ -81,7 +81,7 @@ class _$ClientCopyWithImpl<$Res, $Val extends Client>
   @pragma('vm:prefer-inline')
   @override
   $Res call({
-    Object? id = null,
+    Object? id = freezed,
     Object? userId = null,
     Object? name = null,
     Object? email = freezed,
@@ -97,10 +97,10 @@ class _$ClientCopyWithImpl<$Res, $Val extends Client>
   }) {
     return _then(
       _value.copyWith(
-            id: null == id
+            id: freezed == id
                 ? _value.id
                 : id // ignore: cast_nullable_to_non_nullable
-                      as String,
+                      as String?,
             userId: null == userId
                 ? _value.userId
                 : userId // ignore: cast_nullable_to_non_nullable
@@ -164,7 +164,7 @@ abstract class _$$ClientImplCopyWith<$Res> implements $ClientCopyWith<$Res> {
   @override
   @useResult
   $Res call({
-    String id,
+    String? id,
     String userId,
     String name,
     String? email,
@@ -194,7 +194,7 @@ class __$$ClientImplCopyWithImpl<$Res>
   @pragma('vm:prefer-inline')
   @override
   $Res call({
-    Object? id = null,
+    Object? id = freezed,
     Object? userId = null,
     Object? name = null,
     Object? email = freezed,
@@ -210,10 +210,10 @@ class __$$ClientImplCopyWithImpl<$Res>
   }) {
     return _then(
       _$ClientImpl(
-        id: null == id
+        id: freezed == id
             ? _value.id
             : id // ignore: cast_nullable_to_non_nullable
-                  as String,
+                  as String?,
         userId: null == userId
             ? _value.userId
             : userId // ignore: cast_nullable_to_non_nullable
@@ -271,7 +271,7 @@ class __$$ClientImplCopyWithImpl<$Res>
 @JsonSerializable()
 class _$ClientImpl implements _Client {
   const _$ClientImpl({
-    required this.id,
+    this.id,
     required this.userId,
     required this.name,
     this.email,
@@ -290,7 +290,7 @@ class _$ClientImpl implements _Client {
       _$$ClientImplFromJson(json);
 
   @override
-  final String id;
+  final String? id;
   @override
   final String userId;
   @override
@@ -384,7 +384,7 @@ class _$ClientImpl implements _Client {
 
 abstract class _Client implements Client {
   const factory _Client({
-    required final String id,
+    final String? id,
     required final String userId,
     required final String name,
     final String? email,
@@ -402,7 +402,7 @@ abstract class _Client implements Client {
   factory _Client.fromJson(Map<String, dynamic> json) = _$ClientImpl.fromJson;
 
   @override
-  String get id;
+  String? get id;
   @override
   String get userId;
   @override

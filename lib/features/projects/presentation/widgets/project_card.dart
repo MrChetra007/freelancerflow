@@ -23,7 +23,7 @@ class ProjectCard extends StatelessWidget {
         project.status == ProjectStatus.inProgress;
 
     return Dismissible(
-      key: Key(project.id),
+      key: Key(project.id!),
       direction: DismissDirection.endToStart,
       background: Container(
         alignment: Alignment.centerRight,

@@ -17,7 +17,7 @@ enum ProjectStatus {
 @freezed
 class Project with _$Project {
   const factory Project({
-    required String id,
+    String? id,
     required String userId,
     required String clientId,
     required String title,

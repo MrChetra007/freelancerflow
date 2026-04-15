@@ -158,7 +158,7 @@ class ClientsScreen extends ConsumerWidget {
           ),
           TextButton(
             onPressed: () {
-              ref.read(clientsProvider.notifier).deleteClient(client.id);
+              ref.read(clientsProvider.notifier).deleteClient(client.id!);
               Navigator.pop(context);
             },
             child: const Text(

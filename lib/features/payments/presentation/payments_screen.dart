@@ -95,7 +95,8 @@ class PaymentsScreen extends ConsumerWidget {
                         padding: const EdgeInsets.only(bottom: 12),
                         child: PaymentTile(
                           payment: payment,
-                          onTap: () => context.push('/payments/add'),
+                          onTap: () =>
+                              context.push('/payments/add', extra: payment.id),
                           onDelete: () => _confirmDelete(context, ref, payment),
                         ),
                       );

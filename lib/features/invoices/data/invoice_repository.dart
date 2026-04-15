@@ -105,7 +105,6 @@ class InvoiceRepository {
     final response = await _client
         .from('invoice_items')
         .insert({
-          'id': item.id,
           'invoice_id': item.invoiceId,
           'user_id': item.userId,
           'description': item.description,

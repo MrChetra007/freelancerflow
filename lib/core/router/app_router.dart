@@ -99,7 +99,10 @@ final routerProvider = Provider<GoRouter>((ref) {
       ),
       GoRoute(
         path: '/payments/add',
-        builder: (context, state) => const AddPaymentScreen(),
+        builder: (context, state) {
+          final paymentId = state.extra as String?;
+          return AddPaymentScreen(paymentId: paymentId);
+        },
       ),
       GoRoute(
         path: '/invoices/create',

@@ -107,12 +107,16 @@ class _AddPaymentScreenState extends ConsumerState<AddPaymentScreen> {
           clientId: _selectedClientId ?? _existingPayment!.clientId,
           projectId: _selectedProjectId,
           amount: double.tryParse(_amountController.text) ?? 0,
-          amountPaid: double.tryParse(_amountPaidController.text) ?? 0,
+          amountPaid: _status == PaymentStatus.paid
+              ? (double.tryParse(_amountController.text) ?? 0)
+              : (double.tryParse(_amountPaidController.text) ?? 0),
           currency: _currency,
           status: _status,
           method: _method,
           dueDate: _dueDate,
-          paidDate: _paidDate,
+          paidDate: _status == PaymentStatus.paid && _paidDate == null
+              ? DateTime.now()
+              : _paidDate,
           description: _descriptionController.text.trim().isEmpty
               ? null
               : _descriptionController.text.trim(),
@@ -126,17 +130,20 @@ class _AddPaymentScreenState extends ConsumerState<AddPaymentScreen> {
         await ref.read(paymentsProvider.notifier).updatePayment(updated);
       } else {
         final newPayment = Payment(
-          id: '',
           userId: userId,
           clientId: _selectedClientId!,
           projectId: _selectedProjectId,
           amount: double.tryParse(_amountController.text) ?? 0,
-          amountPaid: double.tryParse(_amountPaidController.text) ?? 0,
+          amountPaid: _status == PaymentStatus.paid
+              ? (double.tryParse(_amountController.text) ?? 0)
+              : (double.tryParse(_amountPaidController.text) ?? 0),
           currency: _currency,
           status: _status,
           method: _method,
           dueDate: _dueDate,
-          paidDate: _paidDate,
+          paidDate: _status == PaymentStatus.paid && _paidDate == null
+              ? DateTime.now()
+              : _paidDate,
           description: _descriptionController.text.trim().isEmpty
               ? null
               : _descriptionController.text.trim(),

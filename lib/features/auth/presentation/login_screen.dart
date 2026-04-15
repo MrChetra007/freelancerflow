@@ -58,6 +58,14 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
           email: email,
           password: password,
         );
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Account created! Signing you in...'),
+              duration: Duration(seconds: 1),
+            ),
+          );
+        }
         await SupabaseConfig.client.auth.signInWithPassword(
           email: email,
           password: password,

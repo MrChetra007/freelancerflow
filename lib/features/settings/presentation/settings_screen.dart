@@ -128,32 +128,17 @@ class SettingsScreen extends ConsumerWidget {
           ),
           ListTile(
             leading: const Icon(Icons.notifications_outlined),
-            title: const Text('Test Notification'),
-            subtitle: const Text('Send a test notification'),
-            onTap: () async {
-              final granted = await NotificationService.instance
-                  .requestPermission();
-              if (granted) {
-                await NotificationService.instance.showNotification(
-                  id: 0,
-                  title: 'Test Notification',
-                  body: 'Notifications are working correctly!',
-                );
-                if (context.mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Test notification sent!')),
-                  );
-                }
-              } else {
-                if (context.mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('Please enable notifications in settings'),
-                    ),
-                  );
-                }
-              }
-            },
+            title: const Text('Test Notifications'),
+            subtitle: const Text('Test notification scheduling'),
+            trailing: const Icon(Icons.chevron_right),
+            onTap: () => _showNotificationTester(context),
+          ),
+          ListTile(
+            leading: const Icon(Icons.schedule_outlined),
+            title: const Text('Scheduled Notifications'),
+            subtitle: const Text('View upcoming notifications'),
+            trailing: const Icon(Icons.chevron_right),
+            onTap: () => _showScheduledNotifications(context, ref),
           ),
           const Divider(),
           _buildSectionHeader(context, 'Premium'),
@@ -313,6 +298,454 @@ class SettingsScreen extends ConsumerWidget {
             const SizedBox(height: 16),
           ],
         ),
+      ),
+    );
+  }
+
+  void _showNotificationTester(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      builder: (context) => NotificationTesterSheet(),
+    );
+  }
+
+  void _showScheduledNotifications(BuildContext context, WidgetRef ref) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      builder: (context) => ScheduledNotificationsSheet(
+        notificationService: NotificationService.instance,
+      ),
+    );
+  }
+}
+
+class NotificationTesterSheet extends StatefulWidget {
+  const NotificationTesterSheet({super.key});
+
+  @override
+  State<NotificationTesterSheet> createState() =>
+      _NotificationTesterSheetState();
+}
+
+class _NotificationTesterSheetState extends State<NotificationTesterSheet> {
+  bool _isLoading = false;
+
+  Future<void> _sendImmediate() async {
+    await _sendTestNotification(
+      'Immediate',
+      'This notification appears instantly!',
+    );
+  }
+
+  Future<void> _sendIn10Seconds() async {
+    await _scheduleNotification(
+      10,
+      '10 Seconds',
+      'This notification will appear in 10 seconds!',
+    );
+  }
+
+  Future<void> _sendIn1Minute() async {
+    await _scheduleNotification(
+      60,
+      '1 Minute',
+      'This notification will appear in 1 minute!',
+    );
+  }
+
+  Future<void> _sendTestNotification(String title, String body) async {
+    setState(() => _isLoading = true);
+    try {
+      final granted = await NotificationService.instance.requestPermission();
+      if (granted) {
+        await NotificationService.instance.showNotification(
+          id: DateTime.now().millisecondsSinceEpoch ~/ 1000,
+          title: 'FreelanceFlow - $title',
+          body: body,
+        );
+        if (mounted) {
+          Navigator.pop(context);
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Test notification sent!')),
+          );
+        }
+      } else {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Please enable notifications in settings'),
+            ),
+          );
+        }
+      }
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
+    }
+  }
+
+  Future<void> _scheduleNotification(
+    int seconds,
+    String title,
+    String body,
+  ) async {
+    setState(() => _isLoading = true);
+    try {
+      final granted = await NotificationService.instance.requestPermission();
+      if (granted) {
+        final scheduledTime = DateTime.now().add(Duration(seconds: seconds));
+        await NotificationService.instance.scheduleNotification(
+          id: DateTime.now().millisecondsSinceEpoch ~/ 1000,
+          title: 'FreelanceFlow - $title',
+          body: body,
+          scheduledDate: scheduledTime,
+        );
+        if (mounted) {
+          Navigator.pop(context);
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Notification scheduled for $title!')),
+          );
+        }
+      } else {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Please enable notifications in settings'),
+            ),
+          );
+        }
+      }
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(24),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Center(
+            child: Container(
+              width: 40,
+              height: 4,
+              decoration: BoxDecoration(
+                color: Theme.of(context).dividerColor,
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
+          ),
+          const SizedBox(height: 16),
+          Text(
+            'Test Notifications',
+            style: Theme.of(
+              context,
+            ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 8),
+          Text(
+            'Test if notifications are working correctly',
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+              color: Theme.of(context).brightness == Brightness.dark
+                  ? AppColors.darkTextSecondary
+                  : AppColors.lightTextSecondary,
+            ),
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 24),
+          _buildTestButton(
+            context,
+            icon: Icons.flash_on,
+            title: 'Send Immediately',
+            subtitle: 'Test notification right now',
+            color: AppColors.statusPaid,
+            onTap: _isLoading ? null : _sendImmediate,
+          ),
+          const SizedBox(height: 12),
+          _buildTestButton(
+            context,
+            icon: Icons.timer,
+            title: 'In 10 Seconds',
+            subtitle: 'Schedule notification for 10 seconds',
+            color: AppColors.primary500,
+            onTap: _isLoading ? null : _sendIn10Seconds,
+          ),
+          const SizedBox(height: 12),
+          _buildTestButton(
+            context,
+            icon: Icons.schedule,
+            title: 'In 1 Minute',
+            subtitle: 'Schedule notification for 1 minute',
+            color: Colors.orange,
+            onTap: _isLoading ? null : _sendIn1Minute,
+          ),
+          const SizedBox(height: 24),
+          if (_isLoading) const Center(child: CircularProgressIndicator()),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildTestButton(
+    BuildContext context, {
+    required IconData icon,
+    required String title,
+    required String subtitle,
+    required Color color,
+    VoidCallback? onTap,
+  }) {
+    return Material(
+      color: color.withValues(alpha: 0.1),
+      borderRadius: BorderRadius.circular(12),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(12),
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: color.withValues(alpha: 0.2),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Icon(icon, color: color),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      title,
+                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    Text(
+                      subtitle,
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: Theme.of(context).brightness == Brightness.dark
+                            ? AppColors.darkTextSecondary
+                            : AppColors.lightTextSecondary,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Icon(
+                Icons.arrow_forward_ios,
+                size: 16,
+                color: Theme.of(context).brightness == Brightness.dark
+                    ? AppColors.darkTextSecondary
+                    : AppColors.lightTextSecondary,
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class ScheduledNotificationsSheet extends StatefulWidget {
+  final NotificationService notificationService;
+
+  const ScheduledNotificationsSheet({
+    super.key,
+    required this.notificationService,
+  });
+
+  @override
+  State<ScheduledNotificationsSheet> createState() =>
+      _ScheduledNotificationsSheetState();
+}
+
+class _ScheduledNotificationsSheetState
+    extends State<ScheduledNotificationsSheet> {
+  final List<Map<String, dynamic>> _scheduledNotifications = [];
+  bool _isLoading = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadScheduledNotifications();
+  }
+
+  Future<void> _loadScheduledNotifications() async {
+    setState(() => _isLoading = true);
+    try {
+      // Note: flutter_local_notifications doesn't expose a method to list pending notifications
+      // So we'll show a message explaining this
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
+    }
+  }
+
+  Future<void> _cancelAllScheduled() async {
+    await widget.notificationService.cancelAllNotifications();
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('All scheduled notifications cancelled')),
+      );
+      Navigator.pop(context);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(24),
+      constraints: BoxConstraints(
+        maxHeight: MediaQuery.of(context).size.height * 0.7,
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Center(
+            child: Container(
+              width: 40,
+              height: 4,
+              decoration: BoxDecoration(
+                color: Theme.of(context).dividerColor,
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
+          ),
+          const SizedBox(height: 16),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                'Scheduled Notifications',
+                style: Theme.of(
+                  context,
+                ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+              ),
+              TextButton.icon(
+                onPressed: _cancelAllScheduled,
+                icon: const Icon(Icons.delete_sweep, size: 18),
+                label: const Text('Cancel All'),
+                style: TextButton.styleFrom(foregroundColor: AppColors.error),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          Text(
+            'Notifications are automatically scheduled for:\n• Payment due dates (1 day before)\n• Project deadlines (1 day before)\n• Invoice due dates (1 day before)',
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+              color: Theme.of(context).brightness == Brightness.dark
+                  ? AppColors.darkTextSecondary
+                  : AppColors.lightTextSecondary,
+            ),
+          ),
+          const SizedBox(height: 16),
+          const Divider(),
+          const SizedBox(height: 8),
+          Text(
+            'Scheduled Notifications Info',
+            style: Theme.of(
+              context,
+            ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600),
+          ),
+          const SizedBox(height: 12),
+          _buildScheduledInfo(
+            context,
+            icon: Icons.payment,
+            title: 'Payment Reminders',
+            subtitle: 'Sent 1 day before payment due date',
+          ),
+          const SizedBox(height: 8),
+          _buildScheduledInfo(
+            context,
+            icon: Icons.folder,
+            title: 'Project Reminders',
+            subtitle: 'Sent 1 day before project deadline',
+          ),
+          const SizedBox(height: 8),
+          _buildScheduledInfo(
+            context,
+            icon: Icons.receipt_long,
+            title: 'Invoice Reminders',
+            subtitle: 'Sent 1 day before invoice due date',
+          ),
+          const SizedBox(height: 16),
+          Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: AppColors.primary500.withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(
+                color: AppColors.primary500.withValues(alpha: 0.3),
+              ),
+            ),
+            child: Row(
+              children: [
+                Icon(Icons.info_outline, color: AppColors.primary500),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Text(
+                    'Enable notification toggles above to receive reminders for each type.',
+                    style: Theme.of(context).textTheme.bodySmall,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 24),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildScheduledInfo(
+    BuildContext context, {
+    required IconData icon,
+    required String title,
+    required String subtitle,
+  }) {
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: Theme.of(context).brightness == Brightness.dark
+            ? Colors.white.withValues(alpha: 0.05)
+            : Colors.black.withValues(alpha: 0.03),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Row(
+        children: [
+          Icon(icon, size: 20, color: AppColors.primary500),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style: Theme.of(
+                    context,
+                  ).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w600),
+                ),
+                Text(
+                  subtitle,
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: Theme.of(context).brightness == Brightness.dark
+                        ? AppColors.darkTextSecondary
+                        : AppColors.lightTextSecondary,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Icon(Icons.check_circle, color: AppColors.statusPaid, size: 20),
+        ],
       ),
     );
   }

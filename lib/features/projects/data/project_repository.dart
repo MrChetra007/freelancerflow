@@ -7,6 +7,13 @@ class ProjectRepository {
 
   ProjectRepository(this._client);
 
+  String _toDbStatus(ProjectStatus status) {
+    return status.name.replaceAllMapped(
+      RegExp(r'[A-Z]'),
+      (match) => '_${match.group(0)!.toLowerCase()}',
+    );
+  }
+
   Future<List<Project>> getProjects() async {
     final response = await _client
         .from('projects')
@@ -43,7 +50,7 @@ class ProjectRepository {
           'client_id': project.clientId,
           'title': project.title,
           'description': project.description,
-          'status': project.status.name.replaceAll('_', ' '),
+          'status': _toDbStatus(project.status),
           'budget': project.budget,
           'currency': project.currency,
           'start_date': project.startDate?.toIso8601String().split('T')[0],
@@ -61,7 +68,7 @@ class ProjectRepository {
         .update({
           'title': project.title,
           'description': project.description,
-          'status': project.status.name.replaceAll('_', ' '),
+          'status': _toDbStatus(project.status),
           'budget': project.budget,
           'currency': project.currency,
           'start_date': project.startDate?.toIso8601String().split('T')[0],

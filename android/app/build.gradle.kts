@@ -7,7 +7,7 @@ plugins {
 }
 
 android {
-    namespace = "com.freelanceflow.app"
+    namespace = "com.sozin.freelanceflow"
     compileSdk = 36
     ndkVersion = flutter.ndkVersion
 
@@ -22,7 +22,7 @@ android {
     }
 
     defaultConfig {
-        applicationId = "com.freelanceflow.app"
+        applicationId = "com.sozin.freelanceflow"
         minSdk = 24
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode

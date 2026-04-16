@@ -1,0 +1,72 @@
+FREELANCEFLOW - Client Management App
+======================================
+
+WHAT IT DOES
+------------
+FreelanceFlow is a mobile app for freelancers to manage their clients, projects, payments, and invoices in one place. It helps track project progress, log payments, generate invoices, and monitor business performance.
+
+AUTHENTICATION
+---------------
+- Email/Password sign up and login
+- Google OAuth sign in
+- Auto-redirect to dashboard on successful auth
+
+MAIN SCREENS
+------------
+1. Dashboard
+   - Overview stats (total clients, active projects, pending payments, revenue)
+   - Recent activity feed
+   - Quick access to add new items
+
+2. Clients
+   - List all clients with search
+   - Add/Edit client (name, email, phone, company, country, currency)
+   - Archive clients
+
+3. Projects
+   - List projects by client
+   - Add/Edit project (title, description, budget, status, dates)
+   - Milestone tracking within projects
+   - Status: In Progress, Completed, On Hold, Cancelled
+
+4. Payments
+   - Track payments per client/project
+   - Add/Edit payment (amount, status, method, due date, paid date)
+   - Payment methods: Bank Transfer, PayPal, Wise, Crypto, Cash, Stripe, Other
+   - Status: Paid, Unpaid, Partial, Overdue, Refunded
+
+5. Invoices
+   - Create invoices with line items
+   - Add tax and discount
+   - Generate PDF
+   - Status: Draft, Sent, Paid, Overdue, Cancelled
+
+6. Settings
+   - Profile management
+   - Currency preference
+   - Theme (Light/Dark)
+   - Premium subscription
+
+DATA FLOW
+---------
+1. User signs up/logs in
+2. Add a Client first
+3. Create a Project linked to a Client
+4. Add Milestones to track project progress
+5. Log Payments for the project
+6. Create Invoice with line items for billing
+7. Dashboard shows summary and recent activity
+
+TECH STACK
+----------
+- Flutter (Android)
+- Supabase (Backend - Auth, Database, Storage)
+- Riverpod (State Management)
+- GoRouter (Navigation)
+- PDF generation for invoices
+
+SECURITY
+--------
+- Supabase Auth with JWT
+- Row-level security (RLS) on all tables
+- User can only access their own data

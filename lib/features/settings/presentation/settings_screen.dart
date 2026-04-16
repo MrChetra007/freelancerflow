@@ -2,11 +2,17 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../../../core/theme/theme_notifier.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/supabase/supabase_client.dart';
 import '../../../core/services/notification_service.dart';
 import '../data/premium_provider.dart';
+
+const _privacyPolicyUrl =
+    'https://mrchetra007.github.io/app-pp-tos/privacy_policy';
+const _termsOfServiceUrl =
+    'https://mrchetra007.github.io/app-pp-tos/terms_of_service';
 
 final notificationPrefsProvider =
     StateNotifierProvider<NotificationPrefsNotifier, NotificationPrefs>((ref) {
@@ -262,13 +268,13 @@ class SettingsScreen extends ConsumerWidget {
             leading: const Icon(Icons.description_outlined),
             title: const Text('Terms of Service'),
             trailing: const Icon(Icons.chevron_right),
-            onTap: () {},
+            onTap: () => _launchUrl(_termsOfServiceUrl),
           ),
           ListTile(
             leading: const Icon(Icons.privacy_tip_outlined),
             title: const Text('Privacy Policy'),
             trailing: const Icon(Icons.chevron_right),
-            onTap: () {},
+            onTap: () => _launchUrl(_privacyPolicyUrl),
           ),
           const Divider(),
           _buildSectionHeader(context, 'Developer Options'),
@@ -398,6 +404,13 @@ class SettingsScreen extends ConsumerWidget {
       ThemeMode.dark => 'Dark',
       ThemeMode.system => 'System',
     };
+  }
+
+  Future<void> _launchUrl(String url) async {
+    final uri = Uri.parse(url);
+    if (await canLaunchUrl(uri)) {
+      await launchUrl(uri, mode: LaunchMode.externalApplication);
+    }
   }
 
   void _showThemePicker(

@@ -1,0 +1,29 @@
+TEST ACCOUNT FOR GOOGLE PLAY REVIEWER
+======================================
+
+App: FreelanceFlow - Client Management
+
+INSTRUCTIONS FOR REVIEWER:
+1. Download and install the app
+2. On the login screen, choose "Sign Up"
+3. Create a free account with any email and password (or use Google Sign-In)
+4. After signup, the reviewer will have full access to all app features
+
+OR use these pre-created test credentials:
+
+Email: freelancerflow.test@gmail.com
+Password: TestPass123!
+
+NOTE: Reviewer may need to verify the email to access all features.
+If email verification is required, please use the "Continue with Google" option 
+which bypasses email verification.
+
+FEATURES TO TEST:
+- Dashboard with stats and activity
+- Add/Edit clients
+- Create projects with milestones
+- Log payments (Bank Transfer, PayPal, etc.)
+- Create invoices with line items
+- Generate PDF invoices
+- Dark/Light theme toggle
+- Profile settings

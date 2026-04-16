@@ -52,7 +52,7 @@ class PaymentRepository {
           'amount_paid': payment.amountPaid,
           'currency': payment.currency,
           'status': payment.status.name,
-          'method': payment.method?.name.replaceAll('_', ' '),
+          'method': _enumToSnakeCase(payment.method?.name),
           'due_date': payment.dueDate?.toIso8601String().split('T')[0],
           'paid_date': payment.paidDate?.toIso8601String().split('T')[0],
           'description': payment.description,
@@ -74,7 +74,7 @@ class PaymentRepository {
           'amount_paid': payment.amountPaid,
           'currency': payment.currency,
           'status': payment.status.name,
-          'method': payment.method?.name.replaceAll('_', ' '),
+          'method': _enumToSnakeCase(payment.method?.name),
           'due_date': payment.dueDate?.toIso8601String().split('T')[0],
           'paid_date': payment.paidDate?.toIso8601String().split('T')[0],
           'description': payment.description,
@@ -141,5 +141,15 @@ class PaymentRepository {
       'other' => PaymentMethod.other,
       _ => null,
     };
+  }
+
+  String? _enumToSnakeCase(String? name) {
+    if (name == null) return null;
+    return name
+        .replaceAllMapped(
+          RegExp(r'[A-Z]'),
+          (match) => '_${match.group(0)!.toLowerCase()}',
+        )
+        .replaceFirst(RegExp(r'^_'), '');
   }
 }

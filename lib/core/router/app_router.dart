@@ -1,6 +1,8 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../features/auth/presentation/splash_screen.dart';
 import '../../features/auth/presentation/login_screen.dart';
 import '../../features/dashboard/presentation/dashboard_screen.dart';
@@ -21,10 +23,33 @@ import '../supabase/supabase_client.dart';
 final _rootNavigatorKey = GlobalKey<NavigatorState>();
 final _shellNavigatorKey = GlobalKey<NavigatorState>();
 
-GoRouter createRouter() {
+class SupabaseAuthNotifier extends ChangeNotifier {
+  SupabaseAuthNotifier() {
+    _subscription = SupabaseConfig.client.auth.onAuthStateChange.listen((_) {
+      notifyListeners();
+    });
+  }
+
+  late final StreamSubscription<AuthState> _subscription;
+
+  @override
+  void dispose() {
+    _subscription.cancel();
+    super.dispose();
+  }
+}
+
+final _authNotifierProvider = Provider<SupabaseAuthNotifier>((ref) {
+  final notifier = SupabaseAuthNotifier();
+  ref.onDispose(() => notifier.dispose());
+  return notifier;
+});
+
+GoRouter createRouter(SupabaseAuthNotifier authNotifier) {
   return GoRouter(
     navigatorKey: _rootNavigatorKey,
     initialLocation: '/splash',
+    refreshListenable: authNotifier,
     redirect: (context, state) {
       final isLoggedIn = SupabaseConfig.client.auth.currentSession != null;
       final isOnSplash = state.matchedLocation == '/splash';
@@ -311,7 +336,10 @@ GoRouter createRouter() {
 }
 
 final routerProvider = Provider<GoRouter>((ref) {
-  return createRouter();
+  final authNotifier = ref.watch(_authNotifierProvider);
+  final router = createRouter(authNotifier);
+  ref.onDispose(() => router.dispose());
+  return router;
 });
 
 class MainShell extends StatefulWidget {

@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/utils/currency_formatter.dart';
+import '../../../core/widgets/loading_widget.dart';
 import '../data/dashboard_provider.dart';
 import '../../projects/domain/project.dart';
 import '../../settings/data/premium_provider.dart';
@@ -77,8 +78,13 @@ class DashboardScreen extends ConsumerWidget {
             ],
           ),
         ),
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (e, _) => Center(child: Text('Error: $e')),
+        loading: () => const Center(
+          child: LoadingDots(),
+        ),
+        error: (e, _) => ErrorDisplay(
+          message: e.toString(),
+          onRetry: () => ref.invalidate(dashboardStatsProvider),
+        ),
       ),
     );
   }

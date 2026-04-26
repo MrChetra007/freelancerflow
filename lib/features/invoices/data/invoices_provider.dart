@@ -52,13 +52,27 @@ final invoiceStatusFilterProvider = StateProvider<InvoiceStatus?>(
   (ref) => null,
 );
 
+final invoiceSearchQueryProvider = StateProvider<String>((ref) => '');
+
 final filteredInvoicesProvider = Provider<AsyncValue<List<Invoice>>>((ref) {
   final invoices = ref.watch(invoicesProvider);
   final filter = ref.watch(invoiceStatusFilterProvider);
+  final query = ref.watch(invoiceSearchQueryProvider).toLowerCase();
 
   return invoices.whenData((list) {
-    if (filter == null) return list;
-    return list.where((i) => i.status == filter).toList();
+    var result = list;
+    
+    if (query.isNotEmpty) {
+      result = result.where((i) =>
+        i.invoiceNumber.toLowerCase().contains(query)
+      ).toList();
+    }
+    
+    if (filter != null) {
+      result = result.where((i) => i.status == filter).toList();
+    }
+    
+    return result;
   });
 });
 

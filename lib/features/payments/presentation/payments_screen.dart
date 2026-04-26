@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/utils/currency_formatter.dart';
 import '../../../../core/widgets/animated_list_item.dart';
+import '../../../../core/widgets/loading_widget.dart';
 import '../../../../core/utils/haptic_utils.dart';
 import '../data/payments_provider.dart';
 import '../domain/payment.dart';
@@ -112,8 +113,11 @@ class PaymentsScreen extends ConsumerWidget {
                   ),
                 );
               },
-              loading: () => const Center(child: CircularProgressIndicator()),
-              error: (e, _) => Center(child: Text('Error: $e')),
+              loading: () => const Center(child: LoadingDots()),
+              error: (e, _) => ErrorDisplay(
+                message: e.toString(),
+                onRetry: () => ref.invalidate(paymentsProvider),
+              ),
             ),
           ),
         ],

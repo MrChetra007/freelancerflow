@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/widgets/animated_list_item.dart';
+import '../../../../core/widgets/loading_widget.dart';
 import '../../../../core/utils/haptic_utils.dart';
 import '../data/invoices_provider.dart';
 import '../domain/invoice.dart';
@@ -15,6 +16,7 @@ class InvoicesScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final invoices = ref.watch(filteredInvoicesProvider);
     final filter = ref.watch(invoiceStatusFilterProvider);
+    final searchQuery = ref.watch(invoiceSearchQueryProvider);
 
     return Scaffold(
       appBar: AppBar(
@@ -28,9 +30,27 @@ class InvoicesScreen extends ConsumerWidget {
       ),
       body: Column(
         children: [
+          Padding(
+            padding: const EdgeInsets.all(16),
+            child: TextField(
+              decoration: InputDecoration(
+                hintText: 'Search invoices...',
+                prefixIcon: const Icon(Icons.search),
+                suffixIcon: searchQuery.isNotEmpty
+                    ? IconButton(
+                        icon: const Icon(Icons.clear),
+                        onPressed: () =>
+                            ref.read(invoiceSearchQueryProvider.notifier).state = '',
+                      )
+                    : null,
+              ),
+              onChanged: (value) =>
+                  ref.read(invoiceSearchQueryProvider.notifier).state = value,
+            ),
+          ),
           if (filter != null)
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              padding: const EdgeInsets.symmetric(horizontal: 16),
               child: Row(
                 children: [
                   Chip(
@@ -47,7 +67,7 @@ class InvoicesScreen extends ConsumerWidget {
             child: invoices.when(
               data: (list) {
                 if (list.isEmpty) {
-                  return _buildEmptyState(context, filter != null);
+                  return _buildEmptyState(context, filter != null || searchQuery.isNotEmpty, searchQuery.isNotEmpty);
                 }
                 return RefreshIndicator(
                   onRefresh: () =>
@@ -76,8 +96,11 @@ class InvoicesScreen extends ConsumerWidget {
                   ),
                 );
               },
-              loading: () => const Center(child: CircularProgressIndicator()),
-              error: (e, _) => Center(child: Text('Error: $e')),
+              loading: () => const Center(child: LoadingDots()),
+              error: (e, _) => ErrorDisplay(
+                message: e.toString(),
+                onRetry: () => ref.invalidate(invoicesProvider),
+              ),
             ),
           ),
         ],
@@ -93,24 +116,25 @@ class InvoicesScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildEmptyState(BuildContext context, bool isFiltered) {
+  Widget _buildEmptyState(BuildContext context, bool isFiltered, bool isSearching) {
+    final isSearchOrFilter = isSearching || isFiltered;
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Icon(
-            isFiltered ? Icons.filter_list_off : Icons.receipt_long_outlined,
+            isSearchOrFilter ? Icons.search_off : Icons.receipt_long_outlined,
             size: 64,
             color: AppColors.lightTextSecondary,
           ),
           const SizedBox(height: 16),
           Text(
-            isFiltered ? 'No invoices match filter' : 'No invoices yet',
+            isSearchOrFilter ? 'No invoices found' : 'No invoices yet',
             style: Theme.of(context).textTheme.titleLarge,
           ),
           const SizedBox(height: 8),
           Text(
-            isFiltered ? 'Try a different filter' : 'Create your first invoice',
+            isSearchOrFilter ? 'Try a different search term' : 'Create your first invoice',
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
               color: AppColors.lightTextSecondary,
             ),

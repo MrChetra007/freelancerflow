@@ -50,13 +50,28 @@ final paymentStatusFilterProvider = StateProvider<PaymentStatus?>(
   (ref) => null,
 );
 
+final paymentSearchQueryProvider = StateProvider<String>((ref) => '');
+
 final filteredPaymentsProvider = Provider<AsyncValue<List<Payment>>>((ref) {
   final payments = ref.watch(paymentsProvider);
   final filter = ref.watch(paymentStatusFilterProvider);
+  final query = ref.watch(paymentSearchQueryProvider).toLowerCase();
 
   return payments.whenData((list) {
-    if (filter == null) return list;
-    return list.where((p) => p.status == filter).toList();
+    var result = list;
+    
+    if (query.isNotEmpty) {
+      result = result.where((p) =>
+        (p.description?.toLowerCase().contains(query) ?? false) ||
+        (p.notes?.toLowerCase().contains(query) ?? false)
+      ).toList();
+    }
+    
+    if (filter != null) {
+      result = result.where((p) => p.status == filter).toList();
+    }
+    
+    return result;
   });
 });
 

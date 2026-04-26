@@ -51,13 +51,28 @@ final projectStatusFilterProvider = StateProvider<ProjectStatus?>(
   (ref) => null,
 );
 
+final projectSearchQueryProvider = StateProvider<String>((ref) => '');
+
 final filteredProjectsProvider = Provider<AsyncValue<List<Project>>>((ref) {
   final projects = ref.watch(projectsProvider);
   final filter = ref.watch(projectStatusFilterProvider);
+  final query = ref.watch(projectSearchQueryProvider).toLowerCase();
 
   return projects.whenData((list) {
-    if (filter == null) return list;
-    return list.where((p) => p.status == filter).toList();
+    var result = list;
+    
+    if (query.isNotEmpty) {
+      result = result.where((p) =>
+        p.title.toLowerCase().contains(query) ||
+        (p.description?.toLowerCase().contains(query) ?? false)
+      ).toList();
+    }
+    
+    if (filter != null) {
+      result = result.where((p) => p.status == filter).toList();
+    }
+    
+    return result;
   });
 });
 

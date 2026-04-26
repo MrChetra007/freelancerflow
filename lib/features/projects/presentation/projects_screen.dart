@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/widgets/animated_list_item.dart';
+import '../../../../core/widgets/loading_widget.dart';
 import '../../../../core/utils/haptic_utils.dart';
 import '../data/projects_provider.dart';
 import '../domain/project.dart';
@@ -15,6 +16,7 @@ class ProjectsScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final projects = ref.watch(filteredProjectsProvider);
     final filter = ref.watch(projectStatusFilterProvider);
+    final searchQuery = ref.watch(projectSearchQueryProvider);
 
     return Scaffold(
       appBar: AppBar(
@@ -28,9 +30,27 @@ class ProjectsScreen extends ConsumerWidget {
       ),
       body: Column(
         children: [
+          Padding(
+            padding: const EdgeInsets.all(16),
+            child: TextField(
+              decoration: InputDecoration(
+                hintText: 'Search projects...',
+                prefixIcon: const Icon(Icons.search),
+                suffixIcon: searchQuery.isNotEmpty
+                    ? IconButton(
+                        icon: const Icon(Icons.clear),
+                        onPressed: () =>
+                            ref.read(projectSearchQueryProvider.notifier).state = '',
+                      )
+                    : null,
+              ),
+              onChanged: (value) =>
+                  ref.read(projectSearchQueryProvider.notifier).state = value,
+            ),
+          ),
           if (filter != null)
             Container(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              padding: const EdgeInsets.symmetric(horizontal: 16),
               child: Row(
                 children: [
                   Chip(
@@ -47,7 +67,7 @@ class ProjectsScreen extends ConsumerWidget {
             child: projects.when(
               data: (list) {
                 if (list.isEmpty) {
-                  return _buildEmptyState(context, filter != null);
+                  return _buildEmptyState(context, filter != null || searchQuery.isNotEmpty, searchQuery.isNotEmpty);
                 }
                 return RefreshIndicator(
                   onRefresh: () =>
@@ -76,8 +96,11 @@ class ProjectsScreen extends ConsumerWidget {
                   ),
                 );
               },
-              loading: () => const Center(child: CircularProgressIndicator()),
-              error: (e, _) => Center(child: Text('Error: $e')),
+              loading: () => const Center(child: LoadingDots()),
+              error: (e, _) => ErrorDisplay(
+                message: e.toString(),
+                onRetry: () => ref.invalidate(projectsProvider),
+              ),
             ),
           ),
         ],
@@ -93,24 +116,25 @@ class ProjectsScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildEmptyState(BuildContext context, bool isFiltered) {
+  Widget _buildEmptyState(BuildContext context, bool isFiltered, bool isSearching) {
+    final isSearchOrFilter = isSearching || isFiltered;
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Icon(
-            isFiltered ? Icons.filter_list_off : Icons.folder_outlined,
+            isSearchOrFilter ? Icons.search_off : Icons.folder_outlined,
             size: 64,
             color: AppColors.lightTextSecondary,
           ),
           const SizedBox(height: 16),
           Text(
-            isFiltered ? 'No projects match filter' : 'No projects yet',
+            isSearchOrFilter ? 'No projects found' : 'No projects yet',
             style: Theme.of(context).textTheme.titleLarge,
           ),
           const SizedBox(height: 8),
           Text(
-            isFiltered ? 'Try a different filter' : 'Create your first project',
+            isSearchOrFilter ? 'Try a different search term' : 'Create your first project',
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
               color: AppColors.lightTextSecondary,
             ),

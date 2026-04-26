@@ -19,11 +19,12 @@ If email verification is required, please use the "Continue with Google" option
 which bypasses email verification.
 
 FEATURES TO TEST:
-- Dashboard with stats and activity
-- Add/Edit clients
+- d/Edit clients
 - Create projects with milestones
 - Log payments (Bank Transfer, PayPal, etc.)
 - Create invoices with line items
 - Generate PDF invoices
 - Dark/Light theme toggle
 - Profile settings
+Dashboard with stats and activity
+- Ad

@@ -284,7 +284,7 @@ class _CreateInvoiceScreenState extends ConsumerState<CreateInvoiceScreen> {
           children: [
             clients.when(
               data: (list) => DropdownButtonFormField<String>(
-                value: _selectedClientId,
+                initialValue: _selectedClientId,
                 decoration: const InputDecoration(
                   labelText: 'Client *',
                   prefixIcon: Icon(Icons.person_outline),
@@ -298,7 +298,7 @@ class _CreateInvoiceScreenState extends ConsumerState<CreateInvoiceScreen> {
                 validator: (v) => v == null ? 'Required' : null,
               ),
               loading: () => const LinearProgressIndicator(),
-              error: (_, __) => const Text('Error loading clients'),
+              error: (_, _) => const Text('Error loading clients'),
             ),
             const SizedBox(height: 16),
             Row(

@@ -10,7 +10,14 @@ class SupabaseConfig {
     final url = dotenv.env['SUPABASE_URL']!;
     final anonKey = dotenv.env['SUPABASE_ANON_KEY']!;
 
-    await Supabase.initialize(url: url, anonKey: anonKey);
+    await Supabase.initialize(
+      url: url,
+      anonKey: anonKey,
+      authOptions: const FlutterAuthClientOptions(
+        autoRefreshToken: true,
+      ),
+    );
+
     _instance = Supabase.instance.client;
   }
 

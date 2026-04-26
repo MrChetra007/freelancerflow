@@ -31,6 +31,7 @@ dependencies:
   timezone: ^0.10.0
   in_app_purchase: ^3.2.3
   url_launcher: ^6.2.5
+  flutter_svg: ^2.2.4
 
 dev_dependencies:
   flutter_test:
@@ -46,6 +47,8 @@ flutter:
   uses-material-design: true
   assets:
     - .env
+    - assets/
+    - assets/videos/
 
 flutter_launcher_icons:
   android: true

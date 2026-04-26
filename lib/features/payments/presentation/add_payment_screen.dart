@@ -257,7 +257,7 @@ class _AddPaymentScreenState extends ConsumerState<AddPaymentScreen> {
                 const SizedBox(width: 16),
                 Expanded(
                   child: DropdownButtonFormField<String>(
-                    value: _currency,
+                    initialValue: _currency,
                     decoration: const InputDecoration(labelText: 'Currency'),
                     items: _currencies
                         .map((c) => DropdownMenuItem(value: c, child: Text(c)))
@@ -270,7 +270,7 @@ class _AddPaymentScreenState extends ConsumerState<AddPaymentScreen> {
             const SizedBox(height: 16),
             clients.when(
               data: (list) => DropdownButtonFormField<String>(
-                value: _selectedClientId,
+                initialValue: _selectedClientId,
                 decoration: const InputDecoration(
                   labelText: 'Client *',
                   prefixIcon: Icon(Icons.person_outline),
@@ -287,11 +287,11 @@ class _AddPaymentScreenState extends ConsumerState<AddPaymentScreen> {
                 validator: (v) => v == null ? 'Required' : null,
               ),
               loading: () => const LinearProgressIndicator(),
-              error: (_, __) => const Text('Error loading clients'),
+              error: (_, _) => const Text('Error loading clients'),
             ),
             const SizedBox(height: 16),
             DropdownButtonFormField<PaymentStatus>(
-              value: _status,
+              initialValue: _status,
               decoration: const InputDecoration(
                 labelText: 'Status',
                 prefixIcon: Icon(Icons.flag_outlined),
@@ -308,7 +308,7 @@ class _AddPaymentScreenState extends ConsumerState<AddPaymentScreen> {
             ),
             const SizedBox(height: 16),
             DropdownButtonFormField<PaymentMethod>(
-              value: _method,
+              initialValue: _method,
               decoration: const InputDecoration(
                 labelText: 'Payment Method',
                 prefixIcon: Icon(Icons.payment),

@@ -307,7 +307,7 @@ class _AddClientScreenState extends ConsumerState<AddClientScreen> {
               children: [
                 Expanded(
                   child: DropdownButtonFormField<String>(
-                    value: _selectedCountry,
+                    initialValue: _selectedCountry,
                     decoration: const InputDecoration(labelText: 'Country'),
                     items: _countries.entries
                         .map(
@@ -326,7 +326,7 @@ class _AddClientScreenState extends ConsumerState<AddClientScreen> {
                 const SizedBox(width: 16),
                 Expanded(
                   child: DropdownButtonFormField<String>(
-                    value: _selectedCurrency,
+                    initialValue: _selectedCurrency,
                     decoration: const InputDecoration(labelText: 'Currency'),
                     items: _currencies
                         .map((c) => DropdownMenuItem(value: c, child: Text(c)))

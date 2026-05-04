@@ -38,4 +38,12 @@ class AppColors {
   static const statusActive = Color(0xFF3B82F6);
   static const statusDone = Color(0xFF6B7280);
   static const statusOnHold = Color(0xFFF97316);
+
+  static const expenseSoftware = Color(0xFF6366F1);
+  static const expenseTravel = Color(0xFFF59E0B);
+  static const expenseHardware = Color(0xFF3B82F6);
+  static const expenseOther = Color(0xFF94A3B8);
+
+  static const timerRunning = Color(0xFF22C55E);
+  static const timerStopped = Color(0xFF64748B);
 }

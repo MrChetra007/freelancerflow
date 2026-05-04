@@ -32,6 +32,8 @@ mixin _$Client {
   String? get notes => throw _privateConstructorUsedError;
   String get avatarColor => throw _privateConstructorUsedError;
   bool get isArchived => throw _privateConstructorUsedError;
+  double get defaultHourlyRate => throw _privateConstructorUsedError;
+  List<String> get tags => throw _privateConstructorUsedError;
   DateTime get createdAt => throw _privateConstructorUsedError;
   DateTime? get updatedAt => throw _privateConstructorUsedError;
 
@@ -61,6 +63,8 @@ abstract class $ClientCopyWith<$Res> {
     String? notes,
     String avatarColor,
     bool isArchived,
+    double defaultHourlyRate,
+    List<String> tags,
     DateTime createdAt,
     DateTime? updatedAt,
   });
@@ -92,6 +96,8 @@ class _$ClientCopyWithImpl<$Res, $Val extends Client>
     Object? notes = freezed,
     Object? avatarColor = null,
     Object? isArchived = null,
+    Object? defaultHourlyRate = null,
+    Object? tags = null,
     Object? createdAt = null,
     Object? updatedAt = freezed,
   }) {
@@ -141,6 +147,14 @@ class _$ClientCopyWithImpl<$Res, $Val extends Client>
                 ? _value.isArchived
                 : isArchived // ignore: cast_nullable_to_non_nullable
                       as bool,
+            defaultHourlyRate: null == defaultHourlyRate
+                ? _value.defaultHourlyRate
+                : defaultHourlyRate // ignore: cast_nullable_to_non_nullable
+                      as double,
+            tags: null == tags
+                ? _value.tags
+                : tags // ignore: cast_nullable_to_non_nullable
+                      as List<String>,
             createdAt: null == createdAt
                 ? _value.createdAt
                 : createdAt // ignore: cast_nullable_to_non_nullable
@@ -175,6 +189,8 @@ abstract class _$$ClientImplCopyWith<$Res> implements $ClientCopyWith<$Res> {
     String? notes,
     String avatarColor,
     bool isArchived,
+    double defaultHourlyRate,
+    List<String> tags,
     DateTime createdAt,
     DateTime? updatedAt,
   });
@@ -205,6 +221,8 @@ class __$$ClientImplCopyWithImpl<$Res>
     Object? notes = freezed,
     Object? avatarColor = null,
     Object? isArchived = null,
+    Object? defaultHourlyRate = null,
+    Object? tags = null,
     Object? createdAt = null,
     Object? updatedAt = freezed,
   }) {
@@ -254,6 +272,14 @@ class __$$ClientImplCopyWithImpl<$Res>
             ? _value.isArchived
             : isArchived // ignore: cast_nullable_to_non_nullable
                   as bool,
+        defaultHourlyRate: null == defaultHourlyRate
+            ? _value.defaultHourlyRate
+            : defaultHourlyRate // ignore: cast_nullable_to_non_nullable
+                  as double,
+        tags: null == tags
+            ? _value._tags
+            : tags // ignore: cast_nullable_to_non_nullable
+                  as List<String>,
         createdAt: null == createdAt
             ? _value.createdAt
             : createdAt // ignore: cast_nullable_to_non_nullable
@@ -282,9 +308,11 @@ class _$ClientImpl implements _Client {
     this.notes,
     this.avatarColor = '#2563EB',
     this.isArchived = false,
+    this.defaultHourlyRate = 0,
+    final List<String> tags = const [],
     required this.createdAt,
     this.updatedAt,
-  });
+  }) : _tags = tags;
 
   factory _$ClientImpl.fromJson(Map<String, dynamic> json) =>
       _$$ClientImplFromJson(json);
@@ -315,13 +343,25 @@ class _$ClientImpl implements _Client {
   @JsonKey()
   final bool isArchived;
   @override
+  @JsonKey()
+  final double defaultHourlyRate;
+  final List<String> _tags;
+  @override
+  @JsonKey()
+  List<String> get tags {
+    if (_tags is EqualUnmodifiableListView) return _tags;
+    // ignore: implicit_dynamic_type
+    return EqualUnmodifiableListView(_tags);
+  }
+
+  @override
   final DateTime createdAt;
   @override
   final DateTime? updatedAt;
 
   @override
   String toString() {
-    return 'Client(id: $id, userId: $userId, name: $name, email: $email, phone: $phone, company: $company, country: $country, currency: $currency, notes: $notes, avatarColor: $avatarColor, isArchived: $isArchived, createdAt: $createdAt, updatedAt: $updatedAt)';
+    return 'Client(id: $id, userId: $userId, name: $name, email: $email, phone: $phone, company: $company, country: $country, currency: $currency, notes: $notes, avatarColor: $avatarColor, isArchived: $isArchived, defaultHourlyRate: $defaultHourlyRate, tags: $tags, createdAt: $createdAt, updatedAt: $updatedAt)';
   }
 
   @override
@@ -343,6 +383,9 @@ class _$ClientImpl implements _Client {
                 other.avatarColor == avatarColor) &&
             (identical(other.isArchived, isArchived) ||
                 other.isArchived == isArchived) &&
+            (identical(other.defaultHourlyRate, defaultHourlyRate) ||
+                other.defaultHourlyRate == defaultHourlyRate) &&
+            const DeepCollectionEquality().equals(other._tags, _tags) &&
             (identical(other.createdAt, createdAt) ||
                 other.createdAt == createdAt) &&
             (identical(other.updatedAt, updatedAt) ||
@@ -364,6 +407,8 @@ class _$ClientImpl implements _Client {
     notes,
     avatarColor,
     isArchived,
+    defaultHourlyRate,
+    const DeepCollectionEquality().hash(_tags),
     createdAt,
     updatedAt,
   );
@@ -395,6 +440,8 @@ abstract class _Client implements Client {
     final String? notes,
     final String avatarColor,
     final bool isArchived,
+    final double defaultHourlyRate,
+    final List<String> tags,
     required final DateTime createdAt,
     final DateTime? updatedAt,
   }) = _$ClientImpl;
@@ -423,6 +470,10 @@ abstract class _Client implements Client {
   String get avatarColor;
   @override
   bool get isArchived;
+  @override
+  double get defaultHourlyRate;
+  @override
+  List<String> get tags;
   @override
   DateTime get createdAt;
   @override

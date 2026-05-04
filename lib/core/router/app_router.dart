@@ -18,6 +18,12 @@ import '../../features/invoices/presentation/invoice_detail_screen.dart';
 import '../../features/settings/presentation/settings_screen.dart';
 import '../../features/settings/presentation/premium_screen.dart';
 import '../../features/settings/presentation/profile_screen.dart';
+import '../../features/expenses/presentation/expenses_screen.dart';
+import '../../features/expenses/presentation/add_expense_screen.dart';
+import '../../features/time_tracking/presentation/time_tracking_screen.dart';
+import '../../features/time_tracking/presentation/add_time_entry_screen.dart';
+import '../../features/recurring/presentation/recurring_invoices_screen.dart';
+import '../../features/recurring/presentation/create_recurring_screen.dart';
 import '../supabase/supabase_client.dart';
 
 final _rootNavigatorKey = GlobalKey<NavigatorState>();
@@ -326,6 +332,130 @@ GoRouter createRouter(SupabaseAuthNotifier authNotifier) {
                   ).animate(
                     CurveTween(curve: Curves.easeOutCubic).animate(animation),
                   ),
+              child: child,
+            );
+          },
+        ),
+      ),
+
+      // v2 — Expenses
+      GoRoute(
+        path: '/expenses',
+        pageBuilder: (context, state) => CustomTransitionPage(
+          key: state.pageKey,
+          child: const ExpensesScreen(),
+          transitionsBuilder: (context, animation, secondaryAnimation, child) {
+            return SlideTransition(
+              position:
+                  Tween<Offset>(begin: const Offset(1, 0), end: Offset.zero)
+                      .animate(
+                        CurveTween(
+                          curve: Curves.easeOutCubic,
+                        ).animate(animation),
+                      ),
+              child: child,
+            );
+          },
+        ),
+      ),
+      GoRoute(
+        path: '/expenses/add',
+        pageBuilder: (context, state) {
+          final expenseId = state.extra as String?;
+          return CustomTransitionPage(
+            key: state.pageKey,
+            child: AddExpenseScreen(),
+            transitionsBuilder:
+                (context, animation, secondaryAnimation, child) {
+              return SlideTransition(
+                position: Tween<Offset>(
+                  begin: const Offset(0, 1),
+                  end: Offset.zero,
+                ).animate(
+                  CurveTween(curve: Curves.easeOutCubic).animate(animation),
+                ),
+                child: child,
+              );
+            },
+          );
+        },
+      ),
+
+      // v2 — Time Tracking
+      GoRoute(
+        path: '/time-tracking',
+        pageBuilder: (context, state) => CustomTransitionPage(
+          key: state.pageKey,
+          child: const TimeTrackingScreen(),
+          transitionsBuilder: (context, animation, secondaryAnimation, child) {
+            return SlideTransition(
+              position:
+                  Tween<Offset>(begin: const Offset(1, 0), end: Offset.zero)
+                      .animate(
+                        CurveTween(
+                          curve: Curves.easeOutCubic,
+                        ).animate(animation),
+                      ),
+              child: child,
+            );
+          },
+        ),
+      ),
+      GoRoute(
+        path: '/time-tracking/add',
+        pageBuilder: (context, state) {
+          final projectId = state.extra as String?;
+          return CustomTransitionPage(
+            key: state.pageKey,
+            child: AddTimeEntryScreen(projectId: projectId),
+            transitionsBuilder:
+                (context, animation, secondaryAnimation, child) {
+              return SlideTransition(
+                position: Tween<Offset>(
+                  begin: const Offset(0, 1),
+                  end: Offset.zero,
+                ).animate(
+                  CurveTween(curve: Curves.easeOutCubic).animate(animation),
+                ),
+                child: child,
+              );
+            },
+          );
+        },
+      ),
+
+      // v2 — Recurring Invoices
+      GoRoute(
+        path: '/recurring',
+        pageBuilder: (context, state) => CustomTransitionPage(
+          key: state.pageKey,
+          child: const RecurringInvoicesScreen(),
+          transitionsBuilder: (context, animation, secondaryAnimation, child) {
+            return SlideTransition(
+              position:
+                  Tween<Offset>(begin: const Offset(1, 0), end: Offset.zero)
+                      .animate(
+                        CurveTween(
+                          curve: Curves.easeOutCubic,
+                        ).animate(animation),
+                      ),
+              child: child,
+            );
+          },
+        ),
+      ),
+      GoRoute(
+        path: '/recurring/create',
+        pageBuilder: (context, state) => CustomTransitionPage(
+          key: state.pageKey,
+          child: const CreateRecurringScreen(),
+          transitionsBuilder: (context, animation, secondaryAnimation, child) {
+            return SlideTransition(
+              position:
+                  Tween<Offset>(begin: const Offset(0, 1), end: Offset.zero)
+                      .animate(
+                        CurveTween(curve: Curves.easeOutCubic).animate(animation),
+                      ),
               child: child,
             );
           },

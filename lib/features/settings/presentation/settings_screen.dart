@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -8,11 +9,51 @@ import '../../../core/theme/app_colors.dart';
 import '../../../core/supabase/supabase_client.dart';
 import '../../../core/services/notification_service.dart';
 import '../data/premium_provider.dart';
+import '../data/profile_provider.dart';
 
 const _privacyPolicyUrl =
     'https://mrchetra007.github.io/app-pp-tos/privacy_policy';
 const _termsOfServiceUrl =
     'https://mrchetra007.github.io/app-pp-tos/terms_of_service';
+
+final timerRoundProvider =
+    StateNotifierProvider<TimerRoundNotifier, TimerRoundMode>((ref) {
+  return TimerRoundNotifier(ref.watch(sharedPreferencesProvider));
+});
+
+enum TimerRoundMode {
+  none('None'),
+  five('5 min'),
+  fifteen('15 min'),
+  thirty('30 min');
+
+  final String label;
+  const TimerRoundMode(this.label);
+
+  int get minutes => switch (this) {
+        none => 0,
+        five => 5,
+        fifteen => 15,
+        thirty => 30,
+      };
+}
+
+class TimerRoundNotifier extends StateNotifier<TimerRoundMode> {
+  final SharedPreferences _prefs;
+
+  TimerRoundNotifier(this._prefs)
+    : super(
+        TimerRoundMode.values.firstWhere(
+          (e) => e.name == (_prefs.getString('timer_round') ?? 'none'),
+          orElse: () => TimerRoundMode.none,
+        ),
+      );
+
+  Future<void> setRound(TimerRoundMode mode) async {
+    await _prefs.setString('timer_round', mode.name);
+    state = mode;
+  }
+}
 
 final notificationPrefsProvider =
     StateNotifierProvider<NotificationPrefsNotifier, NotificationPrefs>((ref) {
@@ -79,6 +120,9 @@ class SettingsScreen extends ConsumerWidget {
     final themeMode = ref.watch(themeNotifierProvider);
     final notificationPrefs = ref.watch(notificationPrefsProvider);
     final isPremium = ref.watch(isPremiumProvider);
+    final timerRound = ref.watch(timerRoundProvider);
+    final profileState = ref.watch(profileProvider);
+    final profile = profileState.data;
 
     return Scaffold(
       appBar: AppBar(
@@ -174,6 +218,79 @@ class SettingsScreen extends ConsumerWidget {
             subtitle: Text(_getThemeName(themeMode)),
             trailing: const Icon(Icons.chevron_right),
             onTap: () => _showThemePicker(context, ref, themeMode),
+          ),
+          const Divider(),
+          _buildSectionHeader(context, 'Time Tracking'),
+          ListTile(
+            leading: const Icon(Icons.attach_money_outlined),
+            title: const Text('Default Hourly Rate'),
+            subtitle: Text(
+              profileState.isLoading
+                  ? 'Loading...'
+                  : profile != null && profile.defaultHourlyRate > 0
+                      ? '\$${profile.defaultHourlyRate.toStringAsFixed(2)}/hr'
+                      : 'Not set',
+            ),
+            trailing: const Icon(Icons.chevron_right),
+            onTap: () => _editHourlyRate(context, ref, profile),
+          ),
+          ListTile(
+            leading: const Icon(Icons.timelapse_outlined),
+            title: const Text('Round Timer To'),
+            subtitle: Text(timerRound.label),
+            trailing: const Icon(Icons.chevron_right),
+            onTap: () => _showTimerRoundPicker(context, ref, timerRound),
+          ),
+          const Divider(),
+          _buildSectionHeader(context, 'Invoicing'),
+          ListTile(
+            leading: const Icon(Icons.description_outlined),
+            title: const Text('Default Payment Terms'),
+            subtitle: Text(
+              profileState.isLoading
+                  ? 'Loading...'
+                  : profile?.defaultPaymentTerms?.isNotEmpty == true
+                      ? profile!.defaultPaymentTerms!
+                      : 'Not set',
+            ),
+            trailing: const Icon(Icons.chevron_right),
+            onTap: () => _editPaymentTerms(context, ref, profile),
+          ),
+          ListTile(
+            leading: const Icon(Icons.badge_outlined),
+            title: const Text('Tax ID / VAT Number'),
+            subtitle: Text(
+              profileState.isLoading
+                  ? 'Loading...'
+                  : profile?.taxId?.isNotEmpty == true
+                      ? profile!.taxId!
+                      : 'Not set',
+            ),
+            trailing: const Icon(Icons.chevron_right),
+            onTap: () => _editTaxId(context, ref, profile),
+          ),
+          const Divider(),
+          _buildSectionHeader(context, 'Features'),
+          ListTile(
+            leading: const Icon(Icons.receipt_long_outlined),
+            title: const Text('Expenses'),
+            subtitle: const Text('Track costs & receipts'),
+            trailing: const Icon(Icons.chevron_right),
+            onTap: () => context.push('/expenses'),
+          ),
+          ListTile(
+            leading: const Icon(Icons.timer_outlined),
+            title: const Text('Time Tracking'),
+            subtitle: const Text('Log hours & bill clients'),
+            trailing: const Icon(Icons.chevron_right),
+            onTap: () => context.push('/time-tracking'),
+          ),
+          ListTile(
+            leading: const Icon(Icons.repeat_outlined),
+            title: const Text('Recurring Invoices'),
+            subtitle: const Text('Auto-generate invoices'),
+            trailing: const Icon(Icons.chevron_right),
+            onTap: () => context.push('/recurring'),
           ),
           const Divider(),
           _buildSectionHeader(context, 'Notifications'),
@@ -487,6 +604,186 @@ class SettingsScreen extends ConsumerWidget {
       isScrollControlled: true,
       builder: (context) => ScheduledNotificationsSheet(
         notificationService: NotificationService.instance,
+      ),
+    );
+  }
+
+  Future<void> _editHourlyRate(
+    BuildContext context,
+    WidgetRef ref,
+    dynamic profile,
+  ) async {
+    final controller = TextEditingController(
+      text: profile != null && profile.defaultHourlyRate > 0
+          ? profile.defaultHourlyRate.toString()
+          : '',
+    );
+    final result = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Default Hourly Rate'),
+        content: TextField(
+          controller: controller,
+          keyboardType: const TextInputType.numberWithOptions(decimal: true),
+          decoration: const InputDecoration(
+            prefixText: '\$ ',
+            suffixText: '/hr',
+            hintText: '0.00',
+          ),
+          inputFormatters: [
+            FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d{0,2}')),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => context.pop(false),
+            child: const Text('Cancel'),
+          ),
+          ElevatedButton(
+            onPressed: () => context.pop(true),
+            child: const Text('Save'),
+          ),
+        ],
+      ),
+    );
+    if (result == true && controller.text.isNotEmpty) {
+      final rate = double.tryParse(controller.text) ?? 0;
+      if (context.mounted) {
+        await ref.read(profileProvider.notifier).updateDefaultHourlyRate(rate);
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Hourly rate updated')),
+        );
+      }
+    }
+    controller.dispose();
+  }
+
+  Future<void> _editPaymentTerms(
+    BuildContext context,
+    WidgetRef ref,
+    dynamic profile,
+  ) async {
+    final controller = TextEditingController(
+      text: profile?.defaultPaymentTerms ?? '',
+    );
+    final result = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Default Payment Terms'),
+        content: TextField(
+          controller: controller,
+          decoration: const InputDecoration(
+            hintText: 'e.g. Net 30, Due on receipt',
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => context.pop(false),
+            child: const Text('Cancel'),
+          ),
+          ElevatedButton(
+            onPressed: () => context.pop(true),
+            child: const Text('Save'),
+          ),
+        ],
+      ),
+    );
+    if (result == true) {
+      if (context.mounted) {
+        await ref
+            .read(profileProvider.notifier)
+            .updateDefaultPaymentTerms(
+              controller.text.isEmpty ? null : controller.text.trim(),
+            );
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Payment terms updated')),
+        );
+      }
+    }
+    controller.dispose();
+  }
+
+  Future<void> _editTaxId(
+    BuildContext context,
+    WidgetRef ref,
+    dynamic profile,
+  ) async {
+    final controller = TextEditingController(text: profile?.taxId ?? '');
+    final result = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Tax ID / VAT Number'),
+        content: TextField(
+          controller: controller,
+          decoration: const InputDecoration(
+            hintText: 'e.g. US123456789, VAT-AB12345',
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => context.pop(false),
+            child: const Text('Cancel'),
+          ),
+          ElevatedButton(
+            onPressed: () => context.pop(true),
+            child: const Text('Save'),
+          ),
+        ],
+      ),
+    );
+    if (result == true) {
+      if (context.mounted) {
+        await ref.read(profileProvider.notifier).updateTaxId(
+          controller.text.isEmpty ? null : controller.text.trim(),
+        );
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Tax ID updated')),
+        );
+      }
+    }
+    controller.dispose();
+  }
+
+  void _showTimerRoundPicker(
+    BuildContext context,
+    WidgetRef ref,
+    TimerRoundMode current,
+  ) {
+    showModalBottomSheet(
+      context: context,
+      builder: (context) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const SizedBox(height: 8),
+            Container(
+              width: 40,
+              height: 4,
+              decoration: BoxDecoration(
+                color: Theme.of(context).dividerColor,
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
+            const SizedBox(height: 16),
+            Text(
+              'Round Timer To',
+              style: Theme.of(context).textTheme.titleLarge,
+            ),
+            const SizedBox(height: 8),
+            ...TimerRoundMode.values.map((mode) {
+              return RadioListTile<TimerRoundMode>(
+                value: mode,
+                groupValue: current,
+                onChanged: (value) {
+                  ref.read(timerRoundProvider.notifier).setRound(value!);
+                  context.pop();
+                },
+                title: Text(mode.label),
+              );
+            }),
+            const SizedBox(height: 16),
+          ],
+        ),
       ),
     );
   }

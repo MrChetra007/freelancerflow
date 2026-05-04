@@ -17,6 +17,8 @@ class Client with _$Client {
     String? notes,
     @Default('#2563EB') String avatarColor,
     @Default(false) bool isArchived,
+    @Default(0) double defaultHourlyRate,
+    @Default([]) List<String> tags,
     required DateTime createdAt,
     DateTime? updatedAt,
   }) = _Client;

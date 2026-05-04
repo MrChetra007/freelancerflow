@@ -18,6 +18,10 @@ _$ClientImpl _$$ClientImplFromJson(Map<String, dynamic> json) => _$ClientImpl(
   notes: json['notes'] as String?,
   avatarColor: json['avatarColor'] as String? ?? '#2563EB',
   isArchived: json['isArchived'] as bool? ?? false,
+  defaultHourlyRate: (json['defaultHourlyRate'] as num?)?.toDouble() ?? 0,
+  tags:
+      (json['tags'] as List<dynamic>?)?.map((e) => e as String).toList() ??
+      const [],
   createdAt: DateTime.parse(json['createdAt'] as String),
   updatedAt: json['updatedAt'] == null
       ? null
@@ -37,6 +41,8 @@ Map<String, dynamic> _$$ClientImplToJson(_$ClientImpl instance) =>
       'notes': instance.notes,
       'avatarColor': instance.avatarColor,
       'isArchived': instance.isArchived,
+      'defaultHourlyRate': instance.defaultHourlyRate,
+      'tags': instance.tags,
       'createdAt': instance.createdAt.toIso8601String(),
       'updatedAt': instance.updatedAt?.toIso8601String(),
     };

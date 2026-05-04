@@ -55,6 +55,14 @@ final singleProjectProvider = FutureProvider.family<Project?, String>((
   return repo.getProject(projectId);
 });
 
+final clientProjectsProvider = FutureProvider.family<List<Project>, String>((
+  ref,
+  clientId,
+) async {
+  final repo = ref.watch(projectRepositoryProvider);
+  return repo.getProjectsByClient(clientId);
+});
+
 final projectStatusFilterProvider = StateProvider<ProjectStatus?>(
   (ref) => null,
 );

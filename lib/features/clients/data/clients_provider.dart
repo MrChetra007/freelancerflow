@@ -83,6 +83,14 @@ final filteredClientsProvider = Provider<AsyncValue<List<Client>>>((ref) {
   });
 });
 
+final singleClientProvider = FutureProvider.family<Client?, String>((
+  ref,
+  clientId,
+) async {
+  final repo = ref.watch(clientRepositoryProvider);
+  return repo.getClient(clientId);
+});
+
 final sortOptionProvider = StateProvider<ClientSortOption>(
   (ref) => ClientSortOption.name,
 );

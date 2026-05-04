@@ -37,6 +37,8 @@ class ClientRepository {
           'currency': client.currency,
           'notes': client.notes,
           'avatar_color': client.avatarColor,
+          'default_hourly_rate': client.defaultHourlyRate,
+          'tags': client.tags,
           'is_archived': client.isArchived,
         })
         .select()
@@ -56,6 +58,8 @@ class ClientRepository {
           'currency': client.currency,
           'notes': client.notes,
           'avatar_color': client.avatarColor,
+          'default_hourly_rate': client.defaultHourlyRate,
+          'tags': client.tags,
           'is_archived': client.isArchived,
         })
         .eq('id', client.id!)
@@ -84,6 +88,10 @@ class ClientRepository {
       currency: json['currency'] ?? 'USD',
       notes: json['notes'],
       avatarColor: json['avatar_color'] ?? '#2563EB',
+      defaultHourlyRate: (json['default_hourly_rate'] ?? 0).toDouble(),
+      tags: json['tags'] != null
+          ? List<String>.from(json['tags'])
+          : const [],
       isArchived: json['is_archived'] ?? false,
       createdAt: DateTime.parse(json['created_at']),
       updatedAt: json['updated_at'] != null

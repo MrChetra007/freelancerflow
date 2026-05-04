@@ -36,6 +36,14 @@ Future<List<TimeEntry>> allUnbilledTimeEntries(Ref ref) async {
 }
 
 @riverpod
+Future<List<TimeEntry>> clientTimeEntries(Ref ref, String clientId) async {
+  final result = await ref
+      .read(timeEntryRepositoryProvider)
+      .getByClient(clientId);
+  return result ?? [];
+}
+
+@riverpod
 Stream<List<TimeEntry>> projectTimeEntries(Ref ref, String projectId) {
   return ref
       .read(timeEntryRepositoryProvider)

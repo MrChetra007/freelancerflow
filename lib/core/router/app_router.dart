@@ -8,6 +8,7 @@ import '../../features/auth/presentation/login_screen.dart';
 import '../../features/dashboard/presentation/dashboard_screen.dart';
 import '../../features/clients/presentation/clients_screen.dart';
 import '../../features/clients/presentation/add_client_screen.dart';
+import '../../features/clients/presentation/client_detail_screen.dart';
 import '../../features/projects/presentation/projects_screen.dart';
 import '../../features/projects/presentation/add_project_screen.dart';
 import '../../features/projects/presentation/project_detail_screen.dart';
@@ -145,6 +146,31 @@ GoRouter createRouter(SupabaseAuthNotifier authNotifier) {
       ),
       GoRoute(
         path: '/clients/:id',
+        pageBuilder: (context, state) {
+          final id = state.pathParameters['id']!;
+          return CustomTransitionPage(
+            key: state.pageKey,
+            child: ClientDetailScreen(clientId: id),
+            transitionsBuilder:
+                (context, animation, secondaryAnimation, child) {
+                  return SlideTransition(
+                    position:
+                        Tween<Offset>(
+                          begin: const Offset(1, 0),
+                          end: Offset.zero,
+                        ).animate(
+                          CurveTween(
+                            curve: Curves.easeOutCubic,
+                          ).animate(animation),
+                        ),
+                    child: child,
+                  );
+                },
+          );
+        },
+      ),
+      GoRoute(
+        path: '/clients/:id/edit',
         pageBuilder: (context, state) {
           final id = state.pathParameters['id']!;
           return CustomTransitionPage(

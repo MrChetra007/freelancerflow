@@ -72,6 +72,15 @@ class TimeEntryRepository {
     return result.map((e) => TimeEntry.fromJson(e)).toList();
   }
 
+  Future<List<TimeEntry>?> getByClient(String clientId) async {
+    final result = await SupabaseConfig.client
+        .from('time_entries')
+        .select()
+        .eq('client_id', clientId)
+        .order('started_at', ascending: false);
+    return result.map((e) => TimeEntry.fromJson(e)).toList();
+  }
+
   Future<List<TimeEntry>?> getUnbilledForClient(String clientId) async {
     final result = await SupabaseConfig.client
         .from('time_entries')

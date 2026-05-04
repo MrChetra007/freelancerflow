@@ -16,6 +16,8 @@ class ClientsScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final clients = ref.watch(sortedClientsProvider);
     final searchQuery = ref.watch(searchQueryProvider);
+    final selectedTag = ref.watch(selectedTagProvider);
+    final tags = ref.watch(allTagsProvider);
 
     return Scaffold(
       appBar: AppBar(
@@ -47,6 +49,35 @@ class ClientsScreen extends ConsumerWidget {
                   ref.read(searchQueryProvider.notifier).state = value,
             ),
           ),
+          if (tags.isNotEmpty)
+            SizedBox(
+              height: 40,
+              child: ListView(
+                scrollDirection: Axis.horizontal,
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                children: [
+                  FilterChip(
+                    label: const Text('All'),
+                    selected: selectedTag == null,
+                    onSelected: (_) =>
+                        ref.read(selectedTagProvider.notifier).state = null,
+                  ),
+                  const SizedBox(width: 8),
+                  ...tags.map(
+                    (tag) => Padding(
+                      padding: const EdgeInsets.only(right: 8),
+                      child: FilterChip(
+                        label: Text(tag),
+                        selected: selectedTag == tag,
+                        onSelected: (_) =>
+                            ref.read(selectedTagProvider.notifier).state =
+                                selectedTag == tag ? null : tag,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
           Expanded(
             child: clients.when(
               data: (list) {

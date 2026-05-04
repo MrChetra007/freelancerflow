@@ -205,6 +205,127 @@ final allUnbilledTimeEntriesProvider =
 // ignore: unused_element
 typedef AllUnbilledTimeEntriesRef =
     AutoDisposeFutureProviderRef<List<TimeEntry>>;
+String _$clientTimeEntriesHash() => r'e1ee187d2d97139076a87907cc6b39e9061b540d';
+
+/// See also [clientTimeEntries].
+@ProviderFor(clientTimeEntries)
+const clientTimeEntriesProvider = ClientTimeEntriesFamily();
+
+/// See also [clientTimeEntries].
+class ClientTimeEntriesFamily extends Family<AsyncValue<List<TimeEntry>>> {
+  /// See also [clientTimeEntries].
+  const ClientTimeEntriesFamily();
+
+  /// See also [clientTimeEntries].
+  ClientTimeEntriesProvider call(String clientId) {
+    return ClientTimeEntriesProvider(clientId);
+  }
+
+  @override
+  ClientTimeEntriesProvider getProviderOverride(
+    covariant ClientTimeEntriesProvider provider,
+  ) {
+    return call(provider.clientId);
+  }
+
+  static const Iterable<ProviderOrFamily>? _dependencies = null;
+
+  @override
+  Iterable<ProviderOrFamily>? get dependencies => _dependencies;
+
+  static const Iterable<ProviderOrFamily>? _allTransitiveDependencies = null;
+
+  @override
+  Iterable<ProviderOrFamily>? get allTransitiveDependencies =>
+      _allTransitiveDependencies;
+
+  @override
+  String? get name => r'clientTimeEntriesProvider';
+}
+
+/// See also [clientTimeEntries].
+class ClientTimeEntriesProvider
+    extends AutoDisposeFutureProvider<List<TimeEntry>> {
+  /// See also [clientTimeEntries].
+  ClientTimeEntriesProvider(String clientId)
+    : this._internal(
+        (ref) => clientTimeEntries(ref as ClientTimeEntriesRef, clientId),
+        from: clientTimeEntriesProvider,
+        name: r'clientTimeEntriesProvider',
+        debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+            ? null
+            : _$clientTimeEntriesHash,
+        dependencies: ClientTimeEntriesFamily._dependencies,
+        allTransitiveDependencies:
+            ClientTimeEntriesFamily._allTransitiveDependencies,
+        clientId: clientId,
+      );
+
+  ClientTimeEntriesProvider._internal(
+    super._createNotifier, {
+    required super.name,
+    required super.dependencies,
+    required super.allTransitiveDependencies,
+    required super.debugGetCreateSourceHash,
+    required super.from,
+    required this.clientId,
+  }) : super.internal();
+
+  final String clientId;
+
+  @override
+  Override overrideWith(
+    FutureOr<List<TimeEntry>> Function(ClientTimeEntriesRef provider) create,
+  ) {
+    return ProviderOverride(
+      origin: this,
+      override: ClientTimeEntriesProvider._internal(
+        (ref) => create(ref as ClientTimeEntriesRef),
+        from: from,
+        name: null,
+        dependencies: null,
+        allTransitiveDependencies: null,
+        debugGetCreateSourceHash: null,
+        clientId: clientId,
+      ),
+    );
+  }
+
+  @override
+  AutoDisposeFutureProviderElement<List<TimeEntry>> createElement() {
+    return _ClientTimeEntriesProviderElement(this);
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return other is ClientTimeEntriesProvider && other.clientId == clientId;
+  }
+
+  @override
+  int get hashCode {
+    var hash = _SystemHash.combine(0, runtimeType.hashCode);
+    hash = _SystemHash.combine(hash, clientId.hashCode);
+
+    return _SystemHash.finish(hash);
+  }
+}
+
+@Deprecated('Will be removed in 3.0. Use Ref instead')
+// ignore: unused_element
+mixin ClientTimeEntriesRef on AutoDisposeFutureProviderRef<List<TimeEntry>> {
+  /// The parameter `clientId` of this provider.
+  String get clientId;
+}
+
+class _ClientTimeEntriesProviderElement
+    extends AutoDisposeFutureProviderElement<List<TimeEntry>>
+    with ClientTimeEntriesRef {
+  _ClientTimeEntriesProviderElement(super.provider);
+
+  @override
+  String get clientId => (origin as ClientTimeEntriesProvider).clientId;
+}
+
 String _$projectTimeEntriesHash() =>
     r'250856c2b29f37623373e627c23320d176e5f0ec';
 

@@ -47,6 +47,14 @@ class ProjectsNotifier extends AsyncNotifier<List<Project>> {
   }
 }
 
+final singleProjectProvider = FutureProvider.family<Project?, String>((
+  ref,
+  projectId,
+) async {
+  final repo = ref.watch(projectRepositoryProvider);
+  return repo.getProject(projectId);
+});
+
 final projectStatusFilterProvider = StateProvider<ProjectStatus?>(
   (ref) => null,
 );

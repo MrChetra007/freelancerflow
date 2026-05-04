@@ -185,6 +185,26 @@ class _UnbilledTimeEntriesProviderElement
   String get clientId => (origin as UnbilledTimeEntriesProvider).clientId;
 }
 
+String _$allUnbilledTimeEntriesHash() =>
+    r'56c064f25e91628fa1c308f728d35083ca2a1ebb';
+
+/// See also [allUnbilledTimeEntries].
+@ProviderFor(allUnbilledTimeEntries)
+final allUnbilledTimeEntriesProvider =
+    AutoDisposeFutureProvider<List<TimeEntry>>.internal(
+      allUnbilledTimeEntries,
+      name: r'allUnbilledTimeEntriesProvider',
+      debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+          ? null
+          : _$allUnbilledTimeEntriesHash,
+      dependencies: null,
+      allTransitiveDependencies: null,
+    );
+
+@Deprecated('Will be removed in 3.0. Use Ref instead')
+// ignore: unused_element
+typedef AllUnbilledTimeEntriesRef =
+    AutoDisposeFutureProviderRef<List<TimeEntry>>;
 String _$projectTimeEntriesHash() =>
     r'250856c2b29f37623373e627c23320d176e5f0ec';
 

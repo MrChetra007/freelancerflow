@@ -26,7 +26,7 @@ final recurringInvoiceRepositoryProvider =
 // ignore: unused_element
 typedef RecurringInvoiceRepositoryRef =
     AutoDisposeProviderRef<RecurringInvoiceRepository>;
-String _$recurringInvoicesHash() => r'4061b77c5de3912cacf8b3a8d2991bb92aa88e90';
+String _$recurringInvoicesHash() => r'9bbef7a5845ae60a98a0fe9d161c49a68d55839c';
 
 /// See also [recurringInvoices].
 @ProviderFor(recurringInvoices)

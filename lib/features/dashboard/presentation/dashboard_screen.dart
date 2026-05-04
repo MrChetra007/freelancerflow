@@ -9,6 +9,7 @@ import '../../../core/widgets/loading_widget.dart';
 import '../data/dashboard_provider.dart';
 import '../../projects/domain/project.dart';
 import '../../settings/data/premium_provider.dart';
+import 'widgets/active_timer_banner.dart';
 
 class DashboardScreen extends ConsumerWidget {
   const DashboardScreen({super.key});
@@ -66,6 +67,7 @@ class DashboardScreen extends ConsumerWidget {
           child: ListView(
             padding: const EdgeInsets.all(16),
             children: [
+              const ActiveTimerBanner(),
               _buildWelcomeSection(context),
               const SizedBox(height: 24),
               _buildSummaryCards(context, data),
@@ -140,6 +142,39 @@ class DashboardScreen extends ConsumerWidget {
             const SizedBox(width: 12),
             Expanded(
               child: _StatCard(
+                title: 'Expenses',
+                value: CurrencyFormatter.formatCompact(
+                  stats.expensesThisMonth,
+                  'USD',
+                ),
+                icon: Icons.monetization_on_outlined,
+                color: AppColors.error,
+                onTap: () => context.go('/expenses'),
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 12),
+        Row(
+          children: [
+            Expanded(
+              child: _StatCard(
+                title: 'Net Profit',
+                value: CurrencyFormatter.formatCompact(
+                  stats.profitThisMonth,
+                  'USD',
+                ),
+                icon: Icons.account_balance_wallet,
+                color:
+                    stats.profitThisMonth >= 0
+                        ? AppColors.success
+                        : AppColors.error,
+                onTap: () => context.go('/payments'),
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: _StatCard(
                 title: 'Total Clients',
                 value: stats.totalClients.toString(),
                 icon: Icons.people,
@@ -176,6 +211,48 @@ class DashboardScreen extends ConsumerWidget {
             ),
           ],
         ),
+        if (stats.unbilledTimeValue > 0) ...[
+          const SizedBox(height: 12),
+          Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: AppColors.info.withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: AppColors.info.withValues(alpha: 0.3)),
+            ),
+            child: Row(
+              children: [
+                const Icon(Icons.timer_outlined, color: AppColors.info),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text(
+                        'Unbilled Time',
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          color: AppColors.info,
+                        ),
+                      ),
+                      Text(
+                        CurrencyFormatter.format(
+                          stats.unbilledTimeValue,
+                          'USD',
+                        ),
+                        style: const TextStyle(
+                          fontSize: 12,
+                          color: AppColors.info,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const Icon(Icons.chevron_right, color: AppColors.info),
+              ],
+            ),
+          ),
+        ],
         if (stats.overdueProjects > 0) ...[
           const SizedBox(height: 12),
           Container(
@@ -222,9 +299,11 @@ class DashboardScreen extends ConsumerWidget {
   ) {
     final maxAmount = stats.monthlyEarningsData.fold(
       0.0,
-      (max, e) => e.amount > max ? e.amount : max,
+      (max, e) {
+        final combined = e.revenue + e.expenses;
+        return combined > max ? combined : max;
+      },
     );
-    final barColor = AppColors.primary500;
 
     return Card(
       child: Padding(
@@ -236,17 +315,23 @@ class DashboardScreen extends ConsumerWidget {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  'Monthly Earnings',
+                  'Revenue & Expenses',
                   style: Theme.of(context).textTheme.titleMedium?.copyWith(
                     fontWeight: FontWeight.bold,
                   ),
                 ),
-                Text(
-                  CurrencyFormatter.format(stats.monthlyEarnings, 'USD'),
-                  style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    color: AppColors.statusPaid,
-                  ),
+                Row(
+                  children: [
+                    _buildLegendItem(
+                      'Revenue',
+                      AppColors.success,
+                    ),
+                    const SizedBox(width: 12),
+                    _buildLegendItem(
+                      'Expenses',
+                      AppColors.error,
+                    ),
+                  ],
                 ),
               ],
             ),
@@ -261,8 +346,11 @@ class DashboardScreen extends ConsumerWidget {
                     touchTooltipData: BarTouchTooltipData(
                       getTooltipItem: (group, groupIndex, rod, rodIndex) {
                         final data = stats.monthlyEarningsData[groupIndex];
+                        final label = rodIndex == 0
+                            ? 'Revenue: ${CurrencyFormatter.format(data.revenue, 'USD')}'
+                            : 'Expenses: ${CurrencyFormatter.format(data.expenses, 'USD')}';
                         return BarTooltipItem(
-                          CurrencyFormatter.format(data.amount, 'USD'),
+                          label,
                           const TextStyle(color: Colors.white),
                         );
                       },
@@ -312,15 +400,25 @@ class DashboardScreen extends ConsumerWidget {
                       x: entry.key,
                       barRods: [
                         BarChartRodData(
-                          toY: entry.value.amount,
-                          color: barColor,
-                          width: 24,
+                          toY: entry.value.revenue,
+                          color: AppColors.success,
+                          width: 12,
                           borderRadius: const BorderRadius.only(
-                            topLeft: Radius.circular(6),
-                            topRight: Radius.circular(6),
+                            topLeft: Radius.circular(4),
+                            topRight: Radius.circular(4),
+                          ),
+                        ),
+                        BarChartRodData(
+                          toY: entry.value.expenses,
+                          color: AppColors.error,
+                          width: 12,
+                          borderRadius: const BorderRadius.only(
+                            topLeft: Radius.circular(4),
+                            topRight: Radius.circular(4),
                           ),
                         ),
                       ],
+                      barsSpace: 4,
                     );
                   }).toList(),
                 ),
@@ -329,6 +427,26 @@ class DashboardScreen extends ConsumerWidget {
           ],
         ),
       ),
+    );
+  }
+
+  Widget _buildLegendItem(String label, Color color) {
+    return Row(
+      children: [
+        Container(
+          width: 10,
+          height: 10,
+          decoration: BoxDecoration(
+            color: color,
+            borderRadius: BorderRadius.circular(2),
+          ),
+        ),
+        const SizedBox(width: 4),
+        Text(
+          label,
+          style: const TextStyle(fontSize: 12, color: AppColors.lightTextSecondary),
+        ),
+      ],
     );
   }
 

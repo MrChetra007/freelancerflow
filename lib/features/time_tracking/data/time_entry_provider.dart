@@ -26,6 +26,16 @@ Future<List<TimeEntry>> unbilledTimeEntries(Ref ref, String clientId) async {
 }
 
 @riverpod
+Future<List<TimeEntry>> allUnbilledTimeEntries(Ref ref) async {
+  final user = SupabaseConfig.client.auth.currentUser;
+  if (user == null) return [];
+  final result = await ref
+      .read(timeEntryRepositoryProvider)
+      .getAllUnbilled(user.id);
+  return result ?? [];
+}
+
+@riverpod
 Stream<List<TimeEntry>> projectTimeEntries(Ref ref, String projectId) {
   return ref
       .read(timeEntryRepositoryProvider)

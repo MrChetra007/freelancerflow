@@ -61,6 +61,17 @@ class TimeEntryRepository {
     return TimeEntry.fromJson(result);
   }
 
+  Future<List<TimeEntry>?> getAllUnbilled(String userId) async {
+    final result = await SupabaseConfig.client
+        .from('time_entries')
+        .select()
+        .eq('user_id', userId)
+        .eq('is_billed', false)
+        .not('ended_at', 'is', null)
+        .order('started_at', ascending: false);
+    return result.map((e) => TimeEntry.fromJson(e)).toList();
+  }
+
   Future<List<TimeEntry>?> getUnbilledForClient(String clientId) async {
     final result = await SupabaseConfig.client
         .from('time_entries')

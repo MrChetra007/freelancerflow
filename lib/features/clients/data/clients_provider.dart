@@ -47,19 +47,37 @@ class ClientsNotifier extends AsyncNotifier<List<Client>> {
 }
 
 final searchQueryProvider = StateProvider<String>((ref) => '');
+final selectedTagProvider = StateProvider<String?>((ref) => null);
+
+final allTagsProvider = Provider<List<String>>((ref) {
+  final clients = ref.watch(clientsProvider);
+  return clients.whenData((list) {
+    final tags = <String>{};
+    for (final c in list) {
+      tags.addAll(c.tags);
+    }
+    return tags.toList()..sort();
+  }).value ?? [];
+});
 
 final filteredClientsProvider = Provider<AsyncValue<List<Client>>>((ref) {
   final clients = ref.watch(clientsProvider);
   final query = ref.watch(searchQueryProvider).toLowerCase();
+  final tag = ref.watch(selectedTagProvider);
 
   return clients.whenData((list) {
-    if (query.isEmpty) return list;
-    return list
+    var result = list;
+    if (tag != null) {
+      result = result.where((c) => c.tags.contains(tag)).toList();
+    }
+    if (query.isEmpty) return result;
+    return result
         .where(
           (c) =>
               c.name.toLowerCase().contains(query) ||
               (c.email?.toLowerCase().contains(query) ?? false) ||
-              (c.company?.toLowerCase().contains(query) ?? false),
+              (c.company?.toLowerCase().contains(query) ?? false) ||
+              c.tags.any((t) => t.toLowerCase().contains(query)),
         )
         .toList();
   });

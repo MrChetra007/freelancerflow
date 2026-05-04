@@ -473,24 +473,19 @@ class DashboardScreen extends ConsumerWidget {
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
                 _QuickAction(
-                  icon: Icons.person_add,
-                  label: 'Add Client',
-                  onTap: () => context.push('/clients/add'),
+                  icon: Icons.receipt_long_outlined,
+                  label: 'Expenses',
+                  onTap: () => context.push('/expenses'),
                 ),
                 _QuickAction(
-                  icon: Icons.add_box,
-                  label: 'Add Project',
-                  onTap: () => context.push('/projects/add'),
+                  icon: Icons.timer_outlined,
+                  label: 'Time Tracking',
+                  onTap: () => context.push('/time-tracking'),
                 ),
                 _QuickAction(
-                  icon: Icons.receipt,
-                  label: 'Create Invoice',
-                  onTap: () => context.push('/invoices/create'),
-                ),
-                _QuickAction(
-                  icon: Icons.payments,
-                  label: 'Add Payment',
-                  onTap: () => context.push('/payments/add'),
+                  icon: Icons.repeat_outlined,
+                  label: 'Recurring',
+                  onTap: () => context.push('/recurring'),
                 ),
               ],
             ),

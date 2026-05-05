@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:in_app_purchase/in_app_purchase.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -9,15 +10,17 @@ class IapService {
   final InAppPurchase _iap = InAppPurchase.instance;
   late SharedPreferences _prefs;
 
-  static const _premiumKey = 'is_premium';
-  static const _productId = 'premium_unlock';
+  static const String _productId = 'premium_unlock';
+  static const String _premiumKey = 'is_premium';
 
   bool _isInitialized = false;
-  bool _isPremium = false;
   bool _isAvailable = false;
+  bool _isLoading = false;
 
-  bool get isPremium => _isPremium;
+  StreamSubscription<List<PurchaseDetails>>? _streamSubscription;
+
   bool get isAvailable => _isAvailable;
+  bool get isLoading => _isLoading;
 
   IapService._();
 
@@ -25,64 +28,70 @@ class IapService {
     if (_isInitialized) return;
 
     _prefs = await SharedPreferences.getInstance();
-    _isPremium = _prefs.getBool(_premiumKey) ?? false;
 
     try {
       _isAvailable = await _iap.isAvailable();
+      debugPrint('IAP available: $_isAvailable');
 
       if (_isAvailable) {
-        final productIds = {_productId};
-        final response = await _iap.queryProductDetails(productIds);
-
-        if (response.productDetails.isNotEmpty) {
-          _iap.purchaseStream.listen(_handlePurchase);
-        }
+        _streamSubscription = _iap.purchaseStream.listen(_handlePurchase);
+        await restorePurchases();
       }
+
+      _isInitialized = true;
     } catch (e) {
       debugPrint('IAP initialization failed: $e');
     }
-
-    _isInitialized = true;
   }
 
   void _handlePurchase(List<PurchaseDetails> purchases) {
     for (final purchase in purchases) {
-      if (purchase.status == PurchaseStatus.purchased) {
-        if (purchase.productID == _productId) {
-          _grantPremium();
-        }
-        _iap.completePurchase(purchase);
-      } else if (purchase.status == PurchaseStatus.restored) {
-        _grantPremium();
-        _iap.completePurchase(purchase);
+      debugPrint('Purchase: ${purchase.productID} status=${purchase.status}');
+
+      switch (purchase.status) {
+        case PurchaseStatus.purchased:
+        case PurchaseStatus.restored:
+          if (purchase.productID == _productId) {
+            _prefs.setBool(_premiumKey, true);
+          }
+          _iap.completePurchase(purchase);
+          break;
+
+        case PurchaseStatus.error:
+          debugPrint('Purchase error: ${purchase.error?.message}');
+          _iap.completePurchase(purchase);
+          break;
+
+        case PurchaseStatus.canceled:
+          _iap.completePurchase(purchase);
+          break;
+
+        case PurchaseStatus.pending:
+          break;
       }
     }
   }
 
-  Future<void> _grantPremium() async {
-    await _prefs.setBool(_premiumKey, true);
-    _isPremium = true;
+  Future<bool> isPremium() async {
+    await initialize();
+    return _prefs.getBool(_premiumKey) ?? false;
   }
 
   Future<bool> purchasePremium() async {
-    if (!_isAvailable) {
-      debugPrint('IAP not available on this device');
-      return false;
-    }
+    if (!_isAvailable) return false;
 
     try {
-      final productIds = {_productId};
-      final response = await _iap.queryProductDetails(productIds);
+      final response = await _iap.queryProductDetails({_productId});
 
       if (response.productDetails.isEmpty) {
-        debugPrint('Product not found');
+        debugPrint('Product not found: $_productId');
         return false;
       }
 
       final product = response.productDetails.first;
-      final purchaseParam = PurchaseParam(productDetails: product);
-
-      await _iap.buyNonConsumable(purchaseParam: purchaseParam);
+      await _iap.buyNonConsumable(
+        purchaseParam: PurchaseParam(productDetails: product),
+      );
       return true;
     } catch (e) {
       debugPrint('Purchase failed: $e');
@@ -104,12 +113,14 @@ class IapService {
     if (!_isAvailable) return null;
 
     try {
-      final productIds = {_productId};
-      final response = await _iap.queryProductDetails(productIds);
+      final response = await _iap.queryProductDetails({_productId});
       return response.productDetails.firstOrNull;
     } catch (e) {
-      debugPrint('Failed to get product: $e');
       return null;
     }
+  }
+
+  Future<void> dispose() async {
+    await _streamSubscription?.cancel();
   }
 }

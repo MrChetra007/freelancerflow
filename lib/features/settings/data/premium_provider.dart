@@ -1,14 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import '../../../core/services/iap_service.dart';
-
-final premiumPrefsProvider = Provider<SharedPreferences>((ref) {
-  throw UnimplementedError('Initialize SharedPreferences in main.dart');
-});
-
-final iapServiceProvider = Provider<IapService>((ref) {
-  return IapService.instance;
-});
 
 final isPremiumProvider = StateNotifierProvider<IsPremiumNotifier, bool>((ref) {
   return IsPremiumNotifier();
@@ -20,15 +11,23 @@ class IsPremiumNotifier extends StateNotifier<bool> {
   }
 
   Future<void> _loadPremiumStatus() async {
-    await IapService.instance.initialize();
-    state = IapService.instance.isPremium;
+    try {
+      state = await IapService.instance.isPremium();
+    } catch (e) {
+      state = false;
+    }
   }
 
   Future<void> refresh() async {
-    state = IapService.instance.isPremium;
+    await IapService.instance.restorePurchases();
+    await _loadPremiumStatus();
   }
 
-  void setPremium(bool value) {
+  Future<void> setPremiumForTesting(bool value) async {
     state = value;
   }
 }
+
+final productDetailsProvider = FutureProvider((ref) async {
+  return await IapService.instance.getProductDetails();
+});

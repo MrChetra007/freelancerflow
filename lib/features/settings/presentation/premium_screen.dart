@@ -453,7 +453,7 @@ class _PremiumScreenState extends ConsumerState<PremiumScreen> {
                           onPressed: () {
                             ref
                                 .read(isPremiumProvider.notifier)
-                                .setPremium(true);
+                                .setPremiumForTesting(true);
                             Navigator.pop(context);
                             showCelebration(context, () {});
                           },
@@ -470,7 +470,7 @@ class _PremiumScreenState extends ConsumerState<PremiumScreen> {
                           onPressed: () {
                             ref
                                 .read(isPremiumProvider.notifier)
-                                .setPremium(false);
+                                .setPremiumForTesting(false);
                             Navigator.pop(context);
                             ScaffoldMessenger.of(context).showSnackBar(
                               const SnackBar(
@@ -581,13 +581,11 @@ class _PremiumScreenState extends ConsumerState<PremiumScreen> {
     }
   }
 
-  void _cancelSubscription() {
-    ref.read(isPremiumProvider.notifier).setPremium(false);
+  Future<void> _cancelSubscription() async {
+    await ref.read(isPremiumProvider.notifier).refresh();
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
-        content: Text(
-          'Subscription cancelled. Access continues until end of period.',
-        ),
+        content: Text('Subscription status refreshed.'),
       ),
     );
   }

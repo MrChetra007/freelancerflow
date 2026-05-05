@@ -13,9 +13,9 @@ import '../data/premium_provider.dart';
 import '../data/profile_provider.dart';
 
 const _privacyPolicyUrl =
-    'https://mrchetra007.github.io/app-pp-tos/privacy_policy';
+    'https://mrchetra007.github.io/privacy_policy/freelanceflow_privacy-policy';
 const _termsOfServiceUrl =
-    'https://mrchetra007.github.io/app-pp-tos/terms_of_service';
+    'https://mrchetra007.github.io/privacy_policy/freelanceflow_terms-of-service';
 
 final timerRoundProvider =
     StateNotifierProvider<TimerRoundNotifier, TimerRoundMode>((ref) {
@@ -402,13 +402,13 @@ class SettingsScreen extends ConsumerWidget {
             leading: const Icon(Icons.description_outlined),
             title: const Text('Terms of Service'),
             trailing: const Icon(Icons.chevron_right),
-            onTap: () => _launchUrl(_termsOfServiceUrl),
+            onTap: () => _launchUrl(context, _termsOfServiceUrl),
           ),
           ListTile(
             leading: const Icon(Icons.privacy_tip_outlined),
             title: const Text('Privacy Policy'),
             trailing: const Icon(Icons.chevron_right),
-            onTap: () => _launchUrl(_privacyPolicyUrl),
+            onTap: () => _launchUrl(context, _privacyPolicyUrl),
           ),
           const Divider(),
           _buildSectionHeader(context, 'Developer Options'),
@@ -451,7 +451,7 @@ class SettingsScreen extends ConsumerWidget {
                     Expanded(
                       child: ElevatedButton(
                         onPressed: () {
-                          ref.read(isPremiumProvider.notifier).setPremium(true);
+                          ref.read(isPremiumProvider.notifier).setPremiumForTesting(true);
                           ScaffoldMessenger.of(context).showSnackBar(
                             const SnackBar(
                               content: Text('Premium enabled!'),
@@ -472,7 +472,7 @@ class SettingsScreen extends ConsumerWidget {
                         onPressed: () {
                           ref
                               .read(isPremiumProvider.notifier)
-                              .setPremium(false);
+                              .setPremiumForTesting(false);
                           ScaffoldMessenger.of(context).showSnackBar(
                             const SnackBar(
                               content: Text('Switched to Free plan'),
@@ -540,10 +540,16 @@ class SettingsScreen extends ConsumerWidget {
     };
   }
 
-  Future<void> _launchUrl(String url) async {
+  Future<void> _launchUrl(BuildContext context, String url) async {
     final uri = Uri.parse(url);
     if (await canLaunchUrl(uri)) {
       await launchUrl(uri, mode: LaunchMode.externalApplication);
+    } else {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Could not open $url')),
+        );
+      }
     }
   }
 

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 import '../data/recurring_provider.dart';
 import 'create_recurring_screen.dart';
@@ -14,6 +15,10 @@ class RecurringInvoicesScreen extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () => context.pop(),
+        ),
         title: const Text('Recurring Invoices'),
       ),
       body: recurringAsync.when(

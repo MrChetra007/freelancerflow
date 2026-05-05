@@ -2,6 +2,7 @@ import 'package:client_manager/features/recurring/domain/recurrence_frequency.da
 import 'package:client_manager/features/recurring/domain/recurring_invoice.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../../core/utils/date_formatter.dart';
 import '../data/recurring_provider.dart';
@@ -15,6 +16,10 @@ class CreateRecurringScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     return Scaffold(
       appBar: AppBar(
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () => context.pop(),
+        ),
         title: Text(recurring != null ? 'Edit Recurring' : 'Create Recurring'),
       ),
       body: _RecurringForm(ref: ref, recurring: recurring),

@@ -27,6 +27,10 @@ class AddExpenseScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     return Scaffold(
       appBar: AppBar(
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () => context.pop(),
+        ),
         title: Text(expense != null ? 'Edit Expense' : 'Add Expense'),
       ),
       body: _ExpenseForm(expense: expense),

@@ -26,7 +26,13 @@ class ExpensesScreen extends ConsumerWidget {
     final breakdownAsync = ref.watch(expenseBreakdownProvider(6));
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Expenses')),
+      appBar: AppBar(
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () => context.pop(),
+        ),
+        title: const Text('Expenses'),
+      ),
       body: RefreshIndicator(
         onRefresh: () async {
           ref.invalidate(expensesProvider);

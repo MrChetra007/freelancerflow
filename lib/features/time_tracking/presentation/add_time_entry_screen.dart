@@ -21,6 +21,10 @@ class AddTimeEntryScreen extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () => context.pop(),
+        ),
         title: Text(entry != null ? 'Edit Time Entry' : 'Log Time'),
         actions: [
           if (entry != null)

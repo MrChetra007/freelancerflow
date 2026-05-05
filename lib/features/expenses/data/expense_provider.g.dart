@@ -361,5 +361,133 @@ class _ExpenseBreakdownProviderElement
   int get months => (origin as ExpenseBreakdownProvider).months;
 }
 
+String _$unbilledBillableExpensesHash() =>
+    r'760bfc6f7f4c6f44c7a91bc8fb29b29363bd0ec0';
+
+/// See also [unbilledBillableExpenses].
+@ProviderFor(unbilledBillableExpenses)
+const unbilledBillableExpensesProvider = UnbilledBillableExpensesFamily();
+
+/// See also [unbilledBillableExpenses].
+class UnbilledBillableExpensesFamily extends Family<AsyncValue<List<Expense>>> {
+  /// See also [unbilledBillableExpenses].
+  const UnbilledBillableExpensesFamily();
+
+  /// See also [unbilledBillableExpenses].
+  UnbilledBillableExpensesProvider call(String clientId) {
+    return UnbilledBillableExpensesProvider(clientId);
+  }
+
+  @override
+  UnbilledBillableExpensesProvider getProviderOverride(
+    covariant UnbilledBillableExpensesProvider provider,
+  ) {
+    return call(provider.clientId);
+  }
+
+  static const Iterable<ProviderOrFamily>? _dependencies = null;
+
+  @override
+  Iterable<ProviderOrFamily>? get dependencies => _dependencies;
+
+  static const Iterable<ProviderOrFamily>? _allTransitiveDependencies = null;
+
+  @override
+  Iterable<ProviderOrFamily>? get allTransitiveDependencies =>
+      _allTransitiveDependencies;
+
+  @override
+  String? get name => r'unbilledBillableExpensesProvider';
+}
+
+/// See also [unbilledBillableExpenses].
+class UnbilledBillableExpensesProvider
+    extends AutoDisposeFutureProvider<List<Expense>> {
+  /// See also [unbilledBillableExpenses].
+  UnbilledBillableExpensesProvider(String clientId)
+    : this._internal(
+        (ref) => unbilledBillableExpenses(
+          ref as UnbilledBillableExpensesRef,
+          clientId,
+        ),
+        from: unbilledBillableExpensesProvider,
+        name: r'unbilledBillableExpensesProvider',
+        debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+            ? null
+            : _$unbilledBillableExpensesHash,
+        dependencies: UnbilledBillableExpensesFamily._dependencies,
+        allTransitiveDependencies:
+            UnbilledBillableExpensesFamily._allTransitiveDependencies,
+        clientId: clientId,
+      );
+
+  UnbilledBillableExpensesProvider._internal(
+    super._createNotifier, {
+    required super.name,
+    required super.dependencies,
+    required super.allTransitiveDependencies,
+    required super.debugGetCreateSourceHash,
+    required super.from,
+    required this.clientId,
+  }) : super.internal();
+
+  final String clientId;
+
+  @override
+  Override overrideWith(
+    FutureOr<List<Expense>> Function(UnbilledBillableExpensesRef provider)
+    create,
+  ) {
+    return ProviderOverride(
+      origin: this,
+      override: UnbilledBillableExpensesProvider._internal(
+        (ref) => create(ref as UnbilledBillableExpensesRef),
+        from: from,
+        name: null,
+        dependencies: null,
+        allTransitiveDependencies: null,
+        debugGetCreateSourceHash: null,
+        clientId: clientId,
+      ),
+    );
+  }
+
+  @override
+  AutoDisposeFutureProviderElement<List<Expense>> createElement() {
+    return _UnbilledBillableExpensesProviderElement(this);
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return other is UnbilledBillableExpensesProvider &&
+        other.clientId == clientId;
+  }
+
+  @override
+  int get hashCode {
+    var hash = _SystemHash.combine(0, runtimeType.hashCode);
+    hash = _SystemHash.combine(hash, clientId.hashCode);
+
+    return _SystemHash.finish(hash);
+  }
+}
+
+@Deprecated('Will be removed in 3.0. Use Ref instead')
+// ignore: unused_element
+mixin UnbilledBillableExpensesRef
+    on AutoDisposeFutureProviderRef<List<Expense>> {
+  /// The parameter `clientId` of this provider.
+  String get clientId;
+}
+
+class _UnbilledBillableExpensesProviderElement
+    extends AutoDisposeFutureProviderElement<List<Expense>>
+    with UnbilledBillableExpensesRef {
+  _UnbilledBillableExpensesProviderElement(super.provider);
+
+  @override
+  String get clientId => (origin as UnbilledBillableExpensesProvider).clientId;
+}
+
 // ignore_for_file: type=lint
 // ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member, deprecated_member_use_from_same_package

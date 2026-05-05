@@ -36,3 +36,15 @@ Future<List<Map<String, dynamic>>> expenseBreakdown(
   if (user == null) return [];
   return ref.read(expenseRepositoryProvider).getBreakdown(user.id, months);
 }
+
+@riverpod
+Future<List<Expense>> unbilledBillableExpenses(
+  Ref ref,
+  String clientId,
+) async {
+  return ref.read(expenseRepositoryProvider).getExpenses(
+        clientId: clientId,
+        isBillable: true,
+        isBilled: false,
+      );
+}

@@ -80,7 +80,7 @@ final watchAllTimeEntriesProvider =
 // ignore: unused_element
 typedef WatchAllTimeEntriesRef = AutoDisposeStreamProviderRef<List<TimeEntry>>;
 String _$thisWeekTimeEntriesHash() =>
-    r'76efff0fc84b117855ddd4e5585cfb40efeed0f1';
+    r'2c8b260a86e8d30bac0514cf493da9c717eb4a86';
 
 /// See also [thisWeekTimeEntries].
 @ProviderFor(thisWeekTimeEntries)
@@ -99,7 +99,7 @@ final thisWeekTimeEntriesProvider =
 // ignore: unused_element
 typedef ThisWeekTimeEntriesRef = AutoDisposeFutureProviderRef<List<TimeEntry>>;
 String _$thisMonthTimeEntriesHash() =>
-    r'63ef8b181fb9110ebded58168a8862e6e31d10df';
+    r'81b245d6cc100016f72207e1273c3adc7cafc47f';
 
 /// See also [thisMonthTimeEntries].
 @ProviderFor(thisMonthTimeEntries)

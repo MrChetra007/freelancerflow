@@ -6,9 +6,13 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../core/services/notification_service.dart';
 import 'package:client_manager/features/clients/data/clients_provider.dart';
 import 'package:client_manager/features/settings/presentation/settings_screen.dart';
+import '../../time_tracking/data/time_entry_provider.dart';
+import '../../time_tracking/domain/time_entry.dart';
+import '../../expenses/data/expense_provider.dart';
 import '../data/invoices_provider.dart';
 import '../domain/invoice.dart';
 import '../domain/invoice_item.dart';
+import 'widgets/import_line_items_sheet.dart';
 
 class CreateInvoiceScreen extends ConsumerStatefulWidget {
   final String? invoiceId;
@@ -36,20 +40,10 @@ class _CreateInvoiceScreenState extends ConsumerState<CreateInvoiceScreen> {
   bool _isLoading = false;
 
   List<_LineItem> _lineItems = [_LineItem()];
+  final List<String> _importedTimeEntryIds = [];
+  final List<String> _importedExpenseIds = [];
   Invoice? _existingInvoice;
   List<InvoiceItem> _existingItems = [];
-
-  final _currencies = [
-    'USD',
-    'EUR',
-    'GBP',
-    'CAD',
-    'AUD',
-    'JPY',
-    'SGD',
-    'THB',
-    'KHR',
-  ];
 
   bool get isEditing => widget.invoiceId != null;
 
@@ -186,6 +180,18 @@ class _CreateInvoiceScreenState extends ConsumerState<CreateInvoiceScreen> {
         await repo.createInvoiceItem(invoiceItem);
       }
 
+      if (_importedTimeEntryIds.isNotEmpty) {
+        await ref
+            .read(timeEntryRepositoryProvider)
+            .markAsBilled(_importedTimeEntryIds, invoice.id!);
+      }
+
+      if (_importedExpenseIds.isNotEmpty) {
+        await ref
+            .read(expenseRepositoryProvider)
+            .markAsBilled(_importedExpenseIds, invoice.id!);
+      }
+
       if (_dueDate != null) {
         final prefs = ref.read(notificationPrefsProvider);
         if (prefs.invoiceReminders) {
@@ -235,6 +241,71 @@ class _CreateInvoiceScreenState extends ConsumerState<CreateInvoiceScreen> {
           _dueDate = picked;
         }
       });
+    }
+  }
+
+  Future<void> _importEntries() async {
+    if (_selectedClientId == null) return;
+
+    final result = await showImportLineItemsSheet(
+      context,
+      clientId: _selectedClientId!,
+    );
+
+    if (result != null && (result.timeEntryIds.isNotEmpty || result.expenseIds.isNotEmpty)) {
+      if (result.timeEntryIds.isNotEmpty) {
+        final timeEntries = await ref
+            .read(timeEntryRepositoryProvider)
+            .getUnbilledForClient(_selectedClientId!);
+        for (final entry in result.timeEntryIds) {
+          final timeEntry = timeEntries?.firstWhere(
+            (e) => e.id == entry,
+            orElse: () => throw Exception('Time entry not found'),
+          );
+          if (timeEntry != null) {
+            final hours = timeEntry.duration.inSeconds / 3600;
+            _lineItems.add(_LineItem(
+              description: timeEntry.description ?? 'Time entry',
+              quantity: double.parse(hours.toStringAsFixed(2)),
+              unitPrice: timeEntry.hourlyRate,
+            ));
+            _importedTimeEntryIds.add(entry);
+          }
+        }
+      }
+
+      if (result.expenseIds.isNotEmpty) {
+        final expenses = await ref
+            .read(expenseRepositoryProvider)
+            .getExpenses(
+              clientId: _selectedClientId,
+              isBillable: true,
+              isBilled: false,
+            );
+        for (final expenseId in result.expenseIds) {
+          final expense = expenses.firstWhere(
+            (e) => e.id == expenseId,
+            orElse: () => throw Exception('Expense not found'),
+          );
+          _lineItems.add(_LineItem(
+            description: expense.description,
+            quantity: 1,
+            unitPrice: expense.amount,
+          ));
+          _importedExpenseIds.add(expenseId);
+        }
+      }
+
+      if (mounted) {
+        setState(() {});
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              'Imported ${result.timeEntryIds.length + result.expenseIds.length} item(s)',
+            ),
+          ),
+        );
+      }
     }
   }
 
@@ -353,10 +424,20 @@ class _CreateInvoiceScreenState extends ConsumerState<CreateInvoiceScreen> {
                   'Line Items',
                   style: Theme.of(context).textTheme.titleMedium,
                 ),
-                TextButton.icon(
-                  onPressed: _addLineItem,
-                  icon: const Icon(Icons.add),
-                  label: const Text('Add Item'),
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    TextButton.icon(
+                      onPressed: _selectedClientId == null ? null : _importEntries,
+                      icon: const Icon(Icons.download),
+                      label: const Text('Import'),
+                    ),
+                    TextButton.icon(
+                      onPressed: _addLineItem,
+                      icon: const Icon(Icons.add),
+                      label: const Text('Add'),
+                    ),
+                  ],
                 ),
               ],
             ),

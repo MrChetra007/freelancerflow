@@ -9,6 +9,10 @@ import 'package:client_manager/features/settings/presentation/settings_screen.da
 import '../../time_tracking/data/time_entry_provider.dart';
 import '../../time_tracking/domain/time_entry.dart';
 import '../../expenses/data/expense_provider.dart';
+import '../../recurring/data/recurring_provider.dart';
+import '../../recurring/domain/recurring_invoice.dart';
+import '../../recurring/domain/recurrence_frequency.dart';
+import '../../recurring/domain/invoice_line_item.dart';
 import '../data/invoices_provider.dart';
 import '../domain/invoice.dart';
 import '../domain/invoice_item.dart';
@@ -38,6 +42,10 @@ class _CreateInvoiceScreenState extends ConsumerState<CreateInvoiceScreen> {
   double _discountPercent = 0;
   String _currency = 'USD';
   bool _isLoading = false;
+  bool _isRecurring = false;
+  RecurrenceFrequency _recurringFrequency = RecurrenceFrequency.monthly;
+  DateTime _recurringStartDate = DateTime.now();
+  int _recurringDueDays = 30;
 
   List<_LineItem> _lineItems = [_LineItem()];
   final List<String> _importedTimeEntryIds = [];
@@ -190,6 +198,42 @@ class _CreateInvoiceScreenState extends ConsumerState<CreateInvoiceScreen> {
         await ref
             .read(expenseRepositoryProvider)
             .markAsBilled(_importedExpenseIds, invoice.id!);
+      }
+
+      if (_isRecurring && !isEditing) {
+        final lineItems = _lineItems
+            .where((i) => i.descriptionController.text.trim().isNotEmpty)
+            .map(
+              (i) => InvoiceLineItem(
+                description: i.descriptionController.text.trim(),
+                quantity: i.quantity,
+                unitPrice: i.unitPrice,
+              ),
+            )
+            .toList();
+
+        final recurring = RecurringInvoice(
+          userId: userId,
+          clientId: _selectedClientId!,
+          frequency: _recurringFrequency,
+          nextIssueDate: _recurringStartDate,
+          dueDays: _recurringDueDays,
+          lineItems: lineItems,
+          taxPercent: _taxPercent,
+          discountPercent: _discountPercent,
+          currency: _currency,
+          notes: _notesController.text.trim().isEmpty
+              ? null
+              : _notesController.text.trim(),
+          paymentTerms: _paymentTermsController.text.trim().isEmpty
+              ? null
+              : _paymentTermsController.text.trim(),
+          createdAt: DateTime.now(),
+        );
+
+        await ref
+            .read(recurringInvoiceRepositoryProvider)
+            .create(recurring);
       }
 
       if (_dueDate != null) {
@@ -465,6 +509,100 @@ class _CreateInvoiceScreenState extends ConsumerState<CreateInvoiceScreen> {
                 prefixIcon: Icon(Icons.gavel),
               ),
             ),
+            if (!isEditing) ...[
+              const SizedBox(height: 24),
+              Card(
+                child: Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Icon(
+                            Icons.autorenew,
+                            color: Theme.of(context).primaryColor,
+                          ),
+                          const SizedBox(width: 8),
+                          Text(
+                            'Recurring Invoice',
+                            style: Theme.of(context).textTheme.titleMedium,
+                          ),
+                          const Spacer(),
+                          Switch(
+                            value: _isRecurring,
+                            onChanged: (v) => setState(() => _isRecurring = v),
+                          ),
+                        ],
+                      ),
+                      if (_isRecurring) ...[
+                        const SizedBox(height: 16),
+                        DropdownButtonFormField<RecurrenceFrequency>(
+                          value: _recurringFrequency,
+                          decoration: const InputDecoration(
+                            labelText: 'Frequency',
+                            border: OutlineInputBorder(),
+                          ),
+                          items: RecurrenceFrequency.values.map((f) {
+                            return DropdownMenuItem(
+                              value: f,
+                              child: Text(_frequencyLabel(f)),
+                            );
+                          }).toList(),
+                          onChanged: (v) {
+                            if (v != null) {
+                              setState(() => _recurringFrequency = v);
+                            }
+                          },
+                        ),
+                        const SizedBox(height: 16),
+                        InkWell(
+                          onTap: () async {
+                            final date = await showDatePicker(
+                              context: context,
+                              initialDate: _recurringStartDate,
+                              firstDate: DateTime.now(),
+                              lastDate: DateTime.now().add(
+                                const Duration(days: 365),
+                              ),
+                            );
+                            if (date != null) {
+                              setState(() => _recurringStartDate = date);
+                            }
+                          },
+                          child: InputDecorator(
+                            decoration: const InputDecoration(
+                              labelText: 'First Issue Date',
+                              border: OutlineInputBorder(),
+                              prefixIcon: Icon(Icons.calendar_today),
+                            ),
+                            child: Text(
+                              '${_recurringStartDate.month}/${_recurringStartDate.day}/${_recurringStartDate.year}',
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 16),
+                        TextFormField(
+                          initialValue: _recurringDueDays.toString(),
+                          decoration: const InputDecoration(
+                            labelText: 'Due in X days',
+                            border: OutlineInputBorder(),
+                            suffixText: 'days',
+                          ),
+                          keyboardType: TextInputType.number,
+                          onChanged: (v) {
+                            final parsed = int.tryParse(v);
+                            if (parsed != null) {
+                              setState(() => _recurringDueDays = parsed);
+                            }
+                          },
+                        ),
+                      ],
+                    ],
+                  ),
+                ),
+              ),
+            ],
           ],
         ),
       ),
@@ -645,6 +783,15 @@ class _CreateInvoiceScreenState extends ConsumerState<CreateInvoiceScreen> {
         ),
       ),
     );
+  }
+  String _frequencyLabel(RecurrenceFrequency frequency) {
+    return switch (frequency) {
+      RecurrenceFrequency.weekly => 'Weekly',
+      RecurrenceFrequency.biweekly => 'Bi-weekly',
+      RecurrenceFrequency.monthly => 'Monthly',
+      RecurrenceFrequency.quarterly => 'Quarterly',
+      RecurrenceFrequency.yearly => 'Yearly',
+    };
   }
 }
 

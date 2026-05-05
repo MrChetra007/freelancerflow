@@ -196,4 +196,17 @@ class NotificationService {
       );
     }
   }
+
+  Future<void> showRecurringGenerated({
+    required String invoiceId,
+    required String invoiceNumber,
+    required String clientName,
+  }) async {
+    await showNotification(
+      id: 'recurring_$invoiceId'.hashCode,
+      title: 'Invoice Auto-Created',
+      body: 'Invoice $invoiceNumber has been generated for $clientName — review it',
+      payload: 'invoice:$invoiceId',
+    );
+  }
 }

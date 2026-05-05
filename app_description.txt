@@ -3,7 +3,7 @@ FREELANCEFLOW - Client Management App
 
 WHAT IT DOES
 ------------
-FreelanceFlow is a mobile app for freelancers to manage their clients, projects, payments, invoices, expenses, and time tracking in one place. It helps track project progress, log payments, generate invoices, monitor business performance, and track billable hours and expenses.
+FreelanceFlow is a mobile app for freelancers to manage their clients, projects, payments, invoices, expenses, and time tracking in one place. It helps track project progress, log payments, generate invoices, monitor business performance, track billable hours and expenses, and automate recurring billing.
 
 AUTHENTICATION
 ---------------
@@ -14,19 +14,19 @@ AUTHENTICATION
 MAIN SCREENS
 ------------
 1. Dashboard (v2)
-   - 6 stat cards: This Month, Expenses, Net Profit, Total Clients, Active Projects, Pending Invoices
-   - Conditional banners: Unbilled Time, Overdue Projects
-   - Active Timer Banner: live-running timer with stop button (shown when timer is active)
-   - Revenue & Expenses dual bar chart (last 6 months, green for revenue, red for expenses)
-   - Project Status pie chart with legend
+   - 7 stat cards: This Month, Expenses, Net Profit, Unpaid, Overdue, Active Projects, Unbilled Time
+   - Active Timer Banner: live-running timer with project name, elapsed time, and stop button
+   - Revenue & Expenses dual bar chart (last 6 months, tap for tooltip with profit)
+   - Recent activity feed with event types: payment, invoice, project, client, time, expense, recurring
    - Quick Actions: Expenses, Time Tracking, Recurring
 
 2. Clients
-   - List all clients with search and tag filter (horizontal chip row)
-   - Add/Edit client (name, email, phone, company, country, currency, hourly rate, tags)
+   - List all clients with search, tag filter (horizontal chip row)
+   - Sort by: Name / Recent / Most Revenue
+   - Add/Edit client (name, email, phone, company, country, currency, default hourly rate, tags, notes)
    - Archive clients
    - Client Detail Screen (4 tabs):
-     a. Overview: client info, projects/time/expenses summary cards
+     a. Overview: client info, projects/time/expenses summary cards, total earned
      b. Projects: list of client projects with status, tap to view project detail
      c. Time: total hours and value summary + time entry list
      d. Expenses: total expenses summary + expense list
@@ -37,87 +37,136 @@ MAIN SCREENS
    - Add/Edit project (title, description, budget, status, dates, currency)
    - Milestone tracking within projects
    - Status: In Progress, Completed, On Hold, Cancelled
-   - Project Detail Screen (3 tabs):
+   - Project Detail Screen (4 tabs):
      a. Details: project info card + milestones section
-     b. Time: total hours/value summary + time entry list + Add Entry / Start Timer buttons
-     c. Expenses: total expenses summary + expense list + Add Expense button
+     b. Payments: payment list for this project
+     c. Time: total hours/value summary + time entry list + Add Entry / Start Timer buttons
+     d. Expenses: total expenses summary + expense list + Add Expense button
 
 4. Payments
    - Track payments per client/project
    - Add/Edit payment (amount, status, method, due date, paid date)
    - Payment methods: Bank Transfer, PayPal, Wise, Crypto, Cash, Stripe, Other
    - Status: Paid, Unpaid, Partial, Overdue, Refunded
+   - Monthly total at top, grouped by month
 
-5. Invoices
+5. Invoices (v2)
    - Create invoices with line items
    - Add tax and discount
-   - Generate PDF
+   - Generate and share PDF (WhatsApp, Gmail, Drive, etc.)
+   - Upload PDF to Supabase Storage
    - Status: Draft, Sent, Paid, Overdue, Cancelled
+   - Import Time Entries: bottom sheet to select unbilled time entries, adds as line items (qty = hours, unit_price = hourly_rate)
+   - Import Expenses: bottom sheet to select billable unbilled expenses, adds as line items (qty = 1, unit_price = amount)
+   - After import: marks entries as billed and links to invoice
+   - "Make this recurring" toggle: when enabled, creates a recurring invoice template alongside the draft invoice
+     - Frequency picker: Weekly, Bi-weekly, Monthly, Quarterly, Yearly
+     - First issue date picker
+     - Due in X days field
+   - Edit existing invoices with line item management
 
 6. Expenses (v2)
    - List expenses with category filter and search
-   - Add/Edit expense (amount, category, description, date, project/client link, billable flag)
-   - Receipt upload via image picker
-   - Categories: Office Supplies, Software, Travel, Marketing, Meals, Utilities, Other
-   - Billable/unbilled tracking
+   - Add/Edit expense (amount, category, description, date, project/client link, billable flag, notes)
+   - Receipt upload via image picker (stored in Supabase Storage)
+   - Categories: Software, Hardware, Travel, Accommodation, Meals, Marketing, Freelancer, Office, Other
+   - Each category has a unique color and icon
+   - Billable/unbilled tracking, swipe to delete with undo
+   - Expense breakdown pie chart by category (Pro only)
+   - Monthly total at top
 
 7. Time Tracking (v2)
-   - Start/stop timer with project selection
-   - Manual time entry creation
-   - Active timer polling
-   - Unbilled time tracking and value calculation
-   - Per-project and per-client time entry views
+   - Active timer card at top: shows project name, live HH:MM:SS clock, stop button
+   - Green pulsing dot indicator when timer running
+   - Monthly summary bar: Total Hours, Billable amount, Unbilled amount
+   - Filter chips: All / Billable / Unbilled / This Week / This Month
+   - Entries grouped by date (Today, Yesterday, day-of-week, or full date)
+   - Each entry shows: project name, description, duration, billable amount, billed/unbilled badge
+   - FAB with bottom sheet: Start Timer or Log Manual Entry
+   - Manual entry form: project, description, hourly rate, start date/time, end date/time, billable toggle
+   - Edit existing entries, delete with confirmation dialog
+   - Only one timer can run at a time per user
 
 8. Recurring Invoices (v2)
-   - Create recurring invoice templates (daily, weekly, monthly, quarterly, yearly)
-   - Auto-generation of invoices based on schedule
-   - Manage recurring invoice list with active/pause/resume
+   - Create recurring invoice templates from invoice create screen or dedicated screen
+   - Fields: client, project (optional), line items, frequency, first issue date, due days, tax, discount, currency, notes, payment terms
+   - Frequency: Weekly, Bi-weekly, Monthly, Quarterly, Yearly
+   - List of active templates with frequency badge, next issue date, line item count
+   - Toggle active/inactive
+   - Auto-generation on app launch: checks for due templates, creates draft invoices, advances schedule
+   - Shows notification when invoice is auto-created
 
-9. Settings
+9. Settings (v2)
    - Profile management
    - Currency preference
-   - Hourly rate (for time tracking)
-   - Tax ID and payment terms
-   - Timer rounding settings
-   - Theme (Light/Dark)
+   - Hourly rate (for time tracking defaults)
+   - Tax ID / VAT number (auto-fills on invoices)
+   - Payment terms (auto-fills on invoices)
+   - Timer rounding: None / 5 min / 15 min / 30 min
+   - Theme (Light / Dark / System)
+   - Notification preferences: Payment Reminders, Project Reminders, Invoice Reminders
+   - Notification tester: send immediate, schedule in 10s / 1min, view/cancel scheduled notifications
    - Premium subscription
+   - Privacy Policy and Terms of Service
+
+NOTIFICATIONS
+-------------
+- Local notifications via flutter_local_notifications
+- Payment overdue: daily at 9am if overdue
+- Project deadline: 24h before deadline
+- Milestone due: on due date at 9am
+- Invoice unpaid: every 7 days after due date
+- Recurring generated: immediately when auto-created
+- Weekly summary: every Monday at 8am
+- In-app notification bell with unread badge
+- Tap notification navigates to relevant screen
+- Stable notification IDs to avoid duplicates
+- Notification types: payment_overdue, project_deadline, milestone_due, invoice_unpaid, recurring_generated, weekly_summary
 
 DATA FLOW
 ---------
 1. User signs up/logs in
-2. Add a Client first (optionally add tags and hourly rate)
+2. Add a Client first (optionally add tags and default hourly rate)
 3. Create a Project linked to a Client
 4. Add Milestones to track project progress
 5. Start Timer or log Time Entries for the project/client
-6. Add Expenses linked to client or project
+6. Add Expenses linked to client or project (with optional receipt photo)
 7. Log Payments for the project
-8. Create Invoice with line items (can include unbilled time and expenses)
-9. Set up Recurring Invoices for repeat billing
+8. Create Invoice with line items (can import unbilled time entries and expenses)
+9. Optionally make invoice recurring for automated future billing
 10. Dashboard shows summary, net profit, and business overview
+11. Recurring invoices auto-generate on app launch
 
 TECH STACK
 ----------
 - Flutter (Android)
-- Supabase (Backend - Auth, Database, Storage)
-- Riverpod (State Management)
+- Supabase (Backend - Auth, PostgreSQL Database, Storage)
+- Riverpod (State Management with code generation)
 - GoRouter (Navigation)
 - Freezed (Immutable models)
-- fl_chart (Charts and graphs)
+- fl_chart (Charts: bar, pie, dual-axis)
 - PDF generation for invoices
 - image_picker for receipt uploads
+- flutter_local_notifications for reminders
+- Supabase RPC functions for recurring invoice auto-generation and milestone checks
 
 SECURITY
 --------
 - Supabase Auth with JWT
 - Row-level security (RLS) on all tables
 - User can only access their own data
+- Private storage bucket for invoices and receipts
 
 V2 FEATURES ADDED
 -----------------
-- Dashboard: Net Profit, Expenses, Unbilled Time stats, active timer banner, dual bar chart
-- Client Detail: 4-tab screen (Overview, Projects, Time, Expenses) with tag filtering
-- Project Detail: 3-tab screen (Details, Time, Expenses) with time/expense integration
-- Expenses: full CRUD with categories, receipts, billable tracking
-- Time Tracking: timer with polling, manual entries, unbilled time calculation
-- Recurring Invoices: template-based auto-generated invoices
-- Settings v2: hourly rate, tax ID, payment terms, timer rounding
+- Dashboard v2: Net Profit, Expenses, Unbilled Time stats, active timer banner with project name, dual revenue/expenses bar chart with profit tooltip
+- Client Detail v2: 4-tab screen (Overview, Projects, Time, Expenses) with tag filtering and per-client total expenses
+- Project Detail v2: 4-tab screen (Details, Payments, Time, Expenses) with time/expense integration
+- Expenses: full CRUD with 9 categories, receipt photos, billable/unbilled tracking, pie chart breakdown
+- Time Tracking: polished screen with working filters (All/Billable/Unbilled/This Week/This Month), entries grouped by date, live timer with project name, summary bar, upgraded FAB with Start Timer / Log Manual choice, edit/delete with confirmation
+- Invoice Import Flow: import unbilled time entries and expenses as line items via bottom sheet, marks entries as billed after save
+- "Make this recurring" toggle on invoice create screen: frequency picker, first issue date, due days, creates recurring template
+- Recurring Auto-Generation: checks on app launch, generates draft invoices from due templates, advances schedule via Supabase RPC, shows notification
+- Notifications v2: milestone due notifications (on due date at 9am), recurring generated notifications (immediate on auto-create), notification tap navigation
+- Settings v2: default hourly rate, tax ID/VAT, payment terms, timer rounding, notification tester (immediate + scheduled + list/cancel)
+- Notification Test Screen in settings: send immediate notification, schedule in 10s/1min/5min/10min, list all pending scheduled notifications with cancel option

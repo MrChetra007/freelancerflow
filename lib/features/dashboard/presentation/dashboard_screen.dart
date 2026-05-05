@@ -67,12 +67,15 @@ class DashboardScreen extends ConsumerWidget {
           child: ListView(
             padding: const EdgeInsets.all(16),
             children: [
-              const ActiveTimerBanner(),
+              if (isPremium) const ActiveTimerBanner(),
               _buildWelcomeSection(context),
               const SizedBox(height: 24),
-              _buildSummaryCards(context, data),
+              _buildSummaryCards(context, data, isPremium),
               const SizedBox(height: 24),
-              _buildMonthlyEarningsChart(context, data),
+              if (isPremium)
+                _buildMonthlyEarningsChart(context, data)
+              else
+                _buildMonthlyEarningsChartPlaceholder(context),
               const SizedBox(height: 24),
               _buildProjectStatusChart(context, data),
               const SizedBox(height: 24),
@@ -122,7 +125,7 @@ class DashboardScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildSummaryCards(BuildContext context, DashboardStats stats) {
+  Widget _buildSummaryCards(BuildContext context, DashboardStats stats, bool isPremium) {
     return Column(
       children: [
         Row(
@@ -154,64 +157,93 @@ class DashboardScreen extends ConsumerWidget {
             ),
           ],
         ),
-        const SizedBox(height: 12),
-        Row(
-          children: [
-            Expanded(
-              child: _StatCard(
-                title: 'Net Profit',
-                value: CurrencyFormatter.formatCompact(
-                  stats.profitThisMonth,
-                  'USD',
+        if (isPremium) ...[
+          const SizedBox(height: 12),
+          Row(
+            children: [
+              Expanded(
+                child: _StatCard(
+                  title: 'Net Profit',
+                  value: CurrencyFormatter.formatCompact(
+                    stats.profitThisMonth,
+                    'USD',
+                  ),
+                  icon: Icons.account_balance_wallet,
+                  color:
+                      stats.profitThisMonth >= 0
+                          ? AppColors.success
+                          : AppColors.error,
+                  onTap: () => context.go('/payments'),
                 ),
-                icon: Icons.account_balance_wallet,
-                color:
-                    stats.profitThisMonth >= 0
-                        ? AppColors.success
-                        : AppColors.error,
-                onTap: () => context.go('/payments'),
               ),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: _StatCard(
-                title: 'Total Clients',
-                value: stats.totalClients.toString(),
-                icon: Icons.people,
-                color: AppColors.primary500,
-                onTap: () => context.go('/clients'),
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 12),
-        Row(
-          children: [
-            Expanded(
-              child: _StatCard(
-                title: 'Active Projects',
-                value: stats.activeProjects.toString(),
-                icon: Icons.folder_open,
-                color: AppColors.info,
-                onTap: () => context.go('/projects'),
-              ),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: _StatCard(
-                title: 'Pending Invoices',
-                value: CurrencyFormatter.formatCompact(
-                  stats.pendingInvoices,
-                  'USD',
+              const SizedBox(width: 12),
+              Expanded(
+                child: _StatCard(
+                  title: 'Total Clients',
+                  value: stats.totalClients.toString(),
+                  icon: Icons.people,
+                  color: AppColors.primary500,
+                  onTap: () => context.go('/clients'),
                 ),
-                icon: Icons.receipt_long,
-                color: AppColors.warning,
-                onTap: () => context.go('/invoices'),
               ),
-            ),
-          ],
-        ),
-        if (stats.unbilledTimeValue > 0) ...[
+            ],
+          ),
+        ] else ...[
+          const SizedBox(height: 12),
+          Row(
+            children: [
+              Expanded(
+                child: _StatCard(
+                  title: 'Total Clients',
+                  value: stats.totalClients.toString(),
+                  icon: Icons.people,
+                  color: AppColors.primary500,
+                  onTap: () => context.go('/clients'),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: _StatCard(
+                  title: 'Active Projects',
+                  value: stats.activeProjects.toString(),
+                  icon: Icons.folder_open,
+                  color: AppColors.info,
+                  onTap: () => context.go('/projects'),
+                ),
+              ),
+            ],
+          ),
+        ],
+        if (isPremium) ...[
+          const SizedBox(height: 12),
+          Row(
+            children: [
+              Expanded(
+                child: _StatCard(
+                  title: 'Active Projects',
+                  value: stats.activeProjects.toString(),
+                  icon: Icons.folder_open,
+                  color: AppColors.info,
+                  onTap: () => context.go('/projects'),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: _StatCard(
+                  title: 'Pending Invoices',
+                  value: CurrencyFormatter.formatCompact(
+                    stats.pendingInvoices,
+                    'USD',
+                  ),
+                  icon: Icons.receipt_long,
+                  color: AppColors.warning,
+                  onTap: () => context.go('/invoices'),
+                ),
+              ),
+            ],
+          ),
+        ],
+        if (isPremium && stats.unbilledTimeValue > 0) ...[
           const SizedBox(height: 12),
           Container(
             padding: const EdgeInsets.all(16),
@@ -421,6 +453,72 @@ class DashboardScreen extends ConsumerWidget {
                       barsSpace: 4,
                     );
                   }).toList(),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildMonthlyEarningsChartPlaceholder(BuildContext context) {
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  'Revenue & Expenses',
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: Colors.amber.shade100,
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(Icons.workspace_premium, size: 14, color: Colors.amber.shade800),
+                      const SizedBox(width: 4),
+                      Text(
+                        'Pro',
+                        style: TextStyle(
+                          fontSize: 11,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.amber.shade800,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+            SizedBox(
+              height: 150,
+              child: Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(Icons.bar_chart, size: 48, color: Colors.grey.shade400),
+                    const SizedBox(height: 8),
+                    Text(
+                      'Upgrade to Pro to see',
+                      style: TextStyle(color: Colors.grey.shade500),
+                    ),
+                    Text(
+                      'Revenue & Expenses chart',
+                      style: TextStyle(color: Colors.grey.shade500),
+                    ),
+                  ],
                 ),
               ),
             ),

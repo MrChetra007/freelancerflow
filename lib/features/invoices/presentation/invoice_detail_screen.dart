@@ -5,6 +5,7 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../core/utils/currency_formatter.dart';
 import '../../../../core/utils/date_formatter.dart';
 import '../../../../core/utils/pdf_generator.dart';
+import '../../../../features/settings/data/premium_provider.dart';
 import 'package:client_manager/features/clients/data/clients_provider.dart';
 import '../data/invoices_provider.dart';
 import '../domain/invoice.dart';
@@ -64,6 +65,15 @@ class _InvoiceDetailScreenState extends ConsumerState<InvoiceDetailScreen> {
   }
 
   Future<void> _generateAndSharePdf() async {
+    if (!mounted) return;
+    final isPremium = ref.read(isPremiumProvider);
+    if (!isPremium) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('PDF generation requires Pro')),
+      );
+      return;
+    }
+
     if (_invoice == null || _client == null) return;
 
     setState(() => _isGeneratingPdf = true);
@@ -91,6 +101,15 @@ class _InvoiceDetailScreenState extends ConsumerState<InvoiceDetailScreen> {
   }
 
   Future<void> _printPdf() async {
+    if (!mounted) return;
+    final isPremium = ref.read(isPremiumProvider);
+    if (!isPremium) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('PDF printing requires Pro')),
+      );
+      return;
+    }
+
     if (_invoice == null || _client == null) return;
 
     setState(() => _isGeneratingPdf = true);
@@ -171,17 +190,17 @@ class _InvoiceDetailScreenState extends ConsumerState<InvoiceDetailScreen> {
                 child: CircularProgressIndicator(strokeWidth: 2),
               ),
             )
-          else ...[
-            IconButton(
-              icon: const Icon(Icons.print),
-              onPressed: _printPdf,
-              tooltip: 'Print',
-            ),
-            IconButton(
-              icon: const Icon(Icons.share),
-              onPressed: _generateAndSharePdf,
-              tooltip: 'Share PDF',
-            ),
+            else ...[
+              IconButton(
+                icon: const Icon(Icons.print),
+                onPressed: _isGeneratingPdf ? null : () => _printPdf(),
+                tooltip: 'Print',
+              ),
+              IconButton(
+                icon: const Icon(Icons.share),
+                onPressed: _isGeneratingPdf ? null : () => _generateAndSharePdf(),
+                tooltip: 'Share PDF',
+              ),
             PopupMenuButton<InvoiceStatus>(
               icon: const Icon(Icons.more_vert),
               onSelected: _updateStatus,

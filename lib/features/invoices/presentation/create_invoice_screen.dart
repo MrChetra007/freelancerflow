@@ -4,6 +4,8 @@ import 'package:go_router/go_router.dart';
 import '../../../../core/supabase/supabase_client.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/services/notification_service.dart';
+import '../../../../core/widgets/pro_gate.dart';
+import '../../../../features/settings/data/premium_provider.dart';
 import 'package:client_manager/features/clients/data/clients_provider.dart';
 import 'package:client_manager/features/settings/presentation/settings_screen.dart';
 import '../../time_tracking/data/time_entry_provider.dart';
@@ -236,7 +238,7 @@ class _CreateInvoiceScreenState extends ConsumerState<CreateInvoiceScreen> {
             .create(recurring);
       }
 
-      if (_dueDate != null) {
+      if (_dueDate != null && ref.read(isPremiumProvider)) {
         final prefs = ref.read(notificationPrefsProvider);
         if (prefs.invoiceReminders) {
           final clients = await ref.read(clientsProvider.future);
@@ -290,6 +292,17 @@ class _CreateInvoiceScreenState extends ConsumerState<CreateInvoiceScreen> {
 
   Future<void> _importEntries() async {
     if (_selectedClientId == null) return;
+    if (!ref.read(isPremiumProvider)) {
+      showModalBottomSheet(
+        context: context,
+        isScrollControlled: true,
+        shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+        ),
+        builder: (context) => const _ProPromptSheet(),
+      );
+      return;
+    }
 
     final result = await showImportLineItemsSheet(
       context,
@@ -511,94 +524,106 @@ class _CreateInvoiceScreenState extends ConsumerState<CreateInvoiceScreen> {
             ),
             if (!isEditing) ...[
               const SizedBox(height: 24),
-              Card(
-                child: Padding(
-                  padding: const EdgeInsets.all(16),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        children: [
-                          Icon(
-                            Icons.autorenew,
-                            color: Theme.of(context).primaryColor,
+              ProGate(
+                onBlocked: () {
+                  showModalBottomSheet(
+                    context: context,
+                    isScrollControlled: true,
+                    shape: const RoundedRectangleBorder(
+                      borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+                    ),
+                    builder: (context) => const _ProPromptSheet(),
+                  );
+                },
+                child: Card(
+                  child: Padding(
+                    padding: const EdgeInsets.all(16),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            Icon(
+                              Icons.autorenew,
+                              color: Theme.of(context).primaryColor,
+                            ),
+                            const SizedBox(width: 8),
+                            Text(
+                              'Recurring Invoice',
+                              style: Theme.of(context).textTheme.titleMedium,
+                            ),
+                            const Spacer(),
+                            Switch(
+                              value: _isRecurring,
+                              onChanged: (v) => setState(() => _isRecurring = v),
+                            ),
+                          ],
+                        ),
+                        if (_isRecurring) ...[
+                          const SizedBox(height: 16),
+                          DropdownButtonFormField<RecurrenceFrequency>(
+                            value: _recurringFrequency,
+                            decoration: const InputDecoration(
+                              labelText: 'Frequency',
+                              border: OutlineInputBorder(),
+                            ),
+                            items: RecurrenceFrequency.values.map((f) {
+                              return DropdownMenuItem(
+                                value: f,
+                                child: Text(_frequencyLabel(f)),
+                              );
+                            }).toList(),
+                            onChanged: (v) {
+                              if (v != null) {
+                                setState(() => _recurringFrequency = v);
+                              }
+                            },
                           ),
-                          const SizedBox(width: 8),
-                          Text(
-                            'Recurring Invoice',
-                            style: Theme.of(context).textTheme.titleMedium,
+                          const SizedBox(height: 16),
+                          InkWell(
+                            onTap: () async {
+                              final date = await showDatePicker(
+                                context: context,
+                                initialDate: _recurringStartDate,
+                                firstDate: DateTime.now(),
+                                lastDate: DateTime.now().add(
+                                  const Duration(days: 365),
+                                ),
+                              );
+                              if (date != null) {
+                                setState(() => _recurringStartDate = date);
+                              }
+                            },
+                            child: InputDecorator(
+                              decoration: const InputDecoration(
+                                labelText: 'First Issue Date',
+                                border: OutlineInputBorder(),
+                                prefixIcon: Icon(Icons.calendar_today),
+                              ),
+                              child: Text(
+                                '${_recurringStartDate.month}/${_recurringStartDate.day}/${_recurringStartDate.year}',
+                              ),
+                            ),
                           ),
-                          const Spacer(),
-                          Switch(
-                            value: _isRecurring,
-                            onChanged: (v) => setState(() => _isRecurring = v),
+                          const SizedBox(height: 16),
+                          TextFormField(
+                            initialValue: _recurringDueDays.toString(),
+                            decoration: const InputDecoration(
+                              labelText: 'Due in X days',
+                              border: OutlineInputBorder(),
+                              suffixText: 'days',
+                            ),
+                            keyboardType: TextInputType.number,
+                            onChanged: (v) {
+                              final parsed = int.tryParse(v);
+                              if (parsed != null) {
+                                setState(() => _recurringDueDays = parsed);
+                              }
+                            },
                           ),
                         ],
-                      ),
-                      if (_isRecurring) ...[
-                        const SizedBox(height: 16),
-                        DropdownButtonFormField<RecurrenceFrequency>(
-                          value: _recurringFrequency,
-                          decoration: const InputDecoration(
-                            labelText: 'Frequency',
-                            border: OutlineInputBorder(),
-                          ),
-                          items: RecurrenceFrequency.values.map((f) {
-                            return DropdownMenuItem(
-                              value: f,
-                              child: Text(_frequencyLabel(f)),
-                            );
-                          }).toList(),
-                          onChanged: (v) {
-                            if (v != null) {
-                              setState(() => _recurringFrequency = v);
-                            }
-                          },
-                        ),
-                        const SizedBox(height: 16),
-                        InkWell(
-                          onTap: () async {
-                            final date = await showDatePicker(
-                              context: context,
-                              initialDate: _recurringStartDate,
-                              firstDate: DateTime.now(),
-                              lastDate: DateTime.now().add(
-                                const Duration(days: 365),
-                              ),
-                            );
-                            if (date != null) {
-                              setState(() => _recurringStartDate = date);
-                            }
-                          },
-                          child: InputDecorator(
-                            decoration: const InputDecoration(
-                              labelText: 'First Issue Date',
-                              border: OutlineInputBorder(),
-                              prefixIcon: Icon(Icons.calendar_today),
-                            ),
-                            child: Text(
-                              '${_recurringStartDate.month}/${_recurringStartDate.day}/${_recurringStartDate.year}',
-                            ),
-                          ),
-                        ),
-                        const SizedBox(height: 16),
-                        TextFormField(
-                          initialValue: _recurringDueDays.toString(),
-                          decoration: const InputDecoration(
-                            labelText: 'Due in X days',
-                            border: OutlineInputBorder(),
-                            suffixText: 'days',
-                          ),
-                          keyboardType: TextInputType.number,
-                          onChanged: (v) {
-                            final parsed = int.tryParse(v);
-                            if (parsed != null) {
-                              setState(() => _recurringDueDays = parsed);
-                            }
-                          },
-                        ),
                       ],
-                    ],
+                    ),
                   ),
                 ),
               ),
@@ -817,5 +842,76 @@ class _LineItem {
     descriptionController.dispose();
     quantityController.dispose();
     unitPriceController.dispose();
+  }
+}
+
+class _ProPromptSheet extends StatelessWidget {
+  const _ProPromptSheet();
+
+  @override
+  Widget build(BuildContext context) {
+    return SafeArea(
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(24, 8, 24, 32),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Center(
+              child: Container(
+                width: 40,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: Colors.grey.shade300,
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+            ),
+            const SizedBox(height: 24),
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [Colors.amber.shade600, Colors.amber.shade800],
+                ),
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(
+                Icons.workspace_premium,
+                color: Colors.white,
+                size: 48,
+              ),
+            ),
+            const SizedBox(height: 24),
+            const Text(
+              'Upgrade to Pro',
+              textAlign: TextAlign.center,
+              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'Import entries and create recurring invoices with Pro',
+              textAlign: TextAlign.center,
+              style: TextStyle(fontSize: 14, color: Colors.grey.shade600),
+            ),
+            const SizedBox(height: 32),
+            FilledButton.icon(
+              onPressed: () {
+                context.pop();
+                context.push('/premium');
+              },
+              icon: const Icon(Icons.workspace_premium),
+              label: const Text('Upgrade Now'),
+              style: FilledButton.styleFrom(
+                padding: const EdgeInsets.symmetric(vertical: 16),
+                textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+              ),
+            ),
+            const SizedBox(height: 12),
+            TextButton(onPressed: () => context.pop(), child: const Text('Maybe Later')),
+          ],
+        ),
+      ),
+    );
   }
 }

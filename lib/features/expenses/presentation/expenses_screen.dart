@@ -4,7 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../core/theme/app_colors.dart';
-import '../../../../core/utils/currency_formatter.dart';
+import '../../../../core/widgets/pro_gate.dart';
 import '../data/expense_provider.dart';
 import 'add_expense_screen.dart';
 import 'widgets/expense_breakdown_chart.dart';
@@ -38,13 +38,15 @@ class ExpensesScreen extends ConsumerWidget {
             SliverToBoxAdapter(
               child: Padding(
                 padding: const EdgeInsets.all(16),
-                child: breakdownAsync.when(
-                  data: (data) => ExpenseBreakdownChart(data: data),
-                  loading: () => const SizedBox(
-                    height: 200,
-                    child: Center(child: CircularProgressIndicator()),
+                child: ProGate(
+                  child: breakdownAsync.when(
+                    data: (data) => ExpenseBreakdownChart(data: data),
+                    loading: () => const SizedBox(
+                      height: 200,
+                      child: Center(child: CircularProgressIndicator()),
+                    ),
+                    error: (_, __) => const SizedBox.shrink(),
                   ),
-                  error: (_, __) => const SizedBox.shrink(),
                 ),
               ),
             ),
@@ -133,14 +135,14 @@ class ExpensesScreen extends ConsumerWidget {
           ],
         ),
       ),
-      floatingActionButton: FloatingActionButton.extended(
+      floatingActionButton: ProGateButton(
         onPressed: () {
           Navigator.of(
             context,
           ).push(MaterialPageRoute(builder: (_) => const AddExpenseScreen()));
         },
-        icon: const Icon(Icons.add),
-        label: const Text('Add Expense'),
+        icon: Icons.add,
+        label: 'Add Expense',
       ),
     );
   }

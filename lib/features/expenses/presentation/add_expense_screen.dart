@@ -12,11 +12,11 @@ import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 
 import '../../../../core/theme/app_colors.dart';
-import '../../../../core/utils/currency_formatter.dart';
 import '../../../../core/utils/date_formatter.dart';
 import '../../../../core/supabase/supabase_client.dart';
+import '../../../../core/widgets/pro_gate.dart';
+import '../../../../features/settings/data/premium_provider.dart';
 import '../data/expense_provider.dart';
-import '../data/expense_repository.dart';
 
 class AddExpenseScreen extends ConsumerWidget {
   final Expense? expense;
@@ -287,6 +287,14 @@ class _ExpenseFormState extends ConsumerState<_ExpenseForm> {
   }
 
   Future<void> _pickReceipt() async {
+    if (!mounted) return;
+    final isPremium = ref.read(isPremiumProvider);
+    if (!isPremium) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Receipt upload requires Pro')),
+      );
+      return;
+    }
     final picker = ImagePicker();
     final image = await picker.pickImage(
       source: ImageSource.gallery,

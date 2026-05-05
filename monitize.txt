@@ -1,0 +1,77 @@
+Full feature breakdown
+Clients & Projects
+✓
+Client list with search, tags, sort3 free
+✓
+Client detail (Overview, Projects, Time, Expenses)
+✓
+Project list, status filter, milestone tracking3 free
+✓
+Project detail (Details, Payments, Time, Expenses)
+✓
+Archive clients
+Time Tracking
+✓
+Live timer with project name & stop button
+✓
+Manual time entry (start/end, rate, billable toggle)
+✓
+Entries grouped by date, filter chips
+✓
+Monthly summary (hours, billable, unbilled)
+✓
+Timer rounding (None / 5 / 15 / 30 min)
+Set in settings
+Payments
+✓
+Log payments (Bank, PayPal, Wise, Stripe, Crypto, Cash)
+✓
+Payment status (Paid, Unpaid, Partial, Overdue, Refunded)
+✓
+Monthly totals, grouped by month
+Invoices Pro
+✦
+Create invoices with line items, tax & discount
+✦
+Import unbilled time entries as line items
+✦
+Import billable expenses as line items
+✦
+Generate & share PDF (WhatsApp, Gmail, Drive)
+✦
+Invoice status (Draft, Sent, Paid, Overdue, Cancelled)
+✦
+Make recurring — frequency + auto-generation
+Weekly, bi-weekly, monthly, quarterly, yearly
+Expenses Pro
+✦
+Full expense CRUD (9 categories, billable flag)
+Software, Travel, Meals, Freelancer, Office + more
+✦
+Receipt photo upload
+✦
+Expense pie chart breakdown by category
+✦
+Billable/unbilled tracking, swipe to delete with undo
+Dashboard & Reporting Pro
+✦
+Net Profit stat card
+✦
+Expenses & Unbilled Time stat cards
+✦
+Dual revenue/expenses bar chart (6 months)
+✦
+Active timer banner on dashboard
+Notifications Pro
+✦
+Payment overdue reminders (daily 9am)
+✦
+Project deadline alerts (24h before)
+✦
+Milestone due alerts (on due date)
+✦
+Invoice unpaid reminders (every 7 days)
+✦
+Weekly business summary (Monday 8am)
+✦
+Recurring invoice auto-generate notification

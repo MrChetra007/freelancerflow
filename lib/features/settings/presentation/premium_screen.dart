@@ -143,25 +143,27 @@ class _PremiumScreenState extends ConsumerState<PremiumScreen> {
           width: 120,
           height: 120,
           decoration: BoxDecoration(
-            color: AppColors.primary500.withValues(alpha: 0.1),
+            gradient: LinearGradient(
+              colors: [Colors.amber.shade600, Colors.amber.shade800],
+            ),
             shape: BoxShape.circle,
           ),
           child: const Icon(
             Icons.workspace_premium,
             size: 64,
-            color: AppColors.primary500,
+            color: Colors.white,
           ),
         ),
         const SizedBox(height: 24),
         Text(
-          'Unlock Premium',
+          'Upgrade to Pro',
           style: Theme.of(
             context,
           ).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
         ),
         const SizedBox(height: 8),
         Text(
-          'Remove all limits and unlock all features',
+          'Unlock all premium features',
           style: Theme.of(
             context,
           ).textTheme.bodyLarge?.copyWith(color: AppColors.lightTextSecondary),
@@ -171,12 +173,14 @@ class _PremiumScreenState extends ConsumerState<PremiumScreen> {
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
           decoration: BoxDecoration(
-            color: AppColors.primary500,
+            gradient: LinearGradient(
+              colors: [Colors.amber.shade600, Colors.amber.shade800],
+            ),
             borderRadius: BorderRadius.circular(24),
           ),
-          child: Text(
+          child: const Text(
             '\$4.99/month',
-            style: const TextStyle(
+            style: TextStyle(
               color: Colors.white,
               fontWeight: FontWeight.bold,
               fontSize: 18,
@@ -184,32 +188,34 @@ class _PremiumScreenState extends ConsumerState<PremiumScreen> {
           ),
         ),
         const SizedBox(height: 32),
-        _buildFeatureCard(
-          icon: Icons.people,
-          title: 'Unlimited Clients',
-          subtitle: 'Add as many clients as you need',
-          color: AppColors.primary500,
-        ),
-        const SizedBox(height: 16),
-        _buildFeatureCard(
-          icon: Icons.folder,
-          title: 'Unlimited Projects',
-          subtitle: 'No restrictions on projects',
-          color: AppColors.info,
-        ),
-        const SizedBox(height: 16),
-        _buildFeatureCard(
+        _buildProFeatureCard(
           icon: Icons.receipt_long,
-          title: 'Unlimited Invoices',
-          subtitle: 'Create and send unlimited invoices',
-          color: AppColors.statusPaid,
+          title: 'Invoices & PDFs',
+          subtitle: 'Create, import entries, generate & share PDFs',
         ),
-        const SizedBox(height: 16),
-        _buildFeatureCard(
-          icon: Icons.notifications,
-          title: 'Reminders & Notifications',
-          subtitle: 'Stay on top of deadlines',
-          color: AppColors.warning,
+        const SizedBox(height: 12),
+        _buildProFeatureCard(
+          icon: Icons.autorenew,
+          title: 'Recurring Invoices',
+          subtitle: 'Auto-generate invoices on schedule',
+        ),
+        const SizedBox(height: 12),
+        _buildProFeatureCard(
+          icon: Icons.account_balance_wallet,
+          title: 'Expense Tracking',
+          subtitle: 'Receipt upload, billable tracking, pie chart',
+        ),
+        const SizedBox(height: 12),
+        _buildProFeatureCard(
+          icon: Icons.bar_chart,
+          title: 'Dashboard Analytics',
+          subtitle: 'Net profit, revenue chart, timer banner',
+        ),
+        const SizedBox(height: 12),
+        _buildProFeatureCard(
+          icon: Icons.notifications_active,
+          title: 'Smart Notifications',
+          subtitle: 'Payment, project, invoice & milestone reminders',
         ),
         const SizedBox(height: 32),
         SizedBox(
@@ -217,6 +223,8 @@ class _PremiumScreenState extends ConsumerState<PremiumScreen> {
           child: ElevatedButton(
             onPressed: _isLoading ? null : _purchasePremium,
             style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.amber.shade700,
+              foregroundColor: Colors.white,
               padding: const EdgeInsets.symmetric(vertical: 16),
             ),
             child: _isLoading
@@ -243,6 +251,59 @@ class _PremiumScreenState extends ConsumerState<PremiumScreen> {
           style: TextStyle(fontSize: 12, color: AppColors.lightTextSecondary),
         ),
       ],
+    );
+  }
+
+  Widget _buildProFeatureCard({
+    required IconData icon,
+    required String title,
+    required String subtitle,
+  }) {
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(10),
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [
+                    Colors.amber.shade600.withValues(alpha: 0.2),
+                    Colors.amber.shade800.withValues(alpha: 0.2),
+                  ],
+                ),
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Icon(icon, color: Colors.amber.shade700),
+            ),
+            const SizedBox(width: 16),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 15,
+                    ),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    subtitle,
+                    style: TextStyle(
+                      color: AppColors.lightTextSecondary,
+                      fontSize: 13,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const Icon(Icons.check_circle, color: AppColors.statusPaid, size: 20),
+          ],
+        ),
+      ),
     );
   }
 

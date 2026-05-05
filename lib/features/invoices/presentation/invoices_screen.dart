@@ -4,7 +4,9 @@ import 'package:go_router/go_router.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/widgets/animated_list_item.dart';
 import '../../../../core/widgets/loading_widget.dart';
+import '../../../../core/widgets/pro_gate.dart';
 import '../../../../core/utils/haptic_utils.dart';
+import '../../../../features/settings/data/premium_provider.dart';
 import '../data/invoices_provider.dart';
 import '../domain/invoice.dart';
 import 'widgets/invoice_card.dart';
@@ -105,13 +107,13 @@ class InvoicesScreen extends ConsumerWidget {
           ),
         ],
       ),
-      floatingActionButton: FloatingActionButton.extended(
+      floatingActionButton: ProGateButton(
         onPressed: () {
           HapticUtils.mediumImpact();
           context.push('/invoices/create');
         },
-        icon: const Icon(Icons.add),
-        label: const Text('Create Invoice'),
+        label: 'Create Invoice',
+        icon: Icons.add,
       ),
     );
   }

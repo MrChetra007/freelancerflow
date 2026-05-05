@@ -1,5 +1,3 @@
-import 'package:supabase_flutter/supabase_flutter.dart';
-
 import '../../../core/supabase/supabase_client.dart';
 import '../domain/time_entry.dart';
 
@@ -61,6 +59,20 @@ class TimeEntryRepository {
     return TimeEntry.fromJson(result);
   }
 
+  Future<TimeEntry> updateEntry(TimeEntry entry) async {
+    if (entry.id == null) {
+      throw Exception('Cannot update entry without id');
+    }
+    final data = entry.toJson()..remove('id');
+    final result = await SupabaseConfig.client
+        .from('time_entries')
+        .update(data)
+        .eq('id', entry.id!)
+        .select()
+        .single();
+    return TimeEntry.fromJson(result);
+  }
+
   Future<List<TimeEntry>?> getAllUnbilled(String userId) async {
     final result = await SupabaseConfig.client
         .from('time_entries')
@@ -116,6 +128,25 @@ class TimeEntryRepository {
         .stream(primaryKey: ['id'])
         .eq('project_id', projectId)
         .order('started_at')
+        .map((data) => data.map((e) => TimeEntry.fromJson(e)).toList());
+  }
+
+  Future<List<TimeEntry>> getAll(String userId) async {
+    final result = await SupabaseConfig.client
+        .from('time_entries')
+        .select()
+        .eq('user_id', userId)
+        .not('ended_at', 'is', null)
+        .order('started_at', ascending: false);
+    return result.map((e) => TimeEntry.fromJson(e)).toList();
+  }
+
+  Stream<List<TimeEntry>> watchAllEntries(String userId) {
+    return SupabaseConfig.client
+        .from('time_entries')
+        .stream(primaryKey: ['id'])
+        .eq('user_id', userId)
+        .order('started_at', ascending: false)
         .map((data) => data.map((e) => TimeEntry.fromJson(e)).toList());
   }
 

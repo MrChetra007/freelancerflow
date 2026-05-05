@@ -42,6 +42,81 @@ final activeTimerProvider = AutoDisposeFutureProvider<TimeEntry?>.internal(
 @Deprecated('Will be removed in 3.0. Use Ref instead')
 // ignore: unused_element
 typedef ActiveTimerRef = AutoDisposeFutureProviderRef<TimeEntry?>;
+String _$allTimeEntriesHash() => r'02bcc5d09b6a6f9f44158f2c44f8f17fdb06c265';
+
+/// See also [allTimeEntries].
+@ProviderFor(allTimeEntries)
+final allTimeEntriesProvider =
+    AutoDisposeFutureProvider<List<TimeEntry>>.internal(
+      allTimeEntries,
+      name: r'allTimeEntriesProvider',
+      debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+          ? null
+          : _$allTimeEntriesHash,
+      dependencies: null,
+      allTransitiveDependencies: null,
+    );
+
+@Deprecated('Will be removed in 3.0. Use Ref instead')
+// ignore: unused_element
+typedef AllTimeEntriesRef = AutoDisposeFutureProviderRef<List<TimeEntry>>;
+String _$watchAllTimeEntriesHash() =>
+    r'957ab96d211ef225d3d52656aa98f92f3038b8d4';
+
+/// See also [watchAllTimeEntries].
+@ProviderFor(watchAllTimeEntries)
+final watchAllTimeEntriesProvider =
+    AutoDisposeStreamProvider<List<TimeEntry>>.internal(
+      watchAllTimeEntries,
+      name: r'watchAllTimeEntriesProvider',
+      debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+          ? null
+          : _$watchAllTimeEntriesHash,
+      dependencies: null,
+      allTransitiveDependencies: null,
+    );
+
+@Deprecated('Will be removed in 3.0. Use Ref instead')
+// ignore: unused_element
+typedef WatchAllTimeEntriesRef = AutoDisposeStreamProviderRef<List<TimeEntry>>;
+String _$thisWeekTimeEntriesHash() =>
+    r'76efff0fc84b117855ddd4e5585cfb40efeed0f1';
+
+/// See also [thisWeekTimeEntries].
+@ProviderFor(thisWeekTimeEntries)
+final thisWeekTimeEntriesProvider =
+    AutoDisposeFutureProvider<List<TimeEntry>>.internal(
+      thisWeekTimeEntries,
+      name: r'thisWeekTimeEntriesProvider',
+      debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+          ? null
+          : _$thisWeekTimeEntriesHash,
+      dependencies: null,
+      allTransitiveDependencies: null,
+    );
+
+@Deprecated('Will be removed in 3.0. Use Ref instead')
+// ignore: unused_element
+typedef ThisWeekTimeEntriesRef = AutoDisposeFutureProviderRef<List<TimeEntry>>;
+String _$thisMonthTimeEntriesHash() =>
+    r'63ef8b181fb9110ebded58168a8862e6e31d10df';
+
+/// See also [thisMonthTimeEntries].
+@ProviderFor(thisMonthTimeEntries)
+final thisMonthTimeEntriesProvider =
+    AutoDisposeFutureProvider<List<TimeEntry>>.internal(
+      thisMonthTimeEntries,
+      name: r'thisMonthTimeEntriesProvider',
+      debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+          ? null
+          : _$thisMonthTimeEntriesHash,
+      dependencies: null,
+      allTransitiveDependencies: null,
+    );
+
+@Deprecated('Will be removed in 3.0. Use Ref instead')
+// ignore: unused_element
+typedef ThisMonthTimeEntriesRef = AutoDisposeFutureProviderRef<List<TimeEntry>>;
 String _$unbilledTimeEntriesHash() =>
     r'2864a97cc677ba55a086ebf254b71f43247294f3';
 

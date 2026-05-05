@@ -8,7 +8,6 @@ import '../../projects/data/projects_provider.dart';
 import '../../projects/domain/project.dart';
 import '../domain/time_entry.dart';
 import '../data/time_entry_provider.dart';
-import '../data/time_entry_repository.dart';
 
 class AddTimeEntryScreen extends ConsumerWidget {
   final TimeEntry? entry;
@@ -27,14 +26,7 @@ class AddTimeEntryScreen extends ConsumerWidget {
           if (entry != null)
             IconButton(
               icon: const Icon(Icons.delete_outline),
-              onPressed: () async {
-                if (entry!.id != null) {
-                  await ref
-                      .read(timeEntryRepositoryProvider)
-                      .delete(entry!.id!);
-                  if (context.mounted) context.pop();
-                }
-              },
+              onPressed: () => _confirmDelete(context, ref),
             ),
         ],
       ),
@@ -45,7 +37,38 @@ class AddTimeEntryScreen extends ConsumerWidget {
           initialProjectId: projectId,
         ),
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (_, __) => const Center(child: Text('Error loading projects')),
+        error: (e, _) => const Center(child: Text('Error loading projects')),
+      ),
+    );
+  }
+
+  void _confirmDelete(BuildContext context, WidgetRef ref) {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Delete Entry'),
+        content: const Text('Are you sure you want to delete this time entry?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () async {
+              if (entry!.id != null) {
+                await ref
+                    .read(timeEntryRepositoryProvider)
+                    .delete(entry!.id!);
+              }
+              if (context.mounted) {
+                Navigator.pop(ctx);
+                context.pop();
+              }
+            },
+            style: TextButton.styleFrom(foregroundColor: Colors.red),
+            child: const Text('Delete'),
+          ),
+        ],
       ),
     );
   }
@@ -117,7 +140,7 @@ class _TimeEntryFormState extends ConsumerState<_TimeEntryForm> {
         child: ListView(
           children: [
             DropdownButtonFormField<String>(
-              value: _selectedProjectId,
+              initialValue: _selectedProjectId,
               decoration: const InputDecoration(
                 labelText: 'Project',
                 border: OutlineInputBorder(),
@@ -182,12 +205,104 @@ class _TimeEntryFormState extends ConsumerState<_TimeEntryForm> {
               },
               child: InputDecorator(
                 decoration: const InputDecoration(
-                  labelText: 'Date',
+                  labelText: 'Start Date',
                   border: OutlineInputBorder(),
                 ),
                 child: Text(DateFormatter.formatDate(_startedAt)),
               ),
             ),
+            const SizedBox(height: 16),
+            InkWell(
+              onTap: () async {
+                final time = await showTimePicker(
+                  context: context,
+                  initialTime: TimeOfDay.fromDateTime(_startedAt),
+                );
+                if (time != null) {
+                  setState(() {
+                    _startedAt = DateTime(
+                      _startedAt.year,
+                      _startedAt.month,
+                      _startedAt.day,
+                      time.hour,
+                      time.minute,
+                    );
+                  });
+                }
+              },
+              child: InputDecorator(
+                decoration: const InputDecoration(
+                  labelText: 'Start Time',
+                  border: OutlineInputBorder(),
+                ),
+                child: Text(
+                  '${_startedAt.hour.toString().padLeft(2, '0')}:${_startedAt.minute.toString().padLeft(2, '0')}',
+                ),
+              ),
+            ),
+            const SizedBox(height: 16),
+            InkWell(
+              onTap: () async {
+                final date = await showDatePicker(
+                  context: context,
+                  initialDate: _endedAt ?? _startedAt,
+                  firstDate: DateTime(2020),
+                  lastDate: DateTime.now(),
+                );
+                if (date != null) {
+                  setState(() {
+                    _endedAt = DateTime(
+                      date.year,
+                      date.month,
+                      date.day,
+                      _endedAt?.hour ?? _startedAt.hour,
+                      _endedAt?.minute ?? _startedAt.minute,
+                    );
+                  });
+                }
+              },
+              child: InputDecorator(
+                decoration: const InputDecoration(
+                  labelText: 'End Date (optional)',
+                  border: OutlineInputBorder(),
+                ),
+                child: Text(
+                  _endedAt != null
+                      ? DateFormatter.formatDate(_endedAt!)
+                      : 'No end time',
+                ),
+              ),
+            ),
+            const SizedBox(height: 16),
+            if (_endedAt != null)
+              InkWell(
+                onTap: () async {
+                  final time = await showTimePicker(
+                    context: context,
+                    initialTime: TimeOfDay.fromDateTime(_endedAt!),
+                  );
+                  if (time != null) {
+                    setState(() {
+                      _endedAt = DateTime(
+                        _endedAt!.year,
+                        _endedAt!.month,
+                        _endedAt!.day,
+                        time.hour,
+                        time.minute,
+                      );
+                    });
+                  }
+                },
+                child: InputDecorator(
+                  decoration: const InputDecoration(
+                    labelText: 'End Time',
+                    border: OutlineInputBorder(),
+                  ),
+                  child: Text(
+                    '${_endedAt!.hour.toString().padLeft(2, '0')}:${_endedAt!.minute.toString().padLeft(2, '0')}',
+                  ),
+                ),
+              ),
             const SizedBox(height: 16),
             SwitchListTile(
               title: const Text('Billable'),
@@ -246,7 +361,7 @@ class _TimeEntryFormState extends ConsumerState<_TimeEntryForm> {
       );
 
       if (widget.entry != null) {
-        await repo.createManualEntry(newEntry);
+        await repo.updateEntry(newEntry);
       } else {
         await repo.createManualEntry(newEntry);
       }

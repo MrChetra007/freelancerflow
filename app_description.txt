@@ -3,7 +3,7 @@ FREELANCEFLOW - Client Management App
 
 WHAT IT DOES
 ------------
-FreelanceFlow is a mobile app for freelancers to manage their clients, projects, payments, and invoices in one place. It helps track project progress, log payments, generate invoices, and monitor business performance.
+FreelanceFlow is a mobile app for freelancers to manage their clients, projects, payments, invoices, expenses, and time tracking in one place. It helps track project progress, log payments, generate invoices, monitor business performance, and track billable hours and expenses.
 
 AUTHENTICATION
 ---------------
@@ -13,21 +13,34 @@ AUTHENTICATION
 
 MAIN SCREENS
 ------------
-1. Dashboard
-   - Overview stats (total clients, active projects, pending payments, revenue)
-   - Recent activity feed
-   - Quick access to add new items
+1. Dashboard (v2)
+   - 6 stat cards: This Month, Expenses, Net Profit, Total Clients, Active Projects, Pending Invoices
+   - Conditional banners: Unbilled Time, Overdue Projects
+   - Active Timer Banner: live-running timer with stop button (shown when timer is active)
+   - Revenue & Expenses dual bar chart (last 6 months, green for revenue, red for expenses)
+   - Project Status pie chart with legend
+   - Quick Actions: Expenses, Time Tracking, Recurring
 
 2. Clients
-   - List all clients with search
-   - Add/Edit client (name, email, phone, company, country, currency)
+   - List all clients with search and tag filter (horizontal chip row)
+   - Add/Edit client (name, email, phone, company, country, currency, hourly rate, tags)
    - Archive clients
+   - Client Detail Screen (4 tabs):
+     a. Overview: client info, projects/time/expenses summary cards
+     b. Projects: list of client projects with status, tap to view project detail
+     c. Time: total hours and value summary + time entry list
+     d. Expenses: total expenses summary + expense list
+   - Context-aware FAB that changes per tab (Edit / New Project / Log Time / Add Expense)
 
 3. Projects
-   - List projects by client
-   - Add/Edit project (title, description, budget, status, dates)
+   - List projects with search and status filter
+   - Add/Edit project (title, description, budget, status, dates, currency)
    - Milestone tracking within projects
    - Status: In Progress, Completed, On Hold, Cancelled
+   - Project Detail Screen (3 tabs):
+     a. Details: project info card + milestones section
+     b. Time: total hours/value summary + time entry list + Add Entry / Start Timer buttons
+     c. Expenses: total expenses summary + expense list + Add Expense button
 
 4. Payments
    - Track payments per client/project
@@ -41,21 +54,46 @@ MAIN SCREENS
    - Generate PDF
    - Status: Draft, Sent, Paid, Overdue, Cancelled
 
-6. Settings
+6. Expenses (v2)
+   - List expenses with category filter and search
+   - Add/Edit expense (amount, category, description, date, project/client link, billable flag)
+   - Receipt upload via image picker
+   - Categories: Office Supplies, Software, Travel, Marketing, Meals, Utilities, Other
+   - Billable/unbilled tracking
+
+7. Time Tracking (v2)
+   - Start/stop timer with project selection
+   - Manual time entry creation
+   - Active timer polling
+   - Unbilled time tracking and value calculation
+   - Per-project and per-client time entry views
+
+8. Recurring Invoices (v2)
+   - Create recurring invoice templates (daily, weekly, monthly, quarterly, yearly)
+   - Auto-generation of invoices based on schedule
+   - Manage recurring invoice list with active/pause/resume
+
+9. Settings
    - Profile management
    - Currency preference
+   - Hourly rate (for time tracking)
+   - Tax ID and payment terms
+   - Timer rounding settings
    - Theme (Light/Dark)
    - Premium subscription
 
 DATA FLOW
 ---------
 1. User signs up/logs in
-2. Add a Client first
+2. Add a Client first (optionally add tags and hourly rate)
 3. Create a Project linked to a Client
 4. Add Milestones to track project progress
-5. Log Payments for the project
-6. Create Invoice with line items for billing
-7. Dashboard shows summary and recent activity
+5. Start Timer or log Time Entries for the project/client
+6. Add Expenses linked to client or project
+7. Log Payments for the project
+8. Create Invoice with line items (can include unbilled time and expenses)
+9. Set up Recurring Invoices for repeat billing
+10. Dashboard shows summary, net profit, and business overview
 
 TECH STACK
 ----------
@@ -63,10 +101,23 @@ TECH STACK
 - Supabase (Backend - Auth, Database, Storage)
 - Riverpod (State Management)
 - GoRouter (Navigation)
+- Freezed (Immutable models)
+- fl_chart (Charts and graphs)
 - PDF generation for invoices
+- image_picker for receipt uploads
 
 SECURITY
 --------
 - Supabase Auth with JWT
 - Row-level security (RLS) on all tables
 - User can only access their own data
+
+V2 FEATURES ADDED
+-----------------
+- Dashboard: Net Profit, Expenses, Unbilled Time stats, active timer banner, dual bar chart
+- Client Detail: 4-tab screen (Overview, Projects, Time, Expenses) with tag filtering
+- Project Detail: 3-tab screen (Details, Time, Expenses) with time/expense integration
+- Expenses: full CRUD with categories, receipts, billable tracking
+- Time Tracking: timer with polling, manual entries, unbilled time calculation
+- Recurring Invoices: template-based auto-generated invoices
+- Settings v2: hourly rate, tax ID, payment terms, timer rounding

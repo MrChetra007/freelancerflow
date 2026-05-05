@@ -18,6 +18,41 @@ Future<TimeEntry?> activeTimer(Ref ref) async {
 }
 
 @riverpod
+Future<List<TimeEntry>> allTimeEntries(Ref ref) async {
+  final user = SupabaseConfig.client.auth.currentUser;
+  if (user == null) return [];
+  return ref.read(timeEntryRepositoryProvider).getAll(user.id);
+}
+
+@riverpod
+Stream<List<TimeEntry>> watchAllTimeEntries(Ref ref) {
+  final user = SupabaseConfig.client.auth.currentUser;
+  if (user == null) return Stream.value([]);
+  return ref.read(timeEntryRepositoryProvider).watchAllEntries(user.id);
+}
+
+@riverpod
+Future<List<TimeEntry>> thisWeekTimeEntries(Ref ref) async {
+  final user = SupabaseConfig.client.auth.currentUser;
+  if (user == null) return [];
+  final all = await ref.read(timeEntryRepositoryProvider).getAll(user.id);
+  final now = DateTime.now();
+  final startOfWeek = now.subtract(Duration(days: now.weekday - 1));
+  final thisWeekStart = DateTime(startOfWeek.year, startOfWeek.month, startOfWeek.day);
+  return all.where((e) => !e.startedAt.isBefore(thisWeekStart)).toList();
+}
+
+@riverpod
+Future<List<TimeEntry>> thisMonthTimeEntries(Ref ref) async {
+  final user = SupabaseConfig.client.auth.currentUser;
+  if (user == null) return [];
+  final all = await ref.read(timeEntryRepositoryProvider).getAll(user.id);
+  final now = DateTime.now();
+  final startOfMonth = DateTime(now.year, now.month, 1);
+  return all.where((e) => !e.startedAt.isBefore(startOfMonth)).toList();
+}
+
+@riverpod
 Future<List<TimeEntry>> unbilledTimeEntries(Ref ref, String clientId) async {
   final result = await ref
       .read(timeEntryRepositoryProvider)

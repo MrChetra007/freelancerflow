@@ -1,25 +1,24 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/theme/app_colors.dart';
-import '../../../../core/utils/duration_formatter.dart';
 import '../../domain/time_entry.dart';
-import '../time_tracking_screen.dart';
 
-class TimerWidget extends ConsumerWidget {
+class TimerWidget extends StatelessWidget {
   final TimeEntry? entry;
   final bool isRunning;
   final VoidCallback? onStop;
+  final String? projectName;
 
   const TimerWidget({
     super.key,
     this.entry,
     this.isRunning = false,
     this.onStop,
+    this.projectName,
   });
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
@@ -37,7 +36,7 @@ class TimerWidget extends ConsumerWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                _PulseDot(),
+                const _PulseDot(),
                 const SizedBox(width: 8),
                 Text(
                   'TIMER RUNNING',
@@ -49,12 +48,21 @@ class TimerWidget extends ConsumerWidget {
                 ),
               ],
             ),
-          if (isRunning) const SizedBox(height: 12),
+          if (isRunning) const SizedBox(height: 8),
+          if (projectName != null)
+            Text(
+              projectName!,
+              style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.w600,
+                  ),
+              textAlign: TextAlign.center,
+            ),
+          if (projectName != null) const SizedBox(height: 4),
           _LiveTimer(entry: entry, isRunning: isRunning),
-          if (entry != null) ...[
+          if (entry?.description != null) ...[
             const SizedBox(height: 8),
             Text(
-              entry!.description ?? 'No description',
+              entry!.description!,
               style: Theme.of(context).textTheme.bodySmall,
               textAlign: TextAlign.center,
             ),
@@ -81,6 +89,8 @@ class TimerWidget extends ConsumerWidget {
 }
 
 class _PulseDot extends StatefulWidget {
+  const _PulseDot();
+
   @override
   _PulseDotState createState() => _PulseDotState();
 }

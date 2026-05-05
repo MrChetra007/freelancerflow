@@ -10,6 +10,7 @@ class TimeEntryTile extends StatelessWidget {
   final VoidCallback? onTap;
   final VoidCallback? onEdit;
   final VoidCallback? onDelete;
+  final String? projectName;
 
   const TimeEntryTile({
     super.key,
@@ -17,11 +18,11 @@ class TimeEntryTile extends StatelessWidget {
     this.onTap,
     this.onEdit,
     this.onDelete,
+    this.projectName,
   });
 
   @override
   Widget build(BuildContext context) {
-    final duration = entry.duration;
     final isRunning = entry.isRunning;
 
     return ListTile(
@@ -41,13 +42,27 @@ class TimeEntryTile extends StatelessWidget {
         ),
       ),
       title: Text(
-        entry.description ?? 'No description',
+        entry.description ?? projectName ?? 'No description',
         maxLines: 1,
         overflow: TextOverflow.ellipsis,
       ),
-      subtitle: Text(
-        '${formatDuration(duration)} • ${CurrencyFormatter.format(entry.billableAmount, 'USD')}',
-        style: Theme.of(context).textTheme.bodySmall,
+      subtitle: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          if (projectName != null && entry.description != null)
+            Text(
+              projectName!,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: Theme.of(context).colorScheme.secondary,
+                  ),
+            ),
+          Text(
+            '${formatDuration(entry.duration)} • ${CurrencyFormatter.format(entry.billableAmount, 'USD')}',
+            style: Theme.of(context).textTheme.bodySmall,
+          ),
+        ],
       ),
       trailing: Row(
         mainAxisSize: MainAxisSize.min,

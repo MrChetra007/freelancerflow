@@ -24,6 +24,7 @@ import '../../features/expenses/presentation/expenses_screen.dart';
 import '../../features/expenses/presentation/add_expense_screen.dart';
 import '../../features/time_tracking/presentation/time_tracking_screen.dart';
 import '../../features/time_tracking/presentation/add_time_entry_screen.dart';
+import '../../features/time_tracking/domain/time_entry.dart';
 import '../../features/recurring/presentation/recurring_invoices_screen.dart';
 import '../../features/recurring/presentation/create_recurring_screen.dart';
 import '../supabase/supabase_client.dart';
@@ -413,7 +414,6 @@ GoRouter createRouter(SupabaseAuthNotifier authNotifier) {
       GoRoute(
         path: '/expenses/add',
         pageBuilder: (context, state) {
-          final expenseId = state.extra as String?;
           return CustomTransitionPage(
             key: state.pageKey,
             child: AddExpenseScreen(),
@@ -456,10 +456,17 @@ GoRouter createRouter(SupabaseAuthNotifier authNotifier) {
       GoRoute(
         path: '/time-tracking/add',
         pageBuilder: (context, state) {
-          final projectId = state.extra as String?;
+          final extra = state.extra;
+          final TimeEntry? entry =
+              extra is TimeEntry ? extra : null;
+          final String? projectId =
+              extra is String ? extra : null;
           return CustomTransitionPage(
             key: state.pageKey,
-            child: AddTimeEntryScreen(projectId: projectId),
+            child: AddTimeEntryScreen(
+              entry: entry,
+              projectId: projectId,
+            ),
             transitionsBuilder:
                 (context, animation, secondaryAnimation, child) {
               return SlideTransition(

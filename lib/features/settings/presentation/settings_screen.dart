@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import '../../../core/theme/theme_notifier.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/supabase/supabase_client.dart';
@@ -1049,8 +1050,20 @@ class _ScheduledNotificationsSheetState
   Future<void> _loadScheduledNotifications() async {
     setState(() => _isLoading = true);
     try {
-      // Note: flutter_local_notifications doesn't expose a method to list pending notifications
-      // So we'll show a message explaining this
+      final plugin = FlutterLocalNotificationsPlugin();
+      final pending = await plugin.pendingNotificationRequests();
+      if (mounted) {
+        setState(() {
+          _scheduledNotifications.clear();
+          for (final n in pending) {
+            _scheduledNotifications.add({
+              'id': n.id,
+              'title': n.title ?? 'Untitled',
+              'body': n.body ?? '',
+            });
+          }
+        });
+      }
     } finally {
       if (mounted) setState(() => _isLoading = false);
     }
@@ -1092,82 +1105,94 @@ class _ScheduledNotificationsSheetState
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                'Scheduled Notifications',
+                'Scheduled (${_scheduledNotifications.length})',
                 style: Theme.of(
                   context,
                 ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
               ),
-              TextButton.icon(
-                onPressed: _cancelAllScheduled,
-                icon: const Icon(Icons.delete_sweep, size: 18),
-                label: const Text('Cancel All'),
-                style: TextButton.styleFrom(foregroundColor: AppColors.error),
-              ),
+              if (_scheduledNotifications.isNotEmpty)
+                TextButton.icon(
+                  onPressed: _cancelAllScheduled,
+                  icon: const Icon(Icons.delete_sweep, size: 18),
+                  label: const Text('Cancel All'),
+                  style: TextButton.styleFrom(foregroundColor: AppColors.error),
+                ),
             ],
           ),
-          const SizedBox(height: 8),
-          Text(
-            'Notifications are automatically scheduled for:\n• Payment due dates (1 day before)\n• Project deadlines (1 day before)\n• Invoice due dates (1 day before)',
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-              color: Theme.of(context).brightness == Brightness.dark
-                  ? AppColors.darkTextSecondary
-                  : AppColors.lightTextSecondary,
-            ),
-          ),
           const SizedBox(height: 16),
-          const Divider(),
-          const SizedBox(height: 8),
-          Text(
-            'Scheduled Notifications Info',
-            style: Theme.of(
-              context,
-            ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600),
-          ),
-          const SizedBox(height: 12),
-          _buildScheduledInfo(
-            context,
-            icon: Icons.payment,
-            title: 'Payment Reminders',
-            subtitle: 'Sent 1 day before payment due date',
-          ),
-          const SizedBox(height: 8),
-          _buildScheduledInfo(
-            context,
-            icon: Icons.folder,
-            title: 'Project Reminders',
-            subtitle: 'Sent 1 day before project deadline',
-          ),
-          const SizedBox(height: 8),
-          _buildScheduledInfo(
-            context,
-            icon: Icons.receipt_long,
-            title: 'Invoice Reminders',
-            subtitle: 'Sent 1 day before invoice due date',
-          ),
-          const SizedBox(height: 16),
-          Container(
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: AppColors.primary500.withValues(alpha: 0.1),
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(
-                color: AppColors.primary500.withValues(alpha: 0.3),
-              ),
-            ),
-            child: Row(
+          if (_isLoading)
+            const Center(child: CircularProgressIndicator())
+          else if (_scheduledNotifications.isEmpty)
+            Column(
               children: [
-                Icon(Icons.info_outline, color: AppColors.primary500),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Text(
-                    'Enable notification toggles above to receive reminders for each type.',
-                    style: Theme.of(context).textTheme.bodySmall,
-                  ),
+                const Text(
+                  'No pending scheduled notifications',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(color: Colors.grey),
+                ),
+                const SizedBox(height: 16),
+                const Divider(),
+                const SizedBox(height: 16),
+                Text(
+                  'Notifications are automatically scheduled for:',
+                  style: Theme.of(context).textTheme.bodySmall,
+                ),
+                const SizedBox(height: 8),
+                _buildScheduledInfo(
+                  context,
+                  icon: Icons.payment,
+                  title: 'Payment Reminders',
+                  subtitle: '1 day before due date',
+                ),
+                const SizedBox(height: 8),
+                _buildScheduledInfo(
+                  context,
+                  icon: Icons.folder,
+                  title: 'Project Reminders',
+                  subtitle: '1 day before deadline',
+                ),
+                const SizedBox(height: 8),
+                _buildScheduledInfo(
+                  context,
+                  icon: Icons.receipt_long,
+                  title: 'Invoice Reminders',
+                  subtitle: '1 day before due date',
+                ),
+                const SizedBox(height: 8),
+                _buildScheduledInfo(
+                  context,
+                  icon: Icons.flag,
+                  title: 'Milestone Reminders',
+                  subtitle: 'On due date at 9am',
                 ),
               ],
+            )
+          else
+            Expanded(
+              child: ListView.separated(
+                itemCount: _scheduledNotifications.length,
+                separatorBuilder: (_, __) => const Divider(height: 1),
+                itemBuilder: (context, index) {
+                  final n = _scheduledNotifications[index];
+                  return ListTile(
+                    leading: const Icon(
+                      Icons.schedule,
+                      color: AppColors.primary500,
+                    ),
+                    title: Text(n['title'] as String),
+                    subtitle: Text(n['body'] as String),
+                    trailing: IconButton(
+                      icon: const Icon(Icons.close, color: AppColors.error),
+                      onPressed: () {
+                        widget.notificationService
+                            .cancelNotification(n['id'] as int);
+                        _loadScheduledNotifications();
+                      },
+                    ),
+                  );
+                },
+              ),
             ),
-          ),
-          const SizedBox(height: 24),
         ],
       ),
     );

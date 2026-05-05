@@ -27,4 +27,6 @@ class DateFormatter {
       return 'Just now';
     }
   }
+
+  static format(DateTime nextIssueDate) {}
 }

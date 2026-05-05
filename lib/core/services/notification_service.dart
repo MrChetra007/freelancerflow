@@ -45,7 +45,28 @@ class NotificationService {
     }
   }
 
-  void _onNotificationTap(NotificationResponse response) {}
+  void _onNotificationTap(NotificationResponse response) {
+    final payload = response.payload;
+    if (payload == null) return;
+
+    if (payload.startsWith('invoice:')) {
+      final invoiceId = payload.split(':').last;
+      _navigateTo('invoice:$invoiceId');
+    } else if (payload.startsWith('milestone:')) {
+      final milestoneId = payload.split(':').last;
+      _navigateTo('milestone:$milestoneId');
+    } else if (payload.startsWith('project:')) {
+      final projectId = payload.split(':').last;
+      _navigateTo('project:$projectId');
+    } else if (payload.startsWith('payment:')) {
+      final paymentId = payload.split(':').last;
+      _navigateTo('payment:$paymentId');
+    }
+  }
+
+  void _navigateTo(String payload) {
+    debugPrint('Notification tapped: $payload');
+  }
 
   Future<bool> requestPermission() async {
     final androidPlugin = _notifications
@@ -207,6 +228,46 @@ class NotificationService {
       title: 'Invoice Auto-Created',
       body: 'Invoice $invoiceNumber has been generated for $clientName — review it',
       payload: 'invoice:$invoiceId',
+    );
+  }
+
+  Future<void> scheduleMilestoneDueReminder({
+    required String milestoneId,
+    required String milestoneTitle,
+    required String clientName,
+    required DateTime dueDate,
+  }) async {
+    final notifyId = milestoneId.hashCode.abs() % 100000 + 200000;
+    final notifyDate = DateTime(
+      dueDate.year,
+      dueDate.month,
+      dueDate.day,
+      9,
+      0,
+    );
+
+    if (notifyDate.isAfter(DateTime.now())) {
+      await scheduleNotification(
+        id: notifyId,
+        title: 'Milestone Due Today',
+        body: "Milestone '$milestoneTitle' for $clientName is due today",
+        scheduledDate: notifyDate,
+        payload: 'milestone:$milestoneId',
+      );
+    }
+  }
+
+  Future<void> showMilestoneDue({
+    required String milestoneId,
+    required String milestoneTitle,
+    required String clientName,
+  }) async {
+    final notifyId = milestoneId.hashCode.abs() % 100000 + 200000;
+    await showNotification(
+      id: notifyId,
+      title: 'Milestone Due Today',
+      body: "Milestone '$milestoneTitle' for $clientName is due today",
+      payload: 'milestone:$milestoneId',
     );
   }
 }

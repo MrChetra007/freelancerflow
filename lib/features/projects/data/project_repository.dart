@@ -131,6 +131,18 @@ class ProjectRepository {
     await _client.from('milestones').delete().eq('id', id);
   }
 
+  Future<List<Map<String, dynamic>>> getDueMilestones(String userId) async {
+    final today = DateTime.now();
+    final todayStr = '${today.year}-${today.month.toString().padLeft(2, '0')}-${today.day.toString().padLeft(2, '0')}';
+    final response = await _client
+        .from('milestones')
+        .select('*, projects!inner(client_id, clients(name))')
+        .eq('user_id', userId)
+        .eq('is_completed', false)
+        .lte('due_date', todayStr);
+    return List<Map<String, dynamic>>.from(response);
+  }
+
   Project _projectFromDb(Map<String, dynamic> json) {
     return Project(
       id: json['id'],

@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 
 import '../../../../core/theme/app_colors.dart';
@@ -41,10 +43,10 @@ class TimerWidget extends StatelessWidget {
                 Text(
                   'TIMER RUNNING',
                   style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                        color: AppColors.success,
-                        fontWeight: FontWeight.bold,
-                        letterSpacing: 1.2,
-                      ),
+                    color: AppColors.success,
+                    fontWeight: FontWeight.bold,
+                    letterSpacing: 1.2,
+                  ),
                 ),
               ],
             ),
@@ -52,9 +54,9 @@ class TimerWidget extends StatelessWidget {
           if (projectName != null)
             Text(
               projectName!,
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.w600,
-                  ),
+              style: Theme.of(
+                context,
+              ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600),
               textAlign: TextAlign.center,
             ),
           if (projectName != null) const SizedBox(height: 4),
@@ -142,18 +144,28 @@ class _LiveTimer extends StatefulWidget {
 
 class _LiveTimerState extends State<_LiveTimer> {
   late DateTime _now;
+  Timer? _timer; // ← store the timer
 
   @override
   void initState() {
     super.initState();
     _now = DateTime.now();
-    Stream.periodic(const Duration(seconds: 1), (_) {
-      if (mounted) {
-        setState(() {
-          _now = DateTime.now();
-        });
-      }
-    });
+
+    if (widget.isRunning) {
+      _timer = Timer.periodic(const Duration(seconds: 1), (_) {
+        if (mounted) {
+          setState(() {
+            _now = DateTime.now();
+          });
+        }
+      });
+    }
+  }
+
+  @override
+  void dispose() {
+    _timer?.cancel(); // ← cancel to avoid memory leaks
+    super.dispose();
   }
 
   @override
@@ -162,25 +174,25 @@ class _LiveTimerState extends State<_LiveTimer> {
       return Text(
         '00:00:00',
         style: Theme.of(context).textTheme.headlineLarge?.copyWith(
-              fontWeight: FontWeight.bold,
-              fontFamily: 'monospace',
-            ),
+          fontWeight: FontWeight.bold,
+          fontFamily: 'monospace',
+        ),
       );
     }
     final duration = widget.isRunning
         ? _now.difference(widget.entry!.startedAt)
         : (widget.entry!.endedAt != null
-            ? widget.entry!.endedAt!.difference(widget.entry!.startedAt)
-            : Duration.zero);
+              ? widget.entry!.endedAt!.difference(widget.entry!.startedAt)
+              : Duration.zero);
     final hours = duration.inHours;
     final minutes = duration.inMinutes.remainder(60);
     final seconds = duration.inSeconds.remainder(60);
     return Text(
       '${hours.toString().padLeft(2, '0')}:${minutes.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')}',
       style: Theme.of(context).textTheme.headlineLarge?.copyWith(
-            fontWeight: FontWeight.bold,
-            fontFamily: 'monospace',
-          ),
+        fontWeight: FontWeight.bold,
+        fontFamily: 'monospace',
+      ),
     );
   }
 }

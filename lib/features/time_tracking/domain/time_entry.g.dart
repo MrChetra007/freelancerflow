@@ -34,7 +34,6 @@ Map<String, dynamic> _$$TimeEntryImplToJson(_$TimeEntryImpl instance) =>
       'description': instance.description,
       'started_at': instance.startedAt.toIso8601String(),
       'ended_at': instance.endedAt?.toIso8601String(),
-      'duration_seconds': instance.durationSeconds,
       'hourly_rate': instance.hourlyRate,
       'is_billable': instance.isBillable,
       'is_billed': instance.isBilled,

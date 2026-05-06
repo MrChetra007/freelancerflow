@@ -28,7 +28,8 @@ mixin _$TimeEntry {
   String? get description => throw _privateConstructorUsedError;
   DateTime get startedAt => throw _privateConstructorUsedError;
   DateTime? get endedAt => throw _privateConstructorUsedError;
-  double? get durationSeconds => throw _privateConstructorUsedError;
+  @JsonKey(includeToJson: false)
+  double? get durationSeconds => throw _privateConstructorUsedError; // ← must be here
   double get hourlyRate => throw _privateConstructorUsedError;
   bool get isBillable => throw _privateConstructorUsedError;
   bool get isBilled => throw _privateConstructorUsedError;
@@ -58,7 +59,7 @@ abstract class $TimeEntryCopyWith<$Res> {
     String? description,
     DateTime startedAt,
     DateTime? endedAt,
-    double? durationSeconds,
+    @JsonKey(includeToJson: false) double? durationSeconds,
     double hourlyRate,
     bool isBillable,
     bool isBilled,
@@ -173,7 +174,7 @@ abstract class _$$TimeEntryImplCopyWith<$Res>
     String? description,
     DateTime startedAt,
     DateTime? endedAt,
-    double? durationSeconds,
+    @JsonKey(includeToJson: false) double? durationSeconds,
     double hourlyRate,
     bool isBillable,
     bool isBilled,
@@ -280,7 +281,7 @@ class _$TimeEntryImpl extends _TimeEntry {
     this.description,
     required this.startedAt,
     this.endedAt,
-    this.durationSeconds,
+    @JsonKey(includeToJson: false) this.durationSeconds,
     this.hourlyRate = 0,
     this.isBillable = true,
     this.isBilled = false,
@@ -306,7 +307,9 @@ class _$TimeEntryImpl extends _TimeEntry {
   @override
   final DateTime? endedAt;
   @override
+  @JsonKey(includeToJson: false)
   final double? durationSeconds;
+  // ← must be here
   @override
   @JsonKey()
   final double hourlyRate;
@@ -398,7 +401,7 @@ abstract class _TimeEntry extends TimeEntry {
     final String? description,
     required final DateTime startedAt,
     final DateTime? endedAt,
-    final double? durationSeconds,
+    @JsonKey(includeToJson: false) final double? durationSeconds,
     final double hourlyRate,
     final bool isBillable,
     final bool isBilled,
@@ -425,7 +428,8 @@ abstract class _TimeEntry extends TimeEntry {
   @override
   DateTime? get endedAt;
   @override
-  double? get durationSeconds;
+  @JsonKey(includeToJson: false)
+  double? get durationSeconds; // ← must be here
   @override
   double get hourlyRate;
   @override

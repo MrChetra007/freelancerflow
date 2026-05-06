@@ -15,7 +15,7 @@ class TimeEntry with _$TimeEntry {
     String? description,
     required DateTime startedAt,
     DateTime? endedAt,
-    double? durationSeconds,
+    @JsonKey(includeToJson: false) double? durationSeconds, // ← must be here
     @Default(0) double hourlyRate,
     @Default(true) bool isBillable,
     @Default(false) bool isBilled,
@@ -34,6 +34,5 @@ extension TimeEntryX on TimeEntry {
       ? endedAt!.difference(startedAt)
       : DateTime.now().difference(startedAt);
 
-  double get billableAmount =>
-      (duration.inSeconds / 3600) * hourlyRate;
+  double get billableAmount => (duration.inSeconds / 3600) * hourlyRate;
 }

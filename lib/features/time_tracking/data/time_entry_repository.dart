@@ -25,7 +25,7 @@ class TimeEntryRepository {
       'project_id': projectId,
       'client_id': clientId,
       'description': description,
-      'started_at': DateTime.now().toIso8601String(),
+      'started_at': DateTime.now().toUtc().toIso8601String(), // ✅ UTC
       'hourly_rate': hourlyRate,
       'is_billable': true,
       'is_billed': false,
@@ -39,7 +39,7 @@ class TimeEntryRepository {
   }
 
   Future<TimeEntry> stopTimer(String entryId) async {
-    final endedAt = DateTime.now();
+    final endedAt = DateTime.now().toUtc(); // ✅ UTC
     final result = await SupabaseConfig.client
         .from('time_entries')
         .update({'ended_at': endedAt.toIso8601String()})
@@ -152,7 +152,7 @@ class TimeEntryRepository {
 
   Future<int> getCountThisMonth(String userId) async {
     final now = DateTime.now();
-    final startOfMonth = DateTime(now.year, now.month, 1);
+    final startOfMonth = DateTime(now.year, now.month, 1).toUtc(); // ✅ UTC
     final result = await SupabaseConfig.client
         .from('time_entries')
         .select()
@@ -162,9 +162,6 @@ class TimeEntryRepository {
   }
 
   Future<void> delete(String entryId) async {
-    await SupabaseConfig.client
-        .from('time_entries')
-        .delete()
-        .eq('id', entryId);
+    await SupabaseConfig.client.from('time_entries').delete().eq('id', entryId);
   }
 }

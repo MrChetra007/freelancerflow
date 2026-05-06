@@ -13,21 +13,16 @@ _$TimeEntryImpl _$$TimeEntryImplFromJson(Map<String, dynamic> json) =>
       projectId: json['project_id'] as String,
       clientId: json['client_id'] as String,
       description: json['description'] as String?,
-      startedAt: const DateTimeUtcConverter().fromJson(
-        json['started_at'] as String,
-      ),
-      endedAt: _$JsonConverterFromJson<String, DateTime>(
-        json['ended_at'],
-        const DateTimeUtcConverter().fromJson,
-      ),
+      startedAt: DateTime.parse(json['started_at'] as String),
+      endedAt: json['ended_at'] == null
+          ? null
+          : DateTime.parse(json['ended_at'] as String),
       durationSeconds: (json['duration_seconds'] as num?)?.toDouble(),
       hourlyRate: (json['hourly_rate'] as num?)?.toDouble() ?? 0,
       isBillable: json['is_billable'] as bool? ?? true,
       isBilled: json['is_billed'] as bool? ?? false,
       invoiceId: json['invoice_id'] as String?,
-      createdAt: const DateTimeUtcConverter().fromJson(
-        json['created_at'] as String,
-      ),
+      createdAt: DateTime.parse(json['created_at'] as String),
     );
 
 Map<String, dynamic> _$$TimeEntryImplToJson(_$TimeEntryImpl instance) =>
@@ -37,24 +32,11 @@ Map<String, dynamic> _$$TimeEntryImplToJson(_$TimeEntryImpl instance) =>
       'project_id': instance.projectId,
       'client_id': instance.clientId,
       'description': instance.description,
-      'started_at': const DateTimeUtcConverter().toJson(instance.startedAt),
-      'ended_at': _$JsonConverterToJson<String, DateTime>(
-        instance.endedAt,
-        const DateTimeUtcConverter().toJson,
-      ),
+      'started_at': instance.startedAt.toIso8601String(),
+      'ended_at': instance.endedAt?.toIso8601String(),
       'hourly_rate': instance.hourlyRate,
       'is_billable': instance.isBillable,
       'is_billed': instance.isBilled,
       'invoice_id': instance.invoiceId,
-      'created_at': const DateTimeUtcConverter().toJson(instance.createdAt),
+      'created_at': instance.createdAt.toIso8601String(),
     };
-
-Value? _$JsonConverterFromJson<Json, Value>(
-  Object? json,
-  Value? Function(Json json) fromJson,
-) => json == null ? null : fromJson(json as Json);
-
-Json? _$JsonConverterToJson<Json, Value>(
-  Value? value,
-  Json? Function(Value value) toJson,
-) => value == null ? null : toJson(value);

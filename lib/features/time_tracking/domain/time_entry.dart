@@ -1,7 +1,8 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
+import '../../../core/utils/datetime_utc_converter.dart'; // ← add this import
 
-part 'time_entry.freezed.dart';
-part 'time_entry.g.dart';
+part 'time_entry.freezed.old.dart';
+part 'time_entry.g.old.dart';
 
 @freezed
 class TimeEntry with _$TimeEntry {
@@ -13,14 +14,14 @@ class TimeEntry with _$TimeEntry {
     required String projectId,
     required String clientId,
     String? description,
-    required DateTime startedAt,
-    DateTime? endedAt,
-    @JsonKey(includeToJson: false) double? durationSeconds, // ← must be here
+    @DateTimeUtcConverter() required DateTime startedAt, // ← changed
+    @DateTimeUtcConverter() DateTime? endedAt, // ← changed
+    @JsonKey(includeToJson: false) double? durationSeconds,
     @Default(0) double hourlyRate,
     @Default(true) bool isBillable,
     @Default(false) bool isBilled,
     String? invoiceId,
-    required DateTime createdAt,
+    @DateTimeUtcConverter() required DateTime createdAt, // ← changed
   }) = _TimeEntry;
 
   factory TimeEntry.fromJson(Map<String, dynamic> json) =>

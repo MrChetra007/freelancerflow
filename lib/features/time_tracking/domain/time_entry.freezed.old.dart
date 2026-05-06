@@ -26,17 +26,14 @@ mixin _$TimeEntry {
   String get projectId => throw _privateConstructorUsedError;
   String get clientId => throw _privateConstructorUsedError;
   String? get description => throw _privateConstructorUsedError;
-  @DateTimeUtcConverter()
-  DateTime get startedAt => throw _privateConstructorUsedError; // ← changed
-  @DateTimeUtcConverter()
-  DateTime? get endedAt => throw _privateConstructorUsedError; // ← changed
+  DateTime get startedAt => throw _privateConstructorUsedError;
+  DateTime? get endedAt => throw _privateConstructorUsedError;
   @JsonKey(includeToJson: false)
-  double? get durationSeconds => throw _privateConstructorUsedError;
+  double? get durationSeconds => throw _privateConstructorUsedError; // ← must be here
   double get hourlyRate => throw _privateConstructorUsedError;
   bool get isBillable => throw _privateConstructorUsedError;
   bool get isBilled => throw _privateConstructorUsedError;
   String? get invoiceId => throw _privateConstructorUsedError;
-  @DateTimeUtcConverter()
   DateTime get createdAt => throw _privateConstructorUsedError;
 
   /// Serializes this TimeEntry to a JSON map.
@@ -60,14 +57,14 @@ abstract class $TimeEntryCopyWith<$Res> {
     String projectId,
     String clientId,
     String? description,
-    @DateTimeUtcConverter() DateTime startedAt,
-    @DateTimeUtcConverter() DateTime? endedAt,
+    DateTime startedAt,
+    DateTime? endedAt,
     @JsonKey(includeToJson: false) double? durationSeconds,
     double hourlyRate,
     bool isBillable,
     bool isBilled,
     String? invoiceId,
-    @DateTimeUtcConverter() DateTime createdAt,
+    DateTime createdAt,
   });
 }
 
@@ -175,14 +172,14 @@ abstract class _$$TimeEntryImplCopyWith<$Res>
     String projectId,
     String clientId,
     String? description,
-    @DateTimeUtcConverter() DateTime startedAt,
-    @DateTimeUtcConverter() DateTime? endedAt,
+    DateTime startedAt,
+    DateTime? endedAt,
     @JsonKey(includeToJson: false) double? durationSeconds,
     double hourlyRate,
     bool isBillable,
     bool isBilled,
     String? invoiceId,
-    @DateTimeUtcConverter() DateTime createdAt,
+    DateTime createdAt,
   });
 }
 
@@ -282,14 +279,14 @@ class _$TimeEntryImpl extends _TimeEntry {
     required this.projectId,
     required this.clientId,
     this.description,
-    @DateTimeUtcConverter() required this.startedAt,
-    @DateTimeUtcConverter() this.endedAt,
+    required this.startedAt,
+    this.endedAt,
     @JsonKey(includeToJson: false) this.durationSeconds,
     this.hourlyRate = 0,
     this.isBillable = true,
     this.isBilled = false,
     this.invoiceId,
-    @DateTimeUtcConverter() required this.createdAt,
+    required this.createdAt,
   }) : super._();
 
   factory _$TimeEntryImpl.fromJson(Map<String, dynamic> json) =>
@@ -306,16 +303,13 @@ class _$TimeEntryImpl extends _TimeEntry {
   @override
   final String? description;
   @override
-  @DateTimeUtcConverter()
   final DateTime startedAt;
-  // ← changed
   @override
-  @DateTimeUtcConverter()
   final DateTime? endedAt;
-  // ← changed
   @override
   @JsonKey(includeToJson: false)
   final double? durationSeconds;
+  // ← must be here
   @override
   @JsonKey()
   final double hourlyRate;
@@ -328,7 +322,6 @@ class _$TimeEntryImpl extends _TimeEntry {
   @override
   final String? invoiceId;
   @override
-  @DateTimeUtcConverter()
   final DateTime createdAt;
 
   @override
@@ -406,14 +399,14 @@ abstract class _TimeEntry extends TimeEntry {
     required final String projectId,
     required final String clientId,
     final String? description,
-    @DateTimeUtcConverter() required final DateTime startedAt,
-    @DateTimeUtcConverter() final DateTime? endedAt,
+    required final DateTime startedAt,
+    final DateTime? endedAt,
     @JsonKey(includeToJson: false) final double? durationSeconds,
     final double hourlyRate,
     final bool isBillable,
     final bool isBilled,
     final String? invoiceId,
-    @DateTimeUtcConverter() required final DateTime createdAt,
+    required final DateTime createdAt,
   }) = _$TimeEntryImpl;
   const _TimeEntry._() : super._();
 
@@ -431,14 +424,12 @@ abstract class _TimeEntry extends TimeEntry {
   @override
   String? get description;
   @override
-  @DateTimeUtcConverter()
-  DateTime get startedAt; // ← changed
+  DateTime get startedAt;
   @override
-  @DateTimeUtcConverter()
-  DateTime? get endedAt; // ← changed
+  DateTime? get endedAt;
   @override
   @JsonKey(includeToJson: false)
-  double? get durationSeconds;
+  double? get durationSeconds; // ← must be here
   @override
   double get hourlyRate;
   @override
@@ -448,7 +439,6 @@ abstract class _TimeEntry extends TimeEntry {
   @override
   String? get invoiceId;
   @override
-  @DateTimeUtcConverter()
   DateTime get createdAt;
 
   /// Create a copy of TimeEntry

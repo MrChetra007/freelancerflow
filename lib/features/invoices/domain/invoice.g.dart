@@ -9,63 +9,63 @@ part of 'invoice.dart';
 _$InvoiceImpl _$$InvoiceImplFromJson(Map<String, dynamic> json) =>
     _$InvoiceImpl(
       id: json['id'] as String?,
-      userId: json['userId'] as String,
-      clientId: json['clientId'] as String,
-      projectId: json['projectId'] as String?,
-      invoiceNumber: json['invoiceNumber'] as String,
+      userId: json['user_id'] as String,
+      clientId: json['client_id'] as String,
+      projectId: json['project_id'] as String?,
+      invoiceNumber: json['invoice_number'] as String,
       status:
           $enumDecodeNullable(_$InvoiceStatusEnumMap, json['status']) ??
           InvoiceStatus.draft,
-      issueDate: DateTime.parse(json['issueDate'] as String),
-      dueDate: json['dueDate'] == null
+      issueDate: DateTime.parse(json['issue_date'] as String),
+      dueDate: json['due_date'] == null
           ? null
-          : DateTime.parse(json['dueDate'] as String),
+          : DateTime.parse(json['due_date'] as String),
       subtotal: (json['subtotal'] as num?)?.toDouble() ?? 0,
-      taxPercent: (json['taxPercent'] as num?)?.toDouble() ?? 0,
-      taxAmount: (json['taxAmount'] as num?)?.toDouble() ?? 0,
-      discountPercent: (json['discountPercent'] as num?)?.toDouble() ?? 0,
-      discountAmount: (json['discountAmount'] as num?)?.toDouble() ?? 0,
+      taxPercent: (json['tax_percent'] as num?)?.toDouble() ?? 0,
+      taxAmount: (json['tax_amount'] as num?)?.toDouble() ?? 0,
+      discountPercent: (json['discount_percent'] as num?)?.toDouble() ?? 0,
+      discountAmount: (json['discount_amount'] as num?)?.toDouble() ?? 0,
       total: (json['total'] as num?)?.toDouble() ?? 0,
       currency: json['currency'] as String? ?? 'USD',
       notes: json['notes'] as String?,
-      paymentTerms: json['paymentTerms'] as String?,
-      pdfUrl: json['pdfUrl'] as String?,
-      sentAt: json['sentAt'] == null
+      paymentTerms: json['payment_terms'] as String?,
+      pdfUrl: json['pdf_url'] as String?,
+      sentAt: json['sent_at'] == null
           ? null
-          : DateTime.parse(json['sentAt'] as String),
-      paidAt: json['paidAt'] == null
+          : DateTime.parse(json['sent_at'] as String),
+      paidAt: json['paid_at'] == null
           ? null
-          : DateTime.parse(json['paidAt'] as String),
-      createdAt: DateTime.parse(json['createdAt'] as String),
-      updatedAt: json['updatedAt'] == null
+          : DateTime.parse(json['paid_at'] as String),
+      createdAt: DateTime.parse(json['created_at'] as String),
+      updatedAt: json['updated_at'] == null
           ? null
-          : DateTime.parse(json['updatedAt'] as String),
+          : DateTime.parse(json['updated_at'] as String),
     );
 
 Map<String, dynamic> _$$InvoiceImplToJson(_$InvoiceImpl instance) =>
     <String, dynamic>{
       'id': instance.id,
-      'userId': instance.userId,
-      'clientId': instance.clientId,
-      'projectId': instance.projectId,
-      'invoiceNumber': instance.invoiceNumber,
+      'user_id': instance.userId,
+      'client_id': instance.clientId,
+      'project_id': instance.projectId,
+      'invoice_number': instance.invoiceNumber,
       'status': _$InvoiceStatusEnumMap[instance.status]!,
-      'issueDate': instance.issueDate.toIso8601String(),
-      'dueDate': instance.dueDate?.toIso8601String(),
+      'issue_date': instance.issueDate.toIso8601String(),
+      'due_date': instance.dueDate?.toIso8601String(),
       'subtotal': instance.subtotal,
-      'taxPercent': instance.taxPercent,
-      'taxAmount': instance.taxAmount,
-      'discountPercent': instance.discountPercent,
-      'discountAmount': instance.discountAmount,
+      'tax_percent': instance.taxPercent,
+      'tax_amount': instance.taxAmount,
+      'discount_percent': instance.discountPercent,
+      'discount_amount': instance.discountAmount,
       'total': instance.total,
       'currency': instance.currency,
       'notes': instance.notes,
-      'paymentTerms': instance.paymentTerms,
-      'pdfUrl': instance.pdfUrl,
-      'sentAt': instance.sentAt?.toIso8601String(),
-      'paidAt': instance.paidAt?.toIso8601String(),
-      'createdAt': instance.createdAt.toIso8601String(),
-      'updatedAt': instance.updatedAt?.toIso8601String(),
+      'payment_terms': instance.paymentTerms,
+      'pdf_url': instance.pdfUrl,
+      'sent_at': instance.sentAt?.toIso8601String(),
+      'paid_at': instance.paidAt?.toIso8601String(),
+      'created_at': instance.createdAt.toIso8601String(),
+      'updated_at': instance.updatedAt?.toIso8601String(),
     };
 
 const _$InvoiceStatusEnumMap = {

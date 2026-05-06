@@ -9,35 +9,35 @@ part of 'time_entry.dart';
 _$TimeEntryImpl _$$TimeEntryImplFromJson(Map<String, dynamic> json) =>
     _$TimeEntryImpl(
       id: json['id'] as String?,
-      userId: json['userId'] as String,
-      projectId: json['projectId'] as String,
-      clientId: json['clientId'] as String,
+      userId: json['user_id'] as String,
+      projectId: json['project_id'] as String,
+      clientId: json['client_id'] as String,
       description: json['description'] as String?,
-      startedAt: DateTime.parse(json['startedAt'] as String),
-      endedAt: json['endedAt'] == null
+      startedAt: DateTime.parse(json['started_at'] as String),
+      endedAt: json['ended_at'] == null
           ? null
-          : DateTime.parse(json['endedAt'] as String),
-      durationSeconds: (json['durationSeconds'] as num?)?.toDouble(),
-      hourlyRate: (json['hourlyRate'] as num?)?.toDouble() ?? 0,
-      isBillable: json['isBillable'] as bool? ?? true,
-      isBilled: json['isBilled'] as bool? ?? false,
-      invoiceId: json['invoiceId'] as String?,
-      createdAt: DateTime.parse(json['createdAt'] as String),
+          : DateTime.parse(json['ended_at'] as String),
+      durationSeconds: (json['duration_seconds'] as num?)?.toDouble(),
+      hourlyRate: (json['hourly_rate'] as num?)?.toDouble() ?? 0,
+      isBillable: json['is_billable'] as bool? ?? true,
+      isBilled: json['is_billed'] as bool? ?? false,
+      invoiceId: json['invoice_id'] as String?,
+      createdAt: DateTime.parse(json['created_at'] as String),
     );
 
 Map<String, dynamic> _$$TimeEntryImplToJson(_$TimeEntryImpl instance) =>
     <String, dynamic>{
       'id': instance.id,
-      'userId': instance.userId,
-      'projectId': instance.projectId,
-      'clientId': instance.clientId,
+      'user_id': instance.userId,
+      'project_id': instance.projectId,
+      'client_id': instance.clientId,
       'description': instance.description,
-      'startedAt': instance.startedAt.toIso8601String(),
-      'endedAt': instance.endedAt?.toIso8601String(),
-      'durationSeconds': instance.durationSeconds,
-      'hourlyRate': instance.hourlyRate,
-      'isBillable': instance.isBillable,
-      'isBilled': instance.isBilled,
-      'invoiceId': instance.invoiceId,
-      'createdAt': instance.createdAt.toIso8601String(),
+      'started_at': instance.startedAt.toIso8601String(),
+      'ended_at': instance.endedAt?.toIso8601String(),
+      'duration_seconds': instance.durationSeconds,
+      'hourly_rate': instance.hourlyRate,
+      'is_billable': instance.isBillable,
+      'is_billed': instance.isBilled,
+      'invoice_id': instance.invoiceId,
+      'created_at': instance.createdAt.toIso8601String(),
     };

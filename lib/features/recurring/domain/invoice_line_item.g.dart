@@ -11,8 +11,8 @@ _$InvoiceLineItemImpl _$$InvoiceLineItemImplFromJson(
 ) => _$InvoiceLineItemImpl(
   description: json['description'] as String,
   quantity: (json['quantity'] as num?)?.toDouble() ?? 1,
-  unitPrice: (json['unitPrice'] as num?)?.toDouble() ?? 0,
-  sortOrder: (json['sortOrder'] as num?)?.toInt() ?? 0,
+  unitPrice: (json['unit_price'] as num?)?.toDouble() ?? 0,
+  sortOrder: (json['sort_order'] as num?)?.toInt() ?? 0,
 );
 
 Map<String, dynamic> _$$InvoiceLineItemImplToJson(
@@ -20,6 +20,6 @@ Map<String, dynamic> _$$InvoiceLineItemImplToJson(
 ) => <String, dynamic>{
   'description': instance.description,
   'quantity': instance.quantity,
-  'unitPrice': instance.unitPrice,
-  'sortOrder': instance.sortOrder,
+  'unit_price': instance.unitPrice,
+  'sort_order': instance.sortOrder,
 };

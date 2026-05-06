@@ -9,49 +9,49 @@ part of 'payment.dart';
 _$PaymentImpl _$$PaymentImplFromJson(Map<String, dynamic> json) =>
     _$PaymentImpl(
       id: json['id'] as String?,
-      userId: json['userId'] as String,
-      clientId: json['clientId'] as String,
-      projectId: json['projectId'] as String?,
+      userId: json['user_id'] as String,
+      clientId: json['client_id'] as String,
+      projectId: json['project_id'] as String?,
       amount: (json['amount'] as num).toDouble(),
-      amountPaid: (json['amountPaid'] as num?)?.toDouble() ?? 0,
+      amountPaid: (json['amount_paid'] as num?)?.toDouble() ?? 0,
       currency: json['currency'] as String? ?? 'USD',
       status:
           $enumDecodeNullable(_$PaymentStatusEnumMap, json['status']) ??
           PaymentStatus.unpaid,
       method: $enumDecodeNullable(_$PaymentMethodEnumMap, json['method']),
-      dueDate: json['dueDate'] == null
+      dueDate: json['due_date'] == null
           ? null
-          : DateTime.parse(json['dueDate'] as String),
-      paidDate: json['paidDate'] == null
+          : DateTime.parse(json['due_date'] as String),
+      paidDate: json['paid_date'] == null
           ? null
-          : DateTime.parse(json['paidDate'] as String),
+          : DateTime.parse(json['paid_date'] as String),
       description: json['description'] as String?,
-      referenceNo: json['referenceNo'] as String?,
+      referenceNo: json['reference_no'] as String?,
       notes: json['notes'] as String?,
-      createdAt: DateTime.parse(json['createdAt'] as String),
-      updatedAt: json['updatedAt'] == null
+      createdAt: DateTime.parse(json['created_at'] as String),
+      updatedAt: json['updated_at'] == null
           ? null
-          : DateTime.parse(json['updatedAt'] as String),
+          : DateTime.parse(json['updated_at'] as String),
     );
 
 Map<String, dynamic> _$$PaymentImplToJson(_$PaymentImpl instance) =>
     <String, dynamic>{
       'id': instance.id,
-      'userId': instance.userId,
-      'clientId': instance.clientId,
-      'projectId': instance.projectId,
+      'user_id': instance.userId,
+      'client_id': instance.clientId,
+      'project_id': instance.projectId,
       'amount': instance.amount,
-      'amountPaid': instance.amountPaid,
+      'amount_paid': instance.amountPaid,
       'currency': instance.currency,
       'status': _$PaymentStatusEnumMap[instance.status]!,
       'method': _$PaymentMethodEnumMap[instance.method],
-      'dueDate': instance.dueDate?.toIso8601String(),
-      'paidDate': instance.paidDate?.toIso8601String(),
+      'due_date': instance.dueDate?.toIso8601String(),
+      'paid_date': instance.paidDate?.toIso8601String(),
       'description': instance.description,
-      'referenceNo': instance.referenceNo,
+      'reference_no': instance.referenceNo,
       'notes': instance.notes,
-      'createdAt': instance.createdAt.toIso8601String(),
-      'updatedAt': instance.updatedAt?.toIso8601String(),
+      'created_at': instance.createdAt.toIso8601String(),
+      'updated_at': instance.updatedAt?.toIso8601String(),
     };
 
 const _$PaymentStatusEnumMap = {

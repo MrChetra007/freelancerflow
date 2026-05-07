@@ -7,7 +7,6 @@ import 'package:go_router/go_router.dart';
 import '../../../../core/supabase/supabase_client.dart';
 import '../../../../core/utils/date_formatter.dart';
 import '../../clients/data/clients_provider.dart';
-import '../../clients/domain/client.dart';
 import '../data/recurring_provider.dart';
 
 class CreateRecurringScreen extends ConsumerWidget {
@@ -25,22 +24,21 @@ class CreateRecurringScreen extends ConsumerWidget {
         ),
         title: Text(recurring != null ? 'Edit Recurring' : 'Create Recurring'),
       ),
-      body: _RecurringForm(ref: ref, recurring: recurring),
+      body: _RecurringForm(recurring: recurring),
     );
   }
 }
 
-class _RecurringForm extends StatefulWidget {
-  final WidgetRef ref;
+class _RecurringForm extends ConsumerStatefulWidget {
   final RecurringInvoice? recurring;
 
-  const _RecurringForm({required this.ref, this.recurring});
+  const _RecurringForm({this.recurring});
 
   @override
   _RecurringFormState createState() => _RecurringFormState();
 }
 
-class _RecurringFormState extends State<_RecurringForm> {
+class _RecurringFormState extends ConsumerState<_RecurringForm> {
   final _formKey = GlobalKey<FormState>();
   RecurrenceFrequency _frequency = RecurrenceFrequency.monthly;
   DateTime _nextIssueDate = DateTime.now().add(const Duration(days: 30));
@@ -64,7 +62,7 @@ class _RecurringFormState extends State<_RecurringForm> {
 
   @override
   Widget build(BuildContext context) {
-    final clientsAsync = widget.ref.watch(clientsProvider);
+    final clientsAsync = ref.watch(clientsProvider);
 
     return Padding(
       padding: const EdgeInsets.all(16),
@@ -86,15 +84,15 @@ class _RecurringFormState extends State<_RecurringForm> {
                   );
                 }).toList(),
                 onChanged: (value) => setState(() => _selectedClientId = value),
-                validator: (value) =>
-                    value == null || value.isEmpty ? 'Please select a client' : null,
+                validator: (val) =>
+                    val == null || val.isEmpty ? 'Please select a client' : null,
               ),
               loading: () => const LinearProgressIndicator(),
-              error: (_, __) => const Text('Error loading clients'),
+              error: (_, _) => const Text('Error loading clients'),
             ),
             const SizedBox(height: 16),
             DropdownButtonFormField<RecurrenceFrequency>(
-              value: _frequency,
+              initialValue: _frequency,
               decoration: const InputDecoration(
                 labelText: 'Frequency',
                 border: OutlineInputBorder(),
@@ -190,7 +188,7 @@ class _RecurringFormState extends State<_RecurringForm> {
   };
 
   Future<void> _save() async {
-    final repo = widget.ref.read(recurringInvoiceRepositoryProvider);
+    final repo = ref.read(recurringInvoiceRepositoryProvider);
     final tax = double.tryParse(_taxController.text) ?? 0;
     final discount = double.tryParse(_discountController.text) ?? 0;
 

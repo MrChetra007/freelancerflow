@@ -48,25 +48,55 @@ class RecurringInvoicesScreen extends ConsumerWidget {
                       .toggleActive(invoice.id!, !invoice.isActive);
                   ref.invalidate(recurringInvoicesProvider);
                 },
-                onTap: () {
-                  Navigator.of(context).push(
+                onTap: () async {
+                  await Navigator.of(context).push(
                     MaterialPageRoute(
                       builder: (_) => CreateRecurringScreen(recurring: invoice),
                     ),
                   );
+                  ref.invalidate(recurringInvoicesProvider);
+                },
+                onDelete: () async {
+                  final confirmed = await showDialog<bool>(
+                    context: context,
+                    builder: (ctx) => AlertDialog(
+                      title: const Text('Delete Recurring Invoice'),
+                      content: const Text(
+                        'Are you sure you want to delete this recurring invoice? This action cannot be undone.',
+                      ),
+                      actions: [
+                        TextButton(
+                          onPressed: () => Navigator.pop(ctx, false),
+                          child: const Text('Cancel'),
+                        ),
+                        TextButton(
+                          onPressed: () => Navigator.pop(ctx, true),
+                          style: TextButton.styleFrom(foregroundColor: Colors.red),
+                          child: const Text('Delete'),
+                        ),
+                      ],
+                    ),
+                  );
+                  if (confirmed == true && invoice.id != null) {
+                    await ref
+                        .read(recurringInvoiceRepositoryProvider)
+                        .delete(invoice.id!);
+                    ref.invalidate(recurringInvoicesProvider);
+                  }
                 },
               );
             },
           );
         },
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (_, __) => const Center(child: Text('Error loading recurring invoices')),
+        error: (_, _) => const Center(child: Text('Error loading recurring invoices')),
       ),
       floatingActionButton: FloatingActionButton.extended(
-        onPressed: () {
-          Navigator.of(context).push(
+        onPressed: () async {
+          await Navigator.of(context).push(
             MaterialPageRoute(builder: (_) => const CreateRecurringScreen()),
           );
+          ref.invalidate(recurringInvoicesProvider);
         },
         icon: const Icon(Icons.add),
         label: const Text('Create Recurring'),

@@ -8,12 +8,14 @@ class RecurringInvoiceTile extends StatelessWidget {
   final RecurringInvoice invoice;
   final VoidCallback? onToggle;
   final VoidCallback? onTap;
+  final VoidCallback? onDelete;
 
   const RecurringInvoiceTile({
     super.key,
     required this.invoice,
     this.onToggle,
     this.onTap,
+    this.onDelete,
   });
 
   @override
@@ -42,12 +44,30 @@ class RecurringInvoiceTile extends StatelessWidget {
         overflow: TextOverflow.ellipsis,
       ),
       subtitle: Text(
-        '${_frequencyLabel} • Next: ${DateFormatter.formatDate(invoice.nextIssueDate)}',
+        '$_frequencyLabel • Next: ${DateFormatter.formatDate(invoice.nextIssueDate)}',
         style: Theme.of(context).textTheme.bodySmall,
       ),
-      trailing: Switch(
-        value: invoice.isActive,
-        onChanged: (_) => onToggle?.call(),
+      trailing: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Switch(
+            value: invoice.isActive,
+            onChanged: (_) => onToggle?.call(),
+          ),
+          if (onDelete != null)
+            PopupMenuButton<String>(
+              icon: const Icon(Icons.more_vert, size: 20),
+              onSelected: (value) {
+                if (value == 'delete') onDelete?.call();
+              },
+              itemBuilder: (_) => [
+                const PopupMenuItem(
+                  value: 'delete',
+                  child: Text('Delete', style: TextStyle(color: Colors.red)),
+                ),
+              ],
+            ),
+        ],
       ),
       onTap: onTap,
     );

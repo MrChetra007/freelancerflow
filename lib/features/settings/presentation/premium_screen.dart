@@ -411,84 +411,6 @@ class _PremiumScreenState extends ConsumerState<PremiumScreen> {
                 _showCancelConfirmation(context);
               },
             ),
-            const Divider(),
-            Container(
-              margin: const EdgeInsets.all(16),
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: Colors.orange.withValues(alpha: 0.1),
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: Colors.orange.withValues(alpha: 0.3)),
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      Icon(
-                        Icons.bug_report,
-                        color: Colors.orange.shade700,
-                        size: 20,
-                      ),
-                      const SizedBox(width: 8),
-                      Text(
-                        'Testing Mode',
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          color: Colors.orange.shade700,
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 8),
-                  const Text(
-                    'Toggle premium status for testing purposes:',
-                    style: TextStyle(fontSize: 12),
-                  ),
-                  const SizedBox(height: 12),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: ElevatedButton(
-                          onPressed: () {
-                            ref
-                                .read(isPremiumProvider.notifier)
-                                .setPremiumForTesting(true);
-                            Navigator.pop(context);
-                            showCelebration(context, () {});
-                          },
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.amber.shade700,
-                            foregroundColor: Colors.white,
-                          ),
-                          child: const Text('Go Premium'),
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: OutlinedButton(
-                          onPressed: () {
-                            ref
-                                .read(isPremiumProvider.notifier)
-                                .setPremiumForTesting(false);
-                            Navigator.pop(context);
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                content: Text('Switched to Free plan'),
-                              ),
-                            );
-                          },
-                          style: OutlinedButton.styleFrom(
-                            foregroundColor: Colors.grey.shade700,
-                          ),
-                          child: const Text('Go Free'),
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
             const SizedBox(height: 16),
           ],
         ),
@@ -533,7 +455,7 @@ class _PremiumScreenState extends ConsumerState<PremiumScreen> {
 
       if (mounted) {
         if (success) {
-          ref.read(isPremiumProvider.notifier).refresh();
+          ref.read(isPremiumProvider.notifier).setPremium(true);
           showCelebration(context, () {
             Navigator.of(context).pop();
           });
@@ -561,7 +483,8 @@ class _PremiumScreenState extends ConsumerState<PremiumScreen> {
 
     try {
       await IapService.instance.restorePurchases();
-      ref.read(isPremiumProvider.notifier).refresh();
+      final isPremium = await IapService.instance.isPremium();
+      ref.read(isPremiumProvider.notifier).setPremium(isPremium);
 
       if (mounted) {
         ScaffoldMessenger.of(

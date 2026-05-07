@@ -17,6 +17,9 @@ class IapService {
   bool _isAvailable = false;
   bool _isLoading = false;
 
+  final _premiumStatusController = StreamController<bool>.broadcast();
+  Stream<bool> get premiumStatusStream => _premiumStatusController.stream;
+
   StreamSubscription<List<PurchaseDetails>>? _streamSubscription;
 
   bool get isAvailable => _isAvailable;
@@ -53,6 +56,7 @@ class IapService {
         case PurchaseStatus.restored:
           if (purchase.productID == _productId) {
             _prefs.setBool(_premiumKey, true);
+            _premiumStatusController.add(true);
           }
           _iap.completePurchase(purchase);
           break;
@@ -70,6 +74,10 @@ class IapService {
           break;
       }
     }
+  }
+
+  Future<bool> checkPremiumStatus() async {
+    return _prefs.getBool(_premiumKey) ?? false;
   }
 
   Future<bool> isPremium() async {

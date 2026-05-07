@@ -4,7 +4,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../../core/supabase/supabase_client.dart';
 import '../../../../core/utils/date_formatter.dart';
+import '../../clients/data/clients_provider.dart';
+import '../../clients/domain/client.dart';
 import '../data/recurring_provider.dart';
 
 class CreateRecurringScreen extends ConsumerWidget {
@@ -42,6 +45,7 @@ class _RecurringFormState extends State<_RecurringForm> {
   RecurrenceFrequency _frequency = RecurrenceFrequency.monthly;
   DateTime _nextIssueDate = DateTime.now().add(const Duration(days: 30));
   int _dueDays = 30;
+  String? _selectedClientId;
   final _taxController = TextEditingController();
   final _discountController = TextEditingController();
 
@@ -52,6 +56,7 @@ class _RecurringFormState extends State<_RecurringForm> {
       _frequency = widget.recurring!.frequency;
       _nextIssueDate = widget.recurring!.nextIssueDate;
       _dueDays = widget.recurring!.dueDays;
+      _selectedClientId = widget.recurring!.clientId;
       _taxController.text = widget.recurring!.taxPercent.toString();
       _discountController.text = widget.recurring!.discountPercent.toString();
     }
@@ -59,12 +64,35 @@ class _RecurringFormState extends State<_RecurringForm> {
 
   @override
   Widget build(BuildContext context) {
+    final clientsAsync = widget.ref.watch(clientsProvider);
+
     return Padding(
       padding: const EdgeInsets.all(16),
       child: Form(
         key: _formKey,
         child: ListView(
           children: [
+            clientsAsync.when(
+              data: (clients) => DropdownButtonFormField<String>(
+                value: _selectedClientId,
+                decoration: const InputDecoration(
+                  labelText: 'Client',
+                  border: OutlineInputBorder(),
+                ),
+                items: clients.map((client) {
+                  return DropdownMenuItem<String>(
+                    value: client.id,
+                    child: Text(client.name),
+                  );
+                }).toList(),
+                onChanged: (value) => setState(() => _selectedClientId = value),
+                validator: (value) =>
+                    value == null || value.isEmpty ? 'Please select a client' : null,
+              ),
+              loading: () => const LinearProgressIndicator(),
+              error: (_, __) => const Text('Error loading clients'),
+            ),
+            const SizedBox(height: 16),
             DropdownButtonFormField<RecurrenceFrequency>(
               value: _frequency,
               decoration: const InputDecoration(
@@ -166,6 +194,9 @@ class _RecurringFormState extends State<_RecurringForm> {
     final tax = double.tryParse(_taxController.text) ?? 0;
     final discount = double.tryParse(_discountController.text) ?? 0;
 
+    final user = SupabaseConfig.client.auth.currentUser;
+    if (user == null) return;
+
     if (widget.recurring != null) {
       await repo.update(
         widget.recurring!.copyWith(
@@ -177,10 +208,17 @@ class _RecurringFormState extends State<_RecurringForm> {
         ),
       );
     } else {
+      if (_selectedClientId == null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Please select a client')),
+        );
+        return;
+      }
+
       await repo.create(
         RecurringInvoice(
-          userId: '',
-          clientId: '',
+          userId: user.id,
+          clientId: _selectedClientId!,
           frequency: _frequency,
           nextIssueDate: _nextIssueDate,
           dueDays: _dueDays,

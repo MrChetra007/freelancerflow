@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -5,7 +7,6 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../core/utils/duration_formatter.dart';
 import '../../../time_tracking/data/time_entry_provider.dart';
 import '../../../time_tracking/domain/time_entry.dart';
-import '../../../projects/data/projects_provider.dart';
 
 class ActiveTimerBanner extends ConsumerWidget {
   const ActiveTimerBanner({super.key});
@@ -20,7 +21,7 @@ class ActiveTimerBanner extends ConsumerWidget {
         return _ActiveTimerView(entry: entry);
       },
       loading: () => const SizedBox.shrink(),
-      error: (_, __) => const SizedBox.shrink(),
+      error: (_, _) => const SizedBox.shrink(),
     );
   }
 }
@@ -36,13 +37,13 @@ class _ActiveTimerView extends ConsumerStatefulWidget {
 
 class _ActiveTimerViewState extends ConsumerState<_ActiveTimerView> {
   late DateTime _now;
-  late final _timer;
+  Timer? _timer;
 
   @override
   void initState() {
     super.initState();
     _now = DateTime.now();
-    _timer = Stream.periodic(const Duration(seconds: 1), (_) {
+    _timer = Timer.periodic(const Duration(seconds: 1), (_) {
       if (mounted) {
         setState(() {
           _now = DateTime.now();
@@ -53,14 +54,13 @@ class _ActiveTimerViewState extends ConsumerState<_ActiveTimerView> {
 
   @override
   void dispose() {
-    _timer.cancel();
+    _timer?.cancel();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     final duration = _now.difference(widget.entry.startedAt);
-    final projects = ref.watch(projectsProvider);
 
     return Container(
       margin: const EdgeInsets.all(16),

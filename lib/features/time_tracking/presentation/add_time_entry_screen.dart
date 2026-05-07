@@ -60,9 +60,7 @@ class AddTimeEntryScreen extends ConsumerWidget {
           TextButton(
             onPressed: () async {
               if (entry!.id != null) {
-                await ref
-                    .read(timeEntryRepositoryProvider)
-                    .delete(entry!.id!);
+                await ref.read(timeEntryRepositoryProvider).delete(entry!.id!);
               }
               if (context.mounted) {
                 Navigator.pop(ctx);
@@ -182,8 +180,9 @@ class _TimeEntryFormState extends ConsumerState<_TimeEntryForm> {
                 border: OutlineInputBorder(),
                 prefixText: '\$ ',
               ),
-              keyboardType:
-                  const TextInputType.numberWithOptions(decimal: true),
+              keyboardType: const TextInputType.numberWithOptions(
+                decimal: true,
+              ),
               onChanged: (v) => _hourlyRate = double.tryParse(v) ?? 0,
             ),
             const SizedBox(height: 16),
@@ -337,9 +336,9 @@ class _TimeEntryFormState extends ConsumerState<_TimeEntryForm> {
   Future<void> _saveEntry() async {
     if (!_formKey.currentState!.validate()) return;
     if (_selectedProjectId == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please select a project')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Please select a project')));
       return;
     }
 
@@ -370,20 +369,28 @@ class _TimeEntryFormState extends ConsumerState<_TimeEntryForm> {
         await repo.createManualEntry(newEntry);
       }
 
+      // ✅ Invalidate all related providers so UI updates immediately
+      ref.invalidate(activeTimerProvider);
+      ref.invalidate(watchAllTimeEntriesProvider);
+      ref.invalidate(allTimeEntriesProvider);
+      ref.invalidate(thisMonthTimeEntriesProvider);
+      ref.invalidate(thisWeekTimeEntriesProvider);
+
       if (mounted) {
         context.pop();
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content:
-                Text(widget.entry != null ? 'Entry updated' : 'Entry saved'),
+            content: Text(
+              widget.entry != null ? 'Entry updated' : 'Entry saved',
+            ),
           ),
         );
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error: $e')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Error: $e')));
       }
     } finally {
       if (mounted) setState(() => _isLoading = false);

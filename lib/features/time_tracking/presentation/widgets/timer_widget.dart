@@ -142,9 +142,64 @@ class _LiveTimer extends StatefulWidget {
   _LiveTimerState createState() => _LiveTimerState();
 }
 
+// class _LiveTimerState extends State<_LiveTimer> {
+//   late DateTime _now;
+//   Timer? _timer; // ← store the timer
+
+//   @override
+//   void initState() {
+//     super.initState();
+//     _now = DateTime.now();
+
+//     if (widget.isRunning) {
+//       _timer = Timer.periodic(const Duration(seconds: 1), (_) {
+//         if (mounted) {
+//           setState(() {
+//             _now = DateTime.now();
+//           });
+//         }
+//       });
+//     }
+//   }
+
+//   @override
+//   void dispose() {
+//     _timer?.cancel(); // ← cancel to avoid memory leaks
+//     super.dispose();
+//   }
+
+//   @override
+//   Widget build(BuildContext context) {
+//     if (widget.entry == null) {
+//       return Text(
+//         '00:00:00',
+//         style: Theme.of(context).textTheme.headlineLarge?.copyWith(
+//           fontWeight: FontWeight.bold,
+//           fontFamily: 'monospace',
+//         ),
+//       );
+//     }
+//     final duration = widget.isRunning
+//         ? _now.difference(widget.entry!.startedAt)
+//         : (widget.entry!.endedAt != null
+//               ? widget.entry!.endedAt!.difference(widget.entry!.startedAt)
+//               : Duration.zero);
+//     final hours = duration.inHours;
+//     final minutes = duration.inMinutes.remainder(60);
+//     final seconds = duration.inSeconds.remainder(60);
+//     return Text(
+//       '${hours.toString().padLeft(2, '0')}:${minutes.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')}',
+//       style: Theme.of(context).textTheme.headlineLarge?.copyWith(
+//         fontWeight: FontWeight.bold,
+//         fontFamily: 'monospace',
+//       ),
+//     );
+//   }
+// }
+
 class _LiveTimerState extends State<_LiveTimer> {
   late DateTime _now;
-  Timer? _timer; // ← store the timer
+  Timer? _timer;
 
   @override
   void initState() {
@@ -164,7 +219,7 @@ class _LiveTimerState extends State<_LiveTimer> {
 
   @override
   void dispose() {
-    _timer?.cancel(); // ← cancel to avoid memory leaks
+    _timer?.cancel();
     super.dispose();
   }
 
@@ -179,14 +234,20 @@ class _LiveTimerState extends State<_LiveTimer> {
         ),
       );
     }
+
+    // ✅ CORRECTED: Use toUtc() to match how it was saved in Supabase
+    final startedAtUtc = widget.entry!.startedAt.toUtc();
+
     final duration = widget.isRunning
-        ? _now.difference(widget.entry!.startedAt)
+        ? _now.toUtc().difference(startedAtUtc)
         : (widget.entry!.endedAt != null
-              ? widget.entry!.endedAt!.difference(widget.entry!.startedAt)
+              ? widget.entry!.endedAt!.toUtc().difference(startedAtUtc)
               : Duration.zero);
+
     final hours = duration.inHours;
     final minutes = duration.inMinutes.remainder(60);
     final seconds = duration.inSeconds.remainder(60);
+
     return Text(
       '${hours.toString().padLeft(2, '0')}:${minutes.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')}',
       style: Theme.of(context).textTheme.headlineLarge?.copyWith(

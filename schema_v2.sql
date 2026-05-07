@@ -876,3 +876,6 @@ ALTER VIEW expense_summary    SET (security_barrier = true);
 -- ============================================================
 -- DONE — FreelanceFlow schema v2 complete
 -- ============================================================
+-- Run in Supabase SQL editor
+DELETE FROM time_entries 
+WHERE ended_at IS NULL;

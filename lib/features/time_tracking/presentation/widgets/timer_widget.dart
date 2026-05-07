@@ -142,61 +142,6 @@ class _LiveTimer extends StatefulWidget {
   _LiveTimerState createState() => _LiveTimerState();
 }
 
-// class _LiveTimerState extends State<_LiveTimer> {
-//   late DateTime _now;
-//   Timer? _timer; // ← store the timer
-
-//   @override
-//   void initState() {
-//     super.initState();
-//     _now = DateTime.now();
-
-//     if (widget.isRunning) {
-//       _timer = Timer.periodic(const Duration(seconds: 1), (_) {
-//         if (mounted) {
-//           setState(() {
-//             _now = DateTime.now();
-//           });
-//         }
-//       });
-//     }
-//   }
-
-//   @override
-//   void dispose() {
-//     _timer?.cancel(); // ← cancel to avoid memory leaks
-//     super.dispose();
-//   }
-
-//   @override
-//   Widget build(BuildContext context) {
-//     if (widget.entry == null) {
-//       return Text(
-//         '00:00:00',
-//         style: Theme.of(context).textTheme.headlineLarge?.copyWith(
-//           fontWeight: FontWeight.bold,
-//           fontFamily: 'monospace',
-//         ),
-//       );
-//     }
-//     final duration = widget.isRunning
-//         ? _now.difference(widget.entry!.startedAt)
-//         : (widget.entry!.endedAt != null
-//               ? widget.entry!.endedAt!.difference(widget.entry!.startedAt)
-//               : Duration.zero);
-//     final hours = duration.inHours;
-//     final minutes = duration.inMinutes.remainder(60);
-//     final seconds = duration.inSeconds.remainder(60);
-//     return Text(
-//       '${hours.toString().padLeft(2, '0')}:${minutes.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')}',
-//       style: Theme.of(context).textTheme.headlineLarge?.copyWith(
-//         fontWeight: FontWeight.bold,
-//         fontFamily: 'monospace',
-//       ),
-//     );
-//   }
-// }
-
 class _LiveTimerState extends State<_LiveTimer> {
   late DateTime _now;
   Timer? _timer;
@@ -204,16 +149,30 @@ class _LiveTimerState extends State<_LiveTimer> {
   @override
   void initState() {
     super.initState();
-    _now = DateTime.now();
+    _now = DateTime.now(); // ← change here
+    _startTimerIfNeeded();
+  }
 
+  void _startTimerIfNeeded() {
+    _timer?.cancel();
     if (widget.isRunning) {
       _timer = Timer.periodic(const Duration(seconds: 1), (_) {
-        if (mounted) {
-          setState(() {
-            _now = DateTime.now();
-          });
-        }
+        if (mounted) setState(() => _now = DateTime.now()); // ← change here
       });
+    }
+  }
+
+  @override
+  void didUpdateWidget(_LiveTimer oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    // isRunning changed → start or stop the ticker
+    if (widget.isRunning != oldWidget.isRunning) {
+      if (widget.isRunning) {
+        _startTimerIfNeeded();
+      } else {
+        _timer?.cancel();
+        _timer = null;
+      }
     }
   }
 
@@ -234,22 +193,29 @@ class _LiveTimerState extends State<_LiveTimer> {
         ),
       );
     }
+    debugPrint('startedAt: ${widget.entry!.startedAt}');
+    debugPrint('startedAt.isUtc: ${widget.entry!.startedAt.isUtc}');
+    debugPrint('now: $_now');
+    debugPrint('diff: ${_now.difference(widget.entry!.startedAt)}');
 
-    // ✅ CORRECTED: Use toUtc() to match how it was saved in Supabase
-    final startedAtUtc = widget.entry!.startedAt.toUtc();
-
+    // Both _now and startedAt are local time (DateTimeUtcConverter handles
+    // the UTC→local conversion when reading from Supabase), so the
+    // difference is always correct. No .toUtc() needed here.
     final duration = widget.isRunning
-        ? _now.toUtc().difference(startedAtUtc)
+        ? _now.difference(widget.entry!.startedAt)
         : (widget.entry!.endedAt != null
-              ? widget.entry!.endedAt!.toUtc().difference(startedAtUtc)
+              ? widget.entry!.endedAt!.difference(widget.entry!.startedAt)
               : Duration.zero);
 
+    // No more safeDuration needed — just use duration directly
     final hours = duration.inHours;
     final minutes = duration.inMinutes.remainder(60);
     final seconds = duration.inSeconds.remainder(60);
 
     return Text(
-      '${hours.toString().padLeft(2, '0')}:${minutes.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')}',
+      '${hours.toString().padLeft(2, '0')}:'
+      '${minutes.toString().padLeft(2, '0')}:'
+      '${seconds.toString().padLeft(2, '0')}',
       style: Theme.of(context).textTheme.headlineLarge?.copyWith(
         fontWeight: FontWeight.bold,
         fontFamily: 'monospace',

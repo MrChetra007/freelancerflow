@@ -33,7 +33,7 @@ extension TimeEntryX on TimeEntry {
 
   Duration get duration => endedAt != null
       ? endedAt!.difference(startedAt)
-      : DateTime.now().difference(startedAt);
+      : DateTime.now().toUtc().difference(startedAt);
 
   double get billableAmount => (duration.inSeconds / 3600) * hourlyRate;
 }

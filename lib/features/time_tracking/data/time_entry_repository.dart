@@ -1,3 +1,5 @@
+import 'package:flutter/material.dart';
+
 import '../../../core/supabase/supabase_client.dart';
 import '../domain/time_entry.dart';
 
@@ -20,12 +22,16 @@ class TimeEntryRepository {
     String? description,
   }) async {
     final user = SupabaseConfig.client.auth.currentUser!;
+    final now = DateTime.now();
+    debugPrint('now local: $now');
+    debugPrint('now utc: ${now.toUtc()}');
+
     final data = {
       'user_id': user.id,
       'project_id': projectId,
       'client_id': clientId,
       'description': description,
-      'started_at': DateTime.now().toUtc().toIso8601String(), // ✅ UTC
+      'started_at': now.toUtc().toIso8601String(),
       'hourly_rate': hourlyRate,
       'is_billable': true,
       'is_billed': false,

@@ -6,8 +6,8 @@ class DateTimeUtcConverter implements JsonConverter<DateTime, String> {
 
   @override
   DateTime fromJson(String json) {
-    // Read from Supabase → convert to device local time for display
-    return DateTime.parse(json).toLocal();
+    // Keep as UTC — so it matches DateTime.now().toUtc()
+    return DateTime.parse(json).toUtc();
   }
 
   @override

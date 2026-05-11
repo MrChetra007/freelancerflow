@@ -1,8 +1,8 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
-import '../../../core/utils/datetime_utc_converter.dart'; // ← add this import
+import '../../../core/utils/datetime_utc_converter.dart';
 
-part 'time_entry.freezed.old.dart';
-part 'time_entry.g.old.dart';
+part 'time_entry.freezed.dart';
+part 'time_entry.g.dart';
 
 @freezed
 class TimeEntry with _$TimeEntry {
@@ -14,14 +14,14 @@ class TimeEntry with _$TimeEntry {
     required String projectId,
     required String clientId,
     String? description,
-    @DateTimeUtcConverter() required DateTime startedAt, // ← changed
-    @DateTimeUtcConverter() DateTime? endedAt, // ← changed
+    @DateTimeUtcConverter() required DateTime startedAt,
+    @DateTimeUtcConverter() DateTime? endedAt,
     @JsonKey(includeToJson: false) double? durationSeconds,
     @Default(0) double hourlyRate,
     @Default(true) bool isBillable,
     @Default(false) bool isBilled,
     String? invoiceId,
-    @DateTimeUtcConverter() required DateTime createdAt, // ← changed
+    @DateTimeUtcConverter() required DateTime createdAt,
   }) = _TimeEntry;
 
   factory TimeEntry.fromJson(Map<String, dynamic> json) =>
@@ -33,7 +33,7 @@ extension TimeEntryX on TimeEntry {
 
   Duration get duration => endedAt != null
       ? endedAt!.difference(startedAt)
-      : DateTime.now().toUtc().difference(startedAt);
+      : DateTime.now().difference(startedAt);
 
   double get billableAmount => (duration.inSeconds / 3600) * hourlyRate;
 }

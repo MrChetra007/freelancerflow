@@ -166,7 +166,12 @@ class ProfileNotifier extends StateNotifier<ProfileState> {
   Future<void> updateProfile(Map<String, dynamic> updates) async {
     state = state.copyWith(isLoading: true, error: null);
     try {
-      await SupabaseConfig.client.from('profiles').update(updates);
+      final user = SupabaseConfig.client.auth.currentUser;
+      if (user == null) throw Exception('No authenticated user');
+      await SupabaseConfig.client
+          .from('profiles')
+          .update(updates)
+          .eq('id', user.id);
       await loadProfile();
     } catch (e) {
       state = state.copyWith(

@@ -579,11 +579,11 @@ class SettingsScreen extends ConsumerWidget {
         ),
         actions: [
           TextButton(
-            onPressed: () => context.pop(false),
+            onPressed: () => Navigator.of(context).pop(false),
             child: const Text('Cancel'),
           ),
           ElevatedButton(
-            onPressed: () => context.pop(true),
+            onPressed: () => Navigator.of(context).pop(true),
             child: const Text('Save'),
           ),
         ],
@@ -621,11 +621,11 @@ class SettingsScreen extends ConsumerWidget {
         ),
         actions: [
           TextButton(
-            onPressed: () => context.pop(false),
+            onPressed: () => Navigator.of(context).pop(false),
             child: const Text('Cancel'),
           ),
           ElevatedButton(
-            onPressed: () => context.pop(true),
+            onPressed: () => Navigator.of(context).pop(true),
             child: const Text('Save'),
           ),
         ],
@@ -664,11 +664,11 @@ class SettingsScreen extends ConsumerWidget {
         ),
         actions: [
           TextButton(
-            onPressed: () => context.pop(false),
+            onPressed: () => Navigator.of(context).pop(false),
             child: const Text('Cancel'),
           ),
           ElevatedButton(
-            onPressed: () => context.pop(true),
+            onPressed: () => Navigator.of(context).pop(true),
             child: const Text('Save'),
           ),
         ],
@@ -719,7 +719,7 @@ class SettingsScreen extends ConsumerWidget {
                 groupValue: current,
                 onChanged: (value) {
                   ref.read(timerRoundProvider.notifier).setRound(value!);
-                  context.pop();
+                  Navigator.of(context).pop();
                 },
                 title: Text(mode.label),
               );

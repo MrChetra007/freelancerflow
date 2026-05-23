@@ -170,3 +170,5 @@ V2 FEATURES ADDED
 - Notifications v2: milestone due notifications (on due date at 9am), recurring generated notifications (immediate on auto-create), notification tap navigation
 - Settings v2: default hourly rate, tax ID/VAT, payment terms, timer rounding, notification tester (immediate + scheduled + list/cancel)
 - Notification Test Screen in settings: send immediate notification, schedule in 10s/1min/5min/10min, list all pending scheduled notifications with cancel option
+
+

@@ -152,7 +152,7 @@ class DashboardScreen extends ConsumerWidget {
                 ),
                 icon: Icons.monetization_on_outlined,
                 color: AppColors.error,
-                onTap: () => context.go('/expenses'),
+                onTap: () => context.push('/expenses'),
               ),
             ),
           ],

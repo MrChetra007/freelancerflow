@@ -100,43 +100,40 @@ class _ClientDetailScreenState extends ConsumerState<ClientDetailScreen>
     return Consumer(
       builder: (context, ref, child) {
         final tabIndex = _tabController.index;
-        return AnimatedSwitcher(
-          duration: const Duration(milliseconds: 200),
-          child: FloatingActionButton.extended(
-            key: ValueKey(tabIndex),
-            onPressed: () {
-              switch (tabIndex) {
-                case 0:
-                  context.push('/clients/${widget.clientId}/edit');
-                case 1:
-                  context.push('/projects/add');
-                case 2:
-                  context.push('/time-tracking/add', extra: widget.clientId);
-                case 3:
-                  context.push(
-                    '/expenses/add',
-                    extra: {'clientId': widget.clientId},
-                  );
-              }
+        return FloatingActionButton.extended(
+          key: ValueKey(tabIndex),
+          onPressed: () {
+            switch (tabIndex) {
+              case 0:
+                context.push('/clients/${widget.clientId}/edit');
+              case 1:
+                context.push('/projects/add');
+              case 2:
+                context.push('/time-tracking/add', extra: widget.clientId);
+              case 3:
+                context.push(
+                  '/expenses/add',
+                  extra: {'clientId': widget.clientId},
+                );
+            }
+          },
+          icon: Icon(
+            switch (tabIndex) {
+              0 => Icons.edit,
+              1 => Icons.folder,
+              2 => Icons.timer,
+              3 => Icons.receipt_long,
+              _ => Icons.add,
             },
-            icon: Icon(
-              switch (tabIndex) {
-                0 => Icons.edit,
-                1 => Icons.folder,
-                2 => Icons.timer,
-                3 => Icons.receipt_long,
-                _ => Icons.add,
-              },
-            ),
-            label: Text(
-              switch (tabIndex) {
-                0 => 'Edit',
-                1 => 'New Project',
-                2 => 'Log Time',
-                3 => 'Add Expense',
-                _ => 'Add',
-              },
-            ),
+          ),
+          label: Text(
+            switch (tabIndex) {
+              0 => 'Edit',
+              1 => 'New Project',
+              2 => 'Log Time',
+              3 => 'Add Expense',
+              _ => 'Add',
+            },
           ),
         );
       },
@@ -148,6 +145,11 @@ class _ClientDetailScreenState extends ConsumerState<ClientDetailScreen>
       expandedHeight: 200,
       floating: false,
       pinned: true,
+      title: Text(
+        client.name,
+        style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+        overflow: TextOverflow.ellipsis,
+      ),
       actions: [
         IconButton(
           icon: const Icon(Icons.edit_outlined),
@@ -155,10 +157,6 @@ class _ClientDetailScreenState extends ConsumerState<ClientDetailScreen>
         ),
       ],
       flexibleSpace: FlexibleSpaceBar(
-        title: Text(
-          client.name,
-          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-        ),
         background: Container(
           padding: const EdgeInsets.fromLTRB(16, 60, 16, 16),
           child: Column(
@@ -167,20 +165,23 @@ class _ClientDetailScreenState extends ConsumerState<ClientDetailScreen>
             children: [
               Row(
                 children: [
-                  Container(
-                    width: 40,
-                    height: 40,
-                    decoration: BoxDecoration(
-                      color: _parseColor(client.avatarColor),
-                      shape: BoxShape.circle,
-                    ),
-                    child: Center(
-                      child: Text(
-                        client.name[0].toUpperCase(),
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 18,
+                  Hero(
+                    tag: 'client_avatar_${client.id}',
+                    child: Container(
+                      width: 40,
+                      height: 40,
+                      decoration: BoxDecoration(
+                        color: _parseColor(client.avatarColor),
+                        shape: BoxShape.circle,
+                      ),
+                      child: Center(
+                        child: Text(
+                          client.name[0].toUpperCase(),
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 18,
+                          ),
                         ),
                       ),
                     ),
@@ -190,22 +191,31 @@ class _ClientDetailScreenState extends ConsumerState<ClientDetailScreen>
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        if (client.company != null)
+                        if (client.company != null && client.company!.isNotEmpty)
                           Text(
                             client.company!,
                             style: Theme.of(context).textTheme.bodySmall
                                 ?.copyWith(color: AppColors.lightTextSecondary),
+                            overflow: TextOverflow.ellipsis,
                           ),
-                        if (client.email != null)
+                        if (client.email != null && client.email!.isNotEmpty)
                           Text(
                             client.email!,
                             style: Theme.of(context).textTheme.bodySmall
                                 ?.copyWith(color: AppColors.lightTextSecondary),
+                            overflow: TextOverflow.ellipsis,
                           ),
                       ],
                     ),
                   ),
                 ],
+              ),
+              const SizedBox(height: 12),
+              Text(
+                client.name,
+                style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
               ),
               const SizedBox(height: 8),
               if (client.tags.isNotEmpty)
@@ -227,7 +237,7 @@ class _ClientDetailScreenState extends ConsumerState<ClientDetailScreen>
                           )
                           .toList(),
                 ),
-              const SizedBox(height: 4),
+              if (client.tags.isNotEmpty) const SizedBox(height: 4),
               Row(
                 children: [
                   const Icon(

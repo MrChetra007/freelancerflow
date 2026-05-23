@@ -34,6 +34,9 @@ class _ClientDetailScreenState extends ConsumerState<ClientDetailScreen>
   void initState() {
     super.initState();
     _tabController = TabController(length: 4, vsync: this);
+    _tabController.addListener(() {
+      if (mounted) setState(() {});
+    });
   }
 
   @override
@@ -97,46 +100,42 @@ class _ClientDetailScreenState extends ConsumerState<ClientDetailScreen>
   }
 
   Widget _buildFAB(BuildContext context) {
-    return Consumer(
-      builder: (context, ref, child) {
-        final tabIndex = _tabController.index;
-        return FloatingActionButton.extended(
-          key: ValueKey(tabIndex),
-          onPressed: () {
-            switch (tabIndex) {
-              case 0:
-                context.push('/clients/${widget.clientId}/edit');
-              case 1:
-                context.push('/projects/add');
-              case 2:
-                context.push('/time-tracking/add', extra: widget.clientId);
-              case 3:
-                context.push(
-                  '/expenses/add',
-                  extra: {'clientId': widget.clientId},
-                );
-            }
-          },
-          icon: Icon(
-            switch (tabIndex) {
-              0 => Icons.edit,
-              1 => Icons.folder,
-              2 => Icons.timer,
-              3 => Icons.receipt_long,
-              _ => Icons.add,
-            },
-          ),
-          label: Text(
-            switch (tabIndex) {
-              0 => 'Edit',
-              1 => 'New Project',
-              2 => 'Log Time',
-              3 => 'Add Expense',
-              _ => 'Add',
-            },
-          ),
-        );
+    final tabIndex = _tabController.index;
+    return FloatingActionButton.extended(
+      key: ValueKey(tabIndex),
+      onPressed: () {
+        switch (tabIndex) {
+          case 0:
+            context.push('/clients/${widget.clientId}/edit');
+          case 1:
+            context.push('/projects/add');
+          case 2:
+            context.push('/time-tracking/add', extra: widget.clientId);
+          case 3:
+            context.push(
+              '/expenses/add',
+              extra: {'clientId': widget.clientId},
+            );
+        }
       },
+      icon: Icon(
+        switch (tabIndex) {
+          0 => Icons.edit,
+          1 => Icons.folder,
+          2 => Icons.timer,
+          3 => Icons.receipt_long,
+          _ => Icons.add,
+        },
+      ),
+      label: Text(
+        switch (tabIndex) {
+          0 => 'Edit',
+          1 => 'New Project',
+          2 => 'Log Time',
+          3 => 'Add Expense',
+          _ => 'Add',
+        },
+      ),
     );
   }
 

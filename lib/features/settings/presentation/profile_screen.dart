@@ -5,6 +5,11 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/supabase/supabase_client.dart';
 import '../../../core/utils/haptic_utils.dart';
+import '../../../core/utils/currency_formatter.dart';
+import '../../clients/data/clients_provider.dart';
+import '../../projects/data/projects_provider.dart';
+import '../../payments/data/payments_provider.dart';
+import '../../payments/domain/payment.dart';
 
 class ProfileScreen extends ConsumerStatefulWidget {
   const ProfileScreen({super.key});
@@ -68,6 +73,16 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   Widget build(BuildContext context) {
     final user = SupabaseConfig.client.auth.currentUser;
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final clientsAsync = ref.watch(clientsProvider);
+    final projectsAsync = ref.watch(projectsProvider);
+    final paymentsAsync = ref.watch(paymentsProvider);
+
+    final clientCount = clientsAsync.whenData((l) => l.length).value ?? 0;
+    final projectCount = projectsAsync.whenData((l) => l.length).value ?? 0;
+    final totalEarnings = paymentsAsync.whenData((list) => list
+        .where((p) => p.status == PaymentStatus.paid)
+        .fold(0.0, (sum, p) => sum + p.amountPaid)
+    ).value ?? 0.0;
 
     return Scaffold(
       appBar: AppBar(
@@ -106,7 +121,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
             const SizedBox(height: 24),
             _buildInfoSection(context, isDark),
             const SizedBox(height: 24),
-            _buildStatsSection(context, isDark),
+            _buildStatsSection(context, isDark, clientCount, projectCount, totalEarnings),
             const SizedBox(height: 24),
             _buildQuickActions(context, isDark),
           ],
@@ -344,7 +359,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     );
   }
 
-  Widget _buildStatsSection(BuildContext context, bool isDark) {
+  Widget _buildStatsSection(BuildContext context, bool isDark, int clientCount, int projectCount, double totalEarnings) {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
@@ -375,7 +390,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                   context,
                   icon: Icons.people_outline,
                   label: 'Clients',
-                  value: '-',
+                  value: clientCount.toString(),
                   color: AppColors.primary500,
                 ),
               ),
@@ -385,7 +400,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                   context,
                   icon: Icons.folder_outlined,
                   label: 'Projects',
-                  value: '-',
+                  value: projectCount.toString(),
                   color: Colors.orange,
                 ),
               ),
@@ -395,7 +410,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                   context,
                   icon: Icons.payments_outlined,
                   label: 'Earnings',
-                  value: '-',
+                  value: CurrencyFormatter.formatCompact(totalEarnings, 'USD'),
                   color: AppColors.statusPaid,
                 ),
               ),

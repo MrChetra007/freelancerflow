@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:in_app_purchase/in_app_purchase.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import '../supabase/supabase_client.dart';
 
 class IapService {
   static final IapService _instance = IapService._();
@@ -45,6 +46,30 @@ class IapService {
     }
   }
 
+  Future<void> setPremiumStatus(bool value) async {
+    await _prefs.setBool(_premiumKey, value);
+    _premiumStatusController.add(value);
+  }
+
+  Future<void> _syncPremiumToServer() async {
+    try {
+      if (!SupabaseConfig.isInitialized) return;
+      final user = SupabaseConfig.client.auth.currentUser;
+      if (user == null) return;
+      await SupabaseConfig.client
+          .from('profiles')
+          .update({
+            'is_pro': true,
+            'pro_expires_at': DateTime.now()
+                .add(const Duration(days: 365))
+                .toIso8601String(),
+          })
+          .eq('id', user.id);
+    } catch (e) {
+      debugPrint('Failed to sync premium to server: $e');
+    }
+  }
+
   void _handlePurchase(List<PurchaseDetails> purchases) {
     for (final purchase in purchases) {
       switch (purchase.status) {
@@ -54,6 +79,7 @@ class IapService {
             _prefs.setBool(_premiumKey, true);
             _premiumStatusController.add(true);
             _restoreCompleter?.complete(true);
+            _syncPremiumToServer();
           }
           _iap.completePurchase(purchase);
           break;
@@ -74,7 +100,8 @@ class IapService {
 
   Future<bool> isPremium() async {
     await initialize();
-    return _prefs.getBool(_premiumKey) ?? false;
+    // return _prefs.getBool(_premiumKey) ?? false;
+    return true; //for testing
   }
 
   Future<bool> purchasePremium() async {

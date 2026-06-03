@@ -245,79 +245,85 @@ class DashboardScreen extends ConsumerWidget {
         ],
         if (isPremium && stats.unbilledTimeValue > 0) ...[
           const SizedBox(height: 12),
-          Container(
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: AppColors.info.withValues(alpha: 0.1),
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: AppColors.info.withValues(alpha: 0.3)),
-            ),
-            child: Row(
-              children: [
-                const Icon(Icons.timer_outlined, color: AppColors.info),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Text(
-                        'Unbilled Time',
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          color: AppColors.info,
+          GestureDetector(
+            onTap: () => context.push('/time-tracking'),
+            child: Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: AppColors.info.withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: AppColors.info.withValues(alpha: 0.3)),
+              ),
+              child: Row(
+                children: [
+                  const Icon(Icons.timer_outlined, color: AppColors.info),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text(
+                          'Unbilled Time',
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            color: AppColors.info,
+                          ),
                         ),
-                      ),
-                      Text(
-                        CurrencyFormatter.format(
-                          stats.unbilledTimeValue,
-                          'USD',
+                        Text(
+                          CurrencyFormatter.format(
+                            stats.unbilledTimeValue,
+                            'USD',
+                          ),
+                          style: const TextStyle(
+                            fontSize: 12,
+                            color: AppColors.info,
+                          ),
                         ),
-                        style: const TextStyle(
-                          fontSize: 12,
-                          color: AppColors.info,
-                        ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
-                ),
-                const Icon(Icons.chevron_right, color: AppColors.info),
-              ],
+                  const Icon(Icons.chevron_right, color: AppColors.info),
+                ],
+              ),
             ),
           ),
         ],
         if (stats.overdueProjects > 0) ...[
           const SizedBox(height: 12),
-          Container(
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: AppColors.error.withValues(alpha: 0.1),
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: AppColors.error.withValues(alpha: 0.3)),
-            ),
-            child: Row(
-              children: [
-                const Icon(Icons.warning, color: AppColors.error),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        '${stats.overdueProjects} overdue project${stats.overdueProjects > 1 ? 's' : ''}',
-                        style: const TextStyle(
-                          fontWeight: FontWeight.bold,
-                          color: AppColors.error,
+          GestureDetector(
+            onTap: () => context.push('/projects'),
+            child: Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: AppColors.error.withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: AppColors.error.withValues(alpha: 0.3)),
+              ),
+              child: Row(
+                children: [
+                  const Icon(Icons.warning, color: AppColors.error),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          '${stats.overdueProjects} overdue project${stats.overdueProjects > 1 ? 's' : ''}',
+                          style: const TextStyle(
+                            fontWeight: FontWeight.bold,
+                            color: AppColors.error,
+                          ),
                         ),
-                      ),
-                      const Text(
-                        'Tap to view and take action',
-                        style: TextStyle(fontSize: 12, color: AppColors.error),
-                      ),
-                    ],
+                        const Text(
+                          'Tap to view and take action',
+                          style: TextStyle(fontSize: 12, color: AppColors.error),
+                        ),
+                      ],
+                    ),
                   ),
-                ),
-                const Icon(Icons.chevron_right, color: AppColors.error),
-              ],
+                  const Icon(Icons.chevron_right, color: AppColors.error),
+                ],
+              ),
             ),
           ),
         ],

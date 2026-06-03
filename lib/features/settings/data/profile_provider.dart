@@ -1,5 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-
+import '../../../core/services/iap_service.dart';
 import '../../../core/supabase/supabase_client.dart';
 
 class ProfileData {
@@ -167,6 +167,12 @@ class ProfileNotifier extends StateNotifier<ProfileState> {
           .single();
       final profile = ProfileData.fromJson(response);
       state = state.copyWith(data: profile, isLoading: false);
+
+      final expiresAt = profile.proExpiresAt;
+      if (profile.isPro &&
+          (expiresAt == null || expiresAt.isAfter(DateTime.now()))) {
+        await IapService.instance.setPremiumStatus(true);
+      }
     } catch (e) {
       state = state.copyWith(
         isLoading: false,

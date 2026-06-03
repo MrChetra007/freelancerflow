@@ -27,6 +27,13 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   bool _isUploadingAvatar = false;
   final _nameController = TextEditingController();
   final _emailController = TextEditingController();
+  final _businessNameController = TextEditingController();
+  final _businessEmailController = TextEditingController();
+  final _businessPhoneController = TextEditingController();
+  final _businessAddressController = TextEditingController();
+  final _hourlyRateController = TextEditingController();
+  final _currencyController = TextEditingController();
+  final _timezoneController = TextEditingController();
 
   @override
   void initState() {
@@ -40,6 +47,15 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     final profile = ref.read(profileProvider).data;
     if (profile != null) {
       _nameController.text = profile.fullName ?? '';
+      _businessNameController.text = profile.businessName ?? '';
+      _businessEmailController.text = profile.businessEmail ?? '';
+      _businessPhoneController.text = profile.businessPhone ?? '';
+      _businessAddressController.text = profile.businessAddress ?? '';
+      _hourlyRateController.text = profile.defaultHourlyRate > 0
+          ? profile.defaultHourlyRate.toStringAsFixed(2)
+          : '';
+      _currencyController.text = profile.currency;
+      _timezoneController.text = profile.timezone;
     }
   }
 
@@ -47,6 +63,13 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   void dispose() {
     _nameController.dispose();
     _emailController.dispose();
+    _businessNameController.dispose();
+    _businessEmailController.dispose();
+    _businessPhoneController.dispose();
+    _businessAddressController.dispose();
+    _hourlyRateController.dispose();
+    _currencyController.dispose();
+    _timezoneController.dispose();
     super.dispose();
   }
 
@@ -55,6 +78,13 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     try {
       await ref.read(profileProvider.notifier).updateProfile({
         'full_name': _nameController.text.trim(),
+        'business_name': _businessNameController.text.trim(),
+        'business_email': _businessEmailController.text.trim(),
+        'business_phone': _businessPhoneController.text.trim(),
+        'business_address': _businessAddressController.text.trim(),
+        'default_hourly_rate': double.tryParse(_hourlyRateController.text) ?? 0,
+        'currency': _currencyController.text.trim(),
+        'timezone': _timezoneController.text.trim(),
       });
       HapticUtils.success();
       if (mounted) {
@@ -154,7 +184,17 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
               icon: const Icon(Icons.edit_outlined),
               onPressed: () {
                 HapticUtils.lightImpact();
-                _nameController.text = name;
+                final profile = ref.read(profileProvider).data;
+                _nameController.text = profile?.fullName ?? '';
+                _businessNameController.text = profile?.businessName ?? '';
+                _businessEmailController.text = profile?.businessEmail ?? '';
+                _businessPhoneController.text = profile?.businessPhone ?? '';
+                _businessAddressController.text = profile?.businessAddress ?? '';
+                _hourlyRateController.text = (profile?.defaultHourlyRate ?? 0) > 0
+                    ? (profile?.defaultHourlyRate ?? 0).toStringAsFixed(2)
+                    : '';
+                _currencyController.text = profile?.currency ?? 'USD';
+                _timezoneController.text = profile?.timezone ?? 'UTC';
                 setState(() => _isEditing = true);
               },
             ),
@@ -167,6 +207,8 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
             _buildAvatar(context, isDark, name, email, avatarUrl),
             const SizedBox(height: 24),
             _buildInfoSection(context, isDark, profile.data?.createdAt),
+            const SizedBox(height: 24),
+            _buildBusinessSection(context, isDark, profile.data),
             const SizedBox(height: 24),
             _buildStatsSection(context, isDark, clientCount, projectCount, totalEarnings),
             const SizedBox(height: 24),
@@ -431,6 +473,89 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
           ),
         ),
       ],
+    );
+  }
+
+  Widget _buildBusinessSection(BuildContext context, bool isDark, ProfileData? profile) {
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: isDark ? const Color(0xFF1E1E1E) : Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.05),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Business Information',
+            style: Theme.of(context)
+                .textTheme
+                .titleMedium
+                ?.copyWith(fontWeight: FontWeight.bold),
+          ),
+          const SizedBox(height: 16),
+          _buildInfoField(
+            context,
+            icon: Icons.business,
+            label: 'Business Name',
+            controller: _businessNameController,
+            enabled: _isEditing,
+          ),
+          const Divider(height: 24),
+          _buildInfoField(
+            context,
+            icon: Icons.email_outlined,
+            label: 'Business Email',
+            controller: _businessEmailController,
+            enabled: _isEditing,
+          ),
+          const Divider(height: 24),
+          _buildInfoField(
+            context,
+            icon: Icons.phone_outlined,
+            label: 'Business Phone',
+            controller: _businessPhoneController,
+            enabled: _isEditing,
+          ),
+          const Divider(height: 24),
+          _buildInfoField(
+            context,
+            icon: Icons.location_on_outlined,
+            label: 'Business Address',
+            controller: _businessAddressController,
+            enabled: _isEditing,
+          ),
+          const Divider(height: 24),
+          _buildInfoField(
+            context,
+            icon: Icons.attach_money_outlined,
+            label: 'Default Hourly Rate',
+            controller: _hourlyRateController,
+            enabled: _isEditing,
+          ),
+          const Divider(height: 24),
+          _buildInfoRow(
+            context,
+            icon: Icons.monetization_on_outlined,
+            label: 'Currency',
+            value: profile?.currency ?? 'USD',
+          ),
+          const Divider(height: 24),
+          _buildInfoRow(
+            context,
+            icon: Icons.access_time,
+            label: 'Timezone',
+            value: profile?.timezone ?? 'UTC',
+          ),
+        ],
+      ),
     );
   }
 

@@ -333,30 +333,14 @@ class SettingsScreen extends ConsumerWidget {
             title: const Text('Test Notifications'),
             subtitle: const Text('Test notification scheduling'),
             trailing: const Icon(Icons.chevron_right),
-            onTap: () {
-              if (!ref.read(isPremiumProvider)) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Notifications require Pro')),
-                );
-                return;
-              }
-              _showNotificationTester(context);
-            },
+            onTap: () => _showNotificationTester(context),
           ),
           ListTile(
             leading: const Icon(Icons.schedule_outlined),
             title: const Text('Scheduled Notifications'),
             subtitle: const Text('View upcoming notifications'),
             trailing: const Icon(Icons.chevron_right),
-            onTap: () {
-              if (!ref.read(isPremiumProvider)) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Notifications require Pro')),
-                );
-                return;
-              }
-              _showScheduledNotifications(context, ref);
-            },
+            onTap: () => _showScheduledNotifications(context, ref),
           ),
           const Divider(),
           _buildSectionHeader(context, 'Premium'),

@@ -93,9 +93,36 @@ class _ProjectDetailScreenState extends ConsumerState<ProjectDetailScreen>
     final statusLabel = _getStatusLabel(project.status);
 
     return SliverAppBar(
-      expandedHeight: 180,
+      expandedHeight: 220,
       floating: false,
       pinned: true,
+      title: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+            decoration: BoxDecoration(
+              color: statusColor,
+              borderRadius: BorderRadius.circular(4),
+            ),
+            child: Text(
+              statusLabel,
+              style: const TextStyle(
+                fontSize: 10,
+                color: Colors.white,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Text(
+              project.title,
+              overflow: TextOverflow.ellipsis,
+              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+            ),
+          ),
+        ],
+      ),
       actions: [
         IconButton(
           icon: const Icon(Icons.edit_outlined),
@@ -103,12 +130,9 @@ class _ProjectDetailScreenState extends ConsumerState<ProjectDetailScreen>
         ),
       ],
       flexibleSpace: FlexibleSpaceBar(
-        title: Text(
-          project.title,
-          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-        ),
-        background: Container(
-          padding: const EdgeInsets.fromLTRB(16, 60, 16, 16),
+        title: const SizedBox.shrink(),
+        background: Padding(
+          padding: const EdgeInsets.fromLTRB(16, 16, 16, 16),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisAlignment: MainAxisAlignment.end,
@@ -122,7 +146,7 @@ class _ProjectDetailScreenState extends ConsumerState<ProjectDetailScreen>
                 padding: EdgeInsets.zero,
                 materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
               ),
-              const SizedBox(height: 8),
+              const SizedBox(height: 12),
               Row(
                 children: [
                   const Icon(
@@ -154,13 +178,20 @@ class _ProjectDetailScreenState extends ConsumerState<ProjectDetailScreen>
                   ],
                 ],
               ),
+              const SizedBox(height: 12),
+              Text(
+                project.title,
+                style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
+              ),
               if (project.description != null) ...[
-                const SizedBox(height: 4),
+                const SizedBox(height: 6),
                 Text(
                   project.description!,
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                         color: AppColors.lightTextSecondary,
                       ),
                 ),

@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 
 import '../../../../core/theme/app_colors.dart';
+import '../../settings/data/profile_provider.dart';
 import '../../../../core/utils/currency_formatter.dart';
 import '../../../../core/utils/duration_formatter.dart';
 import '../../../../core/widgets/loading_widget.dart';
@@ -426,6 +427,8 @@ class _ProjectTimeTab extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final entriesAsync = ref.watch(projectTimeEntriesProvider(project.id!));
+    final activeTimerAsync = ref.watch(activeTimerProvider);
+    final profileState = ref.watch(profileProvider);
 
     return Column(
       children: [
@@ -509,7 +512,40 @@ class _ProjectTimeTab extends ConsumerWidget {
               const SizedBox(width: 12),
               Expanded(
                 child: FilledButton.icon(
-                  onPressed: () {},
+                  onPressed: activeTimerAsync.valueOrNull != null
+                      ? null
+                      : () async {
+                          try {
+                            final hourlyRate =
+                                profileState.data?.defaultHourlyRate ?? 0;
+                            await ref
+                                .read(timeEntryRepositoryProvider)
+                                .startTimer(
+                                  projectId: project.id!,
+                                  clientId: project.clientId,
+                                  hourlyRate: hourlyRate,
+                                );
+                            ref.invalidate(
+                              projectTimeEntriesProvider(project.id!),
+                            );
+                            ref.invalidate(activeTimerProvider);
+                            if (context.mounted) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                  content: Text('Timer started'),
+                                ),
+                              );
+                            }
+                          } catch (e) {
+                            if (context.mounted) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text('Failed to start timer: $e'),
+                                ),
+                              );
+                            }
+                          }
+                        },
                   icon: const Icon(Icons.play_arrow),
                   label: const Text('Start Timer'),
                 ),
@@ -544,7 +580,9 @@ class _ProjectTimeTab extends ConsumerWidget {
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    formatDuration(Duration(hours: totalHours.round())),
+                    formatDuration(
+                      Duration(seconds: (totalHours * 3600).round()),
+                    ),
                     style: Theme.of(context).textTheme.titleLarge?.copyWith(
                           fontWeight: FontWeight.bold,
                         ),

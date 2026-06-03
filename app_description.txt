@@ -11,6 +11,14 @@ AUTHENTICATION
 - Email/Password sign up and login
 - Google OAuth sign in
 - Auto-redirect to dashboard on successful auth
+- Profile created automatically via Supabase trigger on signup
+
+ONBOARDING & FIRST-RUN
+-----------------------
+- Landing screen: 4-slide app intro shown before login (Welcome, Clients & Projects, Time & Expenses, Stay Organized)
+- Profile setup walkthrough after first signup: Full Name → Business Info (name, email, phone, address) → Preferences (hourly rate, currency, timezone)
+- Setup can be skipped and completed later from Profile screen
+- is_onboarding flag in profiles table tracks completion status
 
 MAIN SCREENS
 ------------
@@ -38,11 +46,14 @@ MAIN SCREENS
    - Add/Edit project (title, description, budget, status, dates, currency)
    - Milestone tracking within projects
    - Status: In Progress, Completed, On Hold, Cancelled
-   - Project Detail Screen (4 tabs):
+   - Project Detail Screen (3 tabs):
      a. Details: project info card + milestones section
-     b. Payments: payment list for this project
-     c. Time: total hours/value summary + time entry list + Add Entry / Start Timer buttons
-     d. Expenses: total expenses summary + expense list + Add Expense button
+     b. Time: total hours/value summary (precise duration, not rounded) + time entry list + Add Entry / Start Timer buttons
+        - Start Timer: checks for active timer, fetches hourly rate from profile, starts live timer
+        - Total Hours: computed from full duration seconds (not rounded to whole hours)
+     c. Expenses: total expenses summary + expense list + Add Expense button (auto-fills project + client)
+        - Pro gate: non-premium users see amber lock button with upgrade prompt
+   - Expandable header: status badge → budget + deadline → project title → description (collapsed shows status badge + title)
 
 4. Payments
    - Track payments per client/project
@@ -65,16 +76,18 @@ MAIN SCREENS
      - First issue date picker
      - Due in X days field
    - Edit existing invoices with line item management
+   - Pro feature (non-premium users see upgrade prompt)
 
-6. Expenses (v2)
+6. Expenses (v2) — Pro feature
    - List expenses with category filter and search
    - Add/Edit expense (amount, category, description, date, project/client link, billable flag, notes)
    - Receipt upload via image picker (stored in Supabase Storage)
    - Categories: Software, Hardware, Travel, Accommodation, Meals, Marketing, Freelancer, Office, Other
    - Each category has a unique color and icon
    - Billable/unbilled tracking, swipe to delete with undo
-   - Expense breakdown pie chart by category (Pro only)
+   - Expense breakdown pie chart by category
    - Monthly total at top
+   - Pro gate on Add Expense buttons throughout the app
 
 7. Time Tracking (v2)
    - Active timer card at top: shows project name, live HH:MM:SS clock, stop button
@@ -84,9 +97,10 @@ MAIN SCREENS
    - Entries grouped by date (Today, Yesterday, day-of-week, or full date)
    - Each entry shows: project name, description, duration, billable amount, billed/unbilled badge
    - FAB with bottom sheet: Start Timer or Log Manual Entry
-   - Manual entry form: project, description, hourly rate, start date/time, end date/time, billable toggle
+   - Manual entry form: project, description, hourly rate (auto-fetched from client profile, then user profile), start date/time, end date/time, billable toggle
    - Edit existing entries, delete with confirmation dialog
    - Only one timer can run at a time per user
+   - Global floating timer overlay (top center, 50% width, pulsing green dot, tappable to time tracking screen, persistent across all routes)
 
 8. Recurring Invoices (v2)
    - Create recurring invoice templates from invoice create screen or dedicated screen
@@ -98,20 +112,25 @@ MAIN SCREENS
    - Shows notification when invoice is auto-created
 
 9. Settings (v2)
-   - Profile management
-   - Currency preference
-   - Hourly rate (for time tracking defaults)
-   - Tax ID / VAT number (auto-fills on invoices)
-   - Payment terms (auto-fills on invoices)
+   - Profile management (name, business info, avatar upload, hourly rate, currency, timezone, tax ID, payment terms)
+   - Avatar upload via image picker → Supabase Storage avatars bucket → profile_url saved to profiles table
+   - Full name read from profiles table (not auth metadata)
    - Timer rounding: None / 5 min / 15 min / 30 min
    - Theme (Light / Dark / System)
    - Notification preferences: Payment Reminders, Project Reminders, Invoice Reminders
-   - Notification tester: send immediate, schedule in 10s / 1min, view/cancel scheduled notifications
-   - Premium subscription
+   - Notification tester: send immediate, schedule in 10s / 1min, view/cancel scheduled notifications (free feature)
+   - Premium subscription management
    - Privacy Policy and Terms of Service
 
+10. Premium Subscription (In-App Purchase)
+    - Upgrade to Pro via Google Play Billing (in_app_purchase package)
+    - Restore purchases with Completer pattern (awaits stream delivery, 15s timeout)
+    - Premium status stored in SharedPreferences (no server-side validation)
+    - Cancel subscription opens Google Play Store subscriptions page
+    - Pro features: Expenses (CRUD), Invoices (create/PDF), Receipt upload, Unbilled time filters, Expense pie chart
+
 NOTIFICATIONS
--------------
+--------------
 - Local notifications via flutter_local_notifications
 - Payment overdue: daily at 9am if overdue
 - Project deadline: 24h before deadline
@@ -120,35 +139,38 @@ NOTIFICATIONS
 - Recurring generated: immediately when auto-created
 - Weekly summary: every Monday at 8am
 - In-app notification bell with unread badge
-- Tap notification navigates to relevant screen
+- Tap notification navigates to relevant screen (debugPrint only — navigation not yet wired)
 - Stable notification IDs to avoid duplicates
 - Notification types: payment_overdue, project_deadline, milestone_due, invoice_unpaid, recurring_generated, weekly_summary
+- Test and schedule notifications from Settings (no premium gate)
 
 DATA FLOW
 ---------
-1. User signs up/logs in
-2. Add a Client first (optionally add tags and default hourly rate)
-3. Create a Project linked to a Client
-4. Add Milestones to track project progress
-5. Start Timer or log Time Entries for the project/client
-6. Add Expenses linked to client or project (with optional receipt photo)
-7. Log Payments for the project
-8. Create Invoice with line items (can import unbilled time entries and expenses)
-9. Optionally make invoice recurring for automated future billing
-10. Dashboard shows summary, net profit, and business overview
-11. Recurring invoices auto-generate on app launch
+1. User opens app → Landing screen (intro slides) → Sign Up / Log In
+2. First signup → Profile setup walkthrough (name, business, preferences)
+3. Add a Client first (optionally add tags and default hourly rate)
+4. Create a Project linked to a Client
+5. Add Milestones to track project progress
+6. Start Timer or log Time Entries for the project/client
+7. Add Expenses linked to client or project (with optional receipt photo) — Pro feature
+8. Log Payments for the project
+9. Create Invoice with line items (can import unbilled time entries and expenses) — Pro feature
+10. Optionally make invoice recurring for automated future billing
+11. Dashboard shows summary, net profit, and business overview
+12. Recurring invoices auto-generate on app launch
 
 TECH STACK
 ----------
 - Flutter (Android)
 - Supabase (Backend - Auth, PostgreSQL Database, Storage)
 - Riverpod (State Management with code generation)
-- GoRouter (Navigation)
+- GoRouter (Navigation with ShellRoute for bottom nav)
 - Freezed (Immutable models)
 - fl_chart (Charts: bar, pie, dual-axis)
 - PDF generation for invoices
-- image_picker for receipt uploads
+- image_picker for receipt uploads and avatar uploads
 - flutter_local_notifications for reminders
+- in_app_purchase for Pro subscription
 - Supabase RPC functions for recurring invoice auto-generation and milestone checks
 
 SECURITY
@@ -156,20 +178,19 @@ SECURITY
 - Supabase Auth with JWT
 - Row-level security (RLS) on all tables
 - User can only access their own data
-- Private storage bucket for invoices and receipts
+- Private storage bucket for invoices and receipts; avatars bucket for profile images
 
-V2 FEATURES ADDED
------------------
-- Dashboard v2: Net Profit, Expenses, Unbilled Time stats, active timer banner with project name, dual revenue/expenses bar chart with profit tooltip
-- Client Detail v2: 4-tab screen (Overview, Projects, Time, Expenses) with tag filtering and per-client total expenses
-- Project Detail v2: 4-tab screen (Details, Payments, Time, Expenses) with time/expense integration
-- Expenses: full CRUD with 9 categories, receipt photos, billable/unbilled tracking, pie chart breakdown
-- Time Tracking: polished screen with working filters (All/Billable/Unbilled/This Week/This Month), entries grouped by date, live timer with project name, summary bar, upgraded FAB with Start Timer / Log Manual choice, edit/delete with confirmation
-- Invoice Import Flow: import unbilled time entries and expenses as line items via bottom sheet, marks entries as billed after save
-- "Make this recurring" toggle on invoice create screen: frequency picker, first issue date, due days, creates recurring template
-- Recurring Auto-Generation: checks on app launch, generates draft invoices from due templates, advances schedule via Supabase RPC, shows notification
-- Notifications v2: milestone due notifications (on due date at 9am), recurring generated notifications (immediate on auto-create), notification tap navigation
-- Settings v2: default hourly rate, tax ID/VAT, payment terms, timer rounding, notification tester (immediate + scheduled + list/cancel)
-- Notification Test Screen in settings: send immediate notification, schedule in 10s/1min/5min/10min, list all pending scheduled notifications with cancel option
-
-
+RECENT UPDATES
+--------------
+- Landing screen: new 4-slide app intro before login (replaces immediate login screen)
+- Onboarding walkthrough: 3-step profile setup after first signup (name → business → preferences)
+- Profile screen: reads full name from profiles table, avatar upload with image picker + Supabase storage
+- Project detail: fixed header layout (no title overlap, collapsed header shows status badge + title)
+- Time tab: Start Timer button wired up with hourly rate from profile, Total Hours now precise (not rounded)
+- Expense tab: Add Expense auto-fills project + client from navigation context
+- Pro paywall: Add Expense button shows upgrade prompt for non-premium users
+- Global timer overlay: floating card at top center (50% width) across all routes
+- Restore purchases: fixed race condition with Completer pattern
+- Notifications: Test/Schedule buttons no longer gated behind premium
+- Hourly rate auto-fetch: time entry form pre-fills from client profile → user profile
+- Premium screen: cancel subscription now opens Google Play Store subscriptions page

@@ -6,6 +6,8 @@ import '../../../../core/utils/date_formatter.dart';
 import '../../../../core/supabase/supabase_client.dart';
 import '../../projects/data/projects_provider.dart';
 import '../../projects/domain/project.dart';
+import '../../settings/data/profile_provider.dart';
+import '../../clients/data/clients_provider.dart';
 import '../domain/time_entry.dart';
 import '../data/time_entry_provider.dart';
 
@@ -96,6 +98,7 @@ class _TimeEntryFormState extends ConsumerState<_TimeEntryForm> {
   String? _selectedProjectId;
   String? _selectedClientId;
   final _descriptionController = TextEditingController();
+  final _hourlyRateController = TextEditingController();
   DateTime _startedAt = DateTime.now();
   DateTime? _endedAt;
   double _hourlyRate = 0;
@@ -112,6 +115,7 @@ class _TimeEntryFormState extends ConsumerState<_TimeEntryForm> {
       _startedAt = widget.entry!.startedAt;
       _endedAt = widget.entry!.endedAt;
       _hourlyRate = widget.entry!.hourlyRate;
+      _hourlyRateController.text = _hourlyRate.toStringAsFixed(2);
       _isBillable = widget.entry!.isBillable;
     } else {
       if (widget.initialProjectId != null) {
@@ -124,12 +128,15 @@ class _TimeEntryFormState extends ConsumerState<_TimeEntryForm> {
         _selectedProjectId = widget.projects.first.id;
         _selectedClientId = widget.projects.first.clientId;
       }
+      _hourlyRate = ref.read(profileProvider).data?.defaultHourlyRate ?? 0;
+      _hourlyRateController.text = _hourlyRate.toStringAsFixed(2);
     }
   }
 
   @override
   void dispose() {
     _descriptionController.dispose();
+    _hourlyRateController.dispose();
     super.dispose();
   }
 
@@ -160,6 +167,7 @@ class _TimeEntryFormState extends ConsumerState<_TimeEntryForm> {
                       .where((p) => p.id == value)
                       .firstOrNull;
                   _selectedClientId = project?.clientId;
+                  _resolveHourlyRateForClient(_selectedClientId);
                 });
               },
             ),
@@ -174,7 +182,7 @@ class _TimeEntryFormState extends ConsumerState<_TimeEntryForm> {
             ),
             const SizedBox(height: 16),
             TextFormField(
-              initialValue: _hourlyRate.toString(),
+              controller: _hourlyRateController,
               decoration: const InputDecoration(
                 labelText: 'Hourly Rate',
                 border: OutlineInputBorder(),
@@ -331,6 +339,27 @@ class _TimeEntryFormState extends ConsumerState<_TimeEntryForm> {
         ),
       ),
     );
+  }
+
+  void _resolveHourlyRateForClient(String? clientId) {
+    double rate;
+    if (clientId != null) {
+      final clients = ref.read(clientsProvider).valueOrNull;
+      if (clients != null) {
+        final client = clients.where((c) => c.id == clientId).firstOrNull;
+        if (client != null && client.defaultHourlyRate > 0) {
+          rate = client.defaultHourlyRate;
+        } else {
+          rate = ref.read(profileProvider).data?.defaultHourlyRate ?? 0;
+        }
+      } else {
+        rate = ref.read(profileProvider).data?.defaultHourlyRate ?? 0;
+      }
+    } else {
+      rate = ref.read(profileProvider).data?.defaultHourlyRate ?? 0;
+    }
+    _hourlyRate = rate;
+    _hourlyRateController.text = rate.toStringAsFixed(2);
   }
 
   Future<void> _saveEntry() async {

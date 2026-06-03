@@ -16,29 +16,43 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
   @override
   void initState() {
     super.initState();
-    _checkAuth();
+    Future.delayed(const Duration(milliseconds: 500), _redirect);
   }
 
-  Future<void> _checkAuth() async {
-    await Future.delayed(const Duration(milliseconds: 500));
+  void _redirect() {
     if (!mounted) return;
-
     final session = SupabaseConfig.client.auth.currentSession;
-    if (session != null) {
-      final profile = ref.read(profileProvider);
-      if (profile.data?.isOnboarding == true) {
-        context.go('/onboarding');
-      } else {
-        context.go('/dashboard');
-      }
+    if (session == null) {
+      context.go('/landing');
+    }
+  }
+
+  void _navigate() {
+    if (!mounted) return;
+    final session = SupabaseConfig.client.auth.currentSession;
+    if (session == null) {
+      context.go('/landing');
+      return;
+    }
+    final profileState = ref.read(profileProvider);
+    if (profileState.data?.isOnboarding == true) {
+      context.go('/onboarding');
     } else {
-      context.go('/login');
+      context.go('/dashboard');
     }
   }
 
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final session = SupabaseConfig.client.auth.currentSession;
+
+    if (session != null) {
+      final profileState = ref.watch(profileProvider);
+      if (!profileState.isLoading && profileState.data != null) {
+        Future.microtask(_navigate);
+      }
+    }
 
     return Scaffold(
       backgroundColor: isDark ? AppColors.darkBackground : AppColors.primary500,

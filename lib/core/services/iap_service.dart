@@ -15,15 +15,15 @@ class IapService {
 
   bool _isInitialized = false;
   bool _isAvailable = false;
-  bool _isLoading = false;
 
   final _premiumStatusController = StreamController<bool>.broadcast();
   Stream<bool> get premiumStatusStream => _premiumStatusController.stream;
 
   StreamSubscription<List<PurchaseDetails>>? _streamSubscription;
 
+  Completer<bool>? _restoreCompleter;
+
   bool get isAvailable => _isAvailable;
-  bool get isLoading => _isLoading;
 
   IapService._();
 
@@ -34,11 +34,9 @@ class IapService {
 
     try {
       _isAvailable = await _iap.isAvailable();
-      debugPrint('IAP available: $_isAvailable');
 
       if (_isAvailable) {
         _streamSubscription = _iap.purchaseStream.listen(_handlePurchase);
-        await restorePurchases();
       }
 
       _isInitialized = true;
@@ -49,20 +47,18 @@ class IapService {
 
   void _handlePurchase(List<PurchaseDetails> purchases) {
     for (final purchase in purchases) {
-      debugPrint('Purchase: ${purchase.productID} status=${purchase.status}');
-
       switch (purchase.status) {
         case PurchaseStatus.purchased:
         case PurchaseStatus.restored:
           if (purchase.productID == _productId) {
             _prefs.setBool(_premiumKey, true);
             _premiumStatusController.add(true);
+            _restoreCompleter?.complete(true);
           }
           _iap.completePurchase(purchase);
           break;
 
         case PurchaseStatus.error:
-          debugPrint('Purchase error: ${purchase.error?.message}');
           _iap.completePurchase(purchase);
           break;
 
@@ -74,10 +70,6 @@ class IapService {
           break;
       }
     }
-  }
-
-  Future<bool> checkPremiumStatus() async {
-    return _prefs.getBool(_premiumKey) ?? false;
   }
 
   Future<bool> isPremium() async {
@@ -92,7 +84,6 @@ class IapService {
       final response = await _iap.queryProductDetails({_productId});
 
       if (response.productDetails.isEmpty) {
-        debugPrint('Product not found: $_productId');
         return false;
       }
 
@@ -102,18 +93,27 @@ class IapService {
       );
       return true;
     } catch (e) {
-      debugPrint('Purchase failed: $e');
       return false;
     }
   }
 
-  Future<void> restorePurchases() async {
-    if (!_isAvailable) return;
+  Future<bool> restorePurchases({
+    Duration timeout = const Duration(seconds: 15),
+  }) async {
+    if (!_isAvailable) return false;
+
+    _restoreCompleter = Completer<bool>();
+
+    await _iap.restorePurchases();
 
     try {
-      await _iap.restorePurchases();
-    } catch (e) {
-      debugPrint('Restore failed: $e');
+      final result = await _restoreCompleter!.future.timeout(
+        timeout,
+        onTimeout: () => false,
+      );
+      return result;
+    } finally {
+      _restoreCompleter = null;
     }
   }
 

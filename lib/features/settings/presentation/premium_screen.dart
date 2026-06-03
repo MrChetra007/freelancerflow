@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/services/iap_service.dart';
 import '../../../core/widgets/celebration_dialog.dart';
@@ -422,24 +423,23 @@ class _PremiumScreenState extends ConsumerState<PremiumScreen> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Cancel Subscription?'),
+        title: const Text('Cancel Subscription'),
         content: const Text(
-          'Are you sure you want to cancel? You will still have access until the end of your billing period.',
+          'To cancel your subscription, please visit Google Play Store > '
+          'Subscriptions. You will still have access until the end of your '
+          'billing period.',
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Keep Subscription'),
+            child: const Text('Close'),
           ),
-          TextButton(
+          FilledButton(
             onPressed: () {
               Navigator.pop(context);
-              _cancelSubscription();
+              _openPlayStore();
             },
-            child: const Text(
-              'Cancel Subscription',
-              style: TextStyle(color: AppColors.error),
-            ),
+            child: const Text('Open Play Store'),
           ),
         ],
       ),
@@ -482,14 +482,21 @@ class _PremiumScreenState extends ConsumerState<PremiumScreen> {
     setState(() => _isLoading = true);
 
     try {
-      await IapService.instance.restorePurchases();
+      await IapService.instance.initialize();
+      final restored = await IapService.instance.restorePurchases();
       final isPremium = await IapService.instance.isPremium();
       ref.read(isPremiumProvider.notifier).setPremium(isPremium);
 
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(const SnackBar(content: Text('Purchases restored!')));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              restored
+                  ? 'Purchases restored!'
+                  : 'No previous purchases found.',
+            ),
+          ),
+        );
       }
     } catch (e) {
       if (mounted) {
@@ -504,20 +511,22 @@ class _PremiumScreenState extends ConsumerState<PremiumScreen> {
     }
   }
 
-  Future<void> _cancelSubscription() async {
-    await ref.read(isPremiumProvider.notifier).refresh();
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Subscription status refreshed.'),
-      ),
+  Future<void> _openPlayStore() async {
+    final uri = Uri.parse(
+      'https://play.google.com/store/account/subscriptions',
     );
-  }
-
-  void _openPlayStore() {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Open Google Play Store > Subscriptions to manage.'),
-      ),
-    );
+    if (await canLaunchUrl(uri)) {
+      await launchUrl(uri, mode: LaunchMode.externalApplication);
+    } else {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text(
+              'Please go to Play Store > Subscriptions to manage.',
+            ),
+          ),
+        );
+      }
+    }
   }
 }

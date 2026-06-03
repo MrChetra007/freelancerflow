@@ -29,6 +29,7 @@ CREATE TABLE profiles (
   default_payment_terms TEXT,                          -- v2: e.g. "Net 30", "Due on receipt"
   is_pro                BOOLEAN NOT NULL DEFAULT FALSE,
   pro_expires_at        TIMESTAMPTZ,
+  is_onboarding         BOOLEAN NOT NULL DEFAULT true,
   created_at            TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   updated_at            TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );

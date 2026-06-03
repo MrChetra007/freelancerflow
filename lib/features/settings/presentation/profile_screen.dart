@@ -1,7 +1,9 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:image_picker/image_picker.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/supabase/supabase_client.dart';
 import '../../../core/utils/haptic_utils.dart';
@@ -10,6 +12,7 @@ import '../../clients/data/clients_provider.dart';
 import '../../projects/data/projects_provider.dart';
 import '../../payments/data/payments_provider.dart';
 import '../../payments/domain/payment.dart';
+import '../data/profile_provider.dart';
 
 class ProfileScreen extends ConsumerStatefulWidget {
   const ProfileScreen({super.key});
@@ -21,6 +24,7 @@ class ProfileScreen extends ConsumerStatefulWidget {
 class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   bool _isEditing = false;
   bool _isLoading = false;
+  bool _isUploadingAvatar = false;
   final _nameController = TextEditingController();
   final _emailController = TextEditingController();
 
@@ -32,9 +36,10 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
 
   void _loadUserData() {
     final user = SupabaseConfig.client.auth.currentUser;
-    if (user != null) {
-      _nameController.text = user.userMetadata?['name'] ?? '';
-      _emailController.text = user.email ?? '';
+    _emailController.text = user?.email ?? '';
+    final profile = ref.read(profileProvider).data;
+    if (profile != null) {
+      _nameController.text = profile.fullName ?? '';
     }
   }
 
@@ -48,9 +53,9 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   Future<void> _updateProfile() async {
     setState(() => _isLoading = true);
     try {
-      await SupabaseConfig.client.auth.updateUser(
-        UserAttributes(data: {'name': _nameController.text.trim()}),
-      );
+      await ref.read(profileProvider.notifier).updateProfile({
+        'full_name': _nameController.text.trim(),
+      });
       HapticUtils.success();
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -69,14 +74,55 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     }
   }
 
+  Future<void> _pickAvatar() async {
+    final picker = ImagePicker();
+    final image = await picker.pickImage(
+      source: ImageSource.gallery,
+      maxWidth: 512,
+      maxHeight: 512,
+    );
+    if (image == null) return;
+
+    setState(() => _isUploadingAvatar = true);
+    try {
+      final user = SupabaseConfig.client.auth.currentUser!;
+      final ext = image.path.split('.').last;
+      final fileName = 'avatars/${user.id}.$ext';
+
+      await SupabaseConfig.client.storage
+          .from('avatars')
+          .upload(fileName, File(image.path));
+
+      final url = SupabaseConfig.client.storage.from('avatars').getPublicUrl(fileName);
+
+      await ref.read(profileProvider.notifier).updateAvatar(url);
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Avatar updated!')),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed to upload avatar: $e')),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _isUploadingAvatar = false);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    final user = SupabaseConfig.client.auth.currentUser;
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final profile = ref.watch(profileProvider);
     final clientsAsync = ref.watch(clientsProvider);
     final projectsAsync = ref.watch(projectsProvider);
     final paymentsAsync = ref.watch(paymentsProvider);
 
+    final name = profile.data?.fullName ?? '';
+    final email = profile.data?.email ?? '';
+    final avatarUrl = profile.data?.avatarUrl;
     final clientCount = clientsAsync.whenData((l) => l.length).value ?? 0;
     final projectCount = projectsAsync.whenData((l) => l.length).value ?? 0;
     final totalEarnings = paymentsAsync.whenData((list) => list
@@ -108,6 +154,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
               icon: const Icon(Icons.edit_outlined),
               onPressed: () {
                 HapticUtils.lightImpact();
+                _nameController.text = name;
                 setState(() => _isEditing = true);
               },
             ),
@@ -117,9 +164,9 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
         padding: const EdgeInsets.all(24),
         child: Column(
           children: [
-            _buildAvatar(user, isDark),
+            _buildAvatar(context, isDark, name, email, avatarUrl),
             const SizedBox(height: 24),
-            _buildInfoSection(context, isDark),
+            _buildInfoSection(context, isDark, profile.data?.createdAt),
             const SizedBox(height: 24),
             _buildStatsSection(context, isDark, clientCount, projectCount, totalEarnings),
             const SizedBox(height: 24),
@@ -130,48 +177,77 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     );
   }
 
-  Widget _buildAvatar(dynamic user, bool isDark) {
-    final name = user?.userMetadata?['name'] ?? '';
-    final email = user?.email ?? '';
-    final initials = _getInitials(name, email);
-
+  Widget _buildAvatar(BuildContext context, bool isDark, String name, String email, String? avatarUrl) {
     return Column(
       children: [
-        Container(
-          width: 120,
-          height: 120,
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-              colors: [AppColors.primary500, AppColors.primary700],
-            ),
-            shape: BoxShape.circle,
-            boxShadow: [
-              BoxShadow(
-                color: AppColors.primary500.withValues(alpha: 0.3),
-                blurRadius: 20,
-                offset: const Offset(0, 10),
+        GestureDetector(
+          onTap: _isUploadingAvatar ? null : _pickAvatar,
+          child: Stack(
+            children: [
+              Container(
+                width: 120,
+                height: 120,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  boxShadow: [
+                    BoxShadow(
+                      color: AppColors.primary500.withValues(alpha: 0.3),
+                      blurRadius: 20,
+                      offset: const Offset(0, 10),
+                    ),
+                  ],
+                ),
+                child: CircleAvatar(
+                  radius: 60,
+                  backgroundImage:
+                      avatarUrl != null ? NetworkImage(avatarUrl) : null,
+                  backgroundColor: AppColors.primary500,
+                  child: avatarUrl == null
+                      ? Text(
+                          _getInitials(name, email),
+                          style: const TextStyle(
+                            fontSize: 40,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
+                          ),
+                        )
+                      : null,
+                ),
+              ),
+              Positioned(
+                bottom: 0,
+                right: 0,
+                child: Container(
+                  width: 36,
+                  height: 36,
+                  decoration: BoxDecoration(
+                    color: AppColors.primary500,
+                    shape: BoxShape.circle,
+                    border: Border.all(color: Colors.white, width: 2),
+                  ),
+                  child: _isUploadingAvatar
+                      ? const SizedBox(
+                          width: 18,
+                          height: 18,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            valueColor:
+                                AlwaysStoppedAnimation<Color>(Colors.white),
+                          ),
+                        )
+                      : const Icon(Icons.camera_alt, size: 18, color: Colors.white),
+                ),
               ),
             ],
-          ),
-          child: Center(
-            child: Text(
-              initials,
-              style: const TextStyle(
-                fontSize: 40,
-                fontWeight: FontWeight.bold,
-                color: Colors.white,
-              ),
-            ),
           ),
         ),
         const SizedBox(height: 16),
         Text(
           name.isNotEmpty ? name : 'Freelancer',
-          style: Theme.of(
-            context,
-          ).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
+          style: Theme.of(context)
+              .textTheme
+              .headlineSmall
+              ?.copyWith(fontWeight: FontWeight.bold),
         ),
         const SizedBox(height: 4),
         Container(
@@ -200,7 +276,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     );
   }
 
-  Widget _buildInfoSection(BuildContext context, bool isDark) {
+  Widget _buildInfoSection(BuildContext context, bool isDark, DateTime? createdAt) {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
@@ -219,9 +295,10 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
         children: [
           Text(
             'Account Information',
-            style: Theme.of(
-              context,
-            ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+            style: Theme.of(context)
+                .textTheme
+                .titleMedium
+                ?.copyWith(fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 16),
           _buildInfoField(
@@ -245,9 +322,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
             context,
             icon: Icons.calendar_today_outlined,
             label: 'Member Since',
-            value: _formatDateString(
-              SupabaseConfig.client.auth.currentUser?.createdAt,
-            ),
+            value: _formatDate(createdAt),
           ),
         ],
       ),
@@ -378,9 +453,10 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
         children: [
           Text(
             'Quick Stats',
-            style: Theme.of(
-              context,
-            ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+            style: Theme.of(context)
+                .textTheme
+                .titleMedium
+                ?.copyWith(fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 16),
           Row(
@@ -478,9 +554,10 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
         children: [
           Text(
             'Quick Actions',
-            style: Theme.of(
-              context,
-            ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+            style: Theme.of(context)
+                .textTheme
+                .titleMedium
+                ?.copyWith(fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 16),
           _buildActionTile(
@@ -543,9 +620,10 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                   children: [
                     Text(
                       title,
-                      style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                        fontWeight: FontWeight.w500,
-                      ),
+                      style: Theme.of(context)
+                          .textTheme
+                          .bodyLarge
+                          ?.copyWith(fontWeight: FontWeight.w500),
                     ),
                     Text(
                       subtitle,
@@ -589,15 +667,5 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   String _formatDate(DateTime? date) {
     if (date == null) return 'Unknown';
     return '${date.day}/${date.month}/${date.year}';
-  }
-
-  String _formatDateString(String? dateStr) {
-    if (dateStr == null) return 'Unknown';
-    try {
-      final date = DateTime.parse(dateStr);
-      return '${date.day}/${date.month}/${date.year}';
-    } catch (e) {
-      return 'Unknown';
-    }
   }
 }

@@ -6,6 +6,7 @@ class ProfileData {
   final String? id;
   final String? fullName;
   final String? email;
+  final String? avatarUrl;
   final String? businessName;
   final String? businessEmail;
   final String? businessPhone;
@@ -17,6 +18,7 @@ class ProfileData {
   final String? defaultPaymentTerms;
   final bool isPro;
   final DateTime? proExpiresAt;
+  final bool isOnboarding;
   final DateTime createdAt;
   final DateTime updatedAt;
 
@@ -24,6 +26,7 @@ class ProfileData {
     this.id,
     this.fullName,
     this.email,
+    this.avatarUrl,
     this.businessName,
     this.businessEmail,
     this.businessPhone,
@@ -35,6 +38,7 @@ class ProfileData {
     this.defaultPaymentTerms,
     required this.isPro,
     this.proExpiresAt,
+    required this.isOnboarding,
     required this.createdAt,
     required this.updatedAt,
   });
@@ -50,6 +54,7 @@ class ProfileData {
       id: json['id'] as String?,
       fullName: json['full_name'] as String?,
       email: json['email'] as String?,
+      avatarUrl: json['avatar_url'] as String?,
       businessName: json['business_name'] as String?,
       businessEmail: json['business_email'] as String?,
       businessPhone: json['business_phone'] as String?,
@@ -61,6 +66,7 @@ class ProfileData {
       defaultPaymentTerms: json['default_payment_terms'] as String?,
       isPro: (json['is_pro'] as bool?) ?? false,
       proExpiresAt: parseDate(json['pro_expires_at']),
+      isOnboarding: (json['is_onboarding'] as bool?) ?? true,
       createdAt: parseDate(json['created_at']),
       updatedAt: parseDate(json['updated_at']),
     );
@@ -70,6 +76,7 @@ class ProfileData {
     return {
       'full_name': fullName,
       'email': email,
+      'avatar_url': avatarUrl,
       'business_name': businessName,
       'business_email': businessEmail,
       'business_phone': businessPhone,
@@ -81,6 +88,7 @@ class ProfileData {
       'default_payment_terms': defaultPaymentTerms,
       'is_pro': isPro,
       'pro_expires_at': proExpiresAt?.toIso8601String(),
+      'is_onboarding': isOnboarding,
       'updated_at': DateTime.now().toIso8601String(),
     };
   }
@@ -88,6 +96,7 @@ class ProfileData {
   ProfileData copyWith({
     String? fullName,
     String? email,
+    String? avatarUrl,
     String? businessName,
     String? businessEmail,
     String? businessPhone,
@@ -99,11 +108,13 @@ class ProfileData {
     String? defaultPaymentTerms,
     bool? isPro,
     DateTime? proExpiresAt,
+    bool? isOnboarding,
   }) {
     return ProfileData(
       id: id,
       fullName: fullName ?? this.fullName,
       email: email ?? this.email,
+      avatarUrl: avatarUrl ?? this.avatarUrl,
       businessName: businessName ?? this.businessName,
       businessEmail: businessEmail ?? this.businessEmail,
       businessPhone: businessPhone ?? this.businessPhone,
@@ -115,6 +126,7 @@ class ProfileData {
       defaultPaymentTerms: defaultPaymentTerms ?? this.defaultPaymentTerms,
       isPro: isPro ?? this.isPro,
       proExpiresAt: proExpiresAt ?? this.proExpiresAt,
+      isOnboarding: isOnboarding ?? this.isOnboarding,
       createdAt: createdAt,
       updatedAt: DateTime.now(),
     );
@@ -192,5 +204,27 @@ class ProfileNotifier extends StateNotifier<ProfileState> {
 
   Future<void> updateDefaultPaymentTerms(String? terms) async {
     await updateProfile({'default_payment_terms': terms});
+  }
+
+  Future<void> completeOnboarding() async {
+    await updateProfile({'is_onboarding': false});
+    if (state.data != null) {
+      state = state.copyWith(
+        data: state.data!.copyWith(isOnboarding: false),
+      );
+    }
+  }
+
+  Future<void> updateAvatar(String? avatarUrl) async {
+    if (avatarUrl != null) {
+      await updateProfile({'avatar_url': avatarUrl});
+    } else {
+      await updateProfile({'avatar_url': null});
+    }
+    if (state.data != null) {
+      state = state.copyWith(
+        data: state.data!.copyWith(avatarUrl: avatarUrl),
+      );
+    }
   }
 }

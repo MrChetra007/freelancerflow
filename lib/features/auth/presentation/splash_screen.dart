@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/supabase/supabase_client.dart';
 import '../../../core/theme/app_colors.dart';
+import '../../settings/data/profile_provider.dart';
 
 class SplashScreen extends ConsumerStatefulWidget {
   const SplashScreen({super.key});
@@ -24,7 +25,12 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
 
     final session = SupabaseConfig.client.auth.currentSession;
     if (session != null) {
-      context.go('/dashboard');
+      final profile = ref.read(profileProvider);
+      if (profile.data?.isOnboarding == true) {
+        context.go('/onboarding');
+      } else {
+        context.go('/dashboard');
+      }
     } else {
       context.go('/login');
     }

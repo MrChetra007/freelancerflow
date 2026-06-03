@@ -5,6 +5,7 @@ import 'package:intl/intl.dart';
 
 import '../../../../core/theme/app_colors.dart';
 import '../../settings/data/profile_provider.dart';
+import '../../settings/data/premium_provider.dart';
 import '../../../../core/utils/currency_formatter.dart';
 import '../../../../core/utils/duration_formatter.dart';
 import '../../../../core/widgets/loading_widget.dart';
@@ -667,6 +668,7 @@ class _ProjectExpensesTab extends ConsumerWidget {
     final expensesAsync = ref.watch(
       expensesProvider(projectId: project.id),
     );
+    final isPremium = ref.watch(isPremiumProvider);
 
     return Column(
       children: [
@@ -732,16 +734,113 @@ class _ProjectExpensesTab extends ConsumerWidget {
             ],
           ),
           child: FilledButton.icon(
-            onPressed: () =>
-                context.push(
-                  '/expenses/add',
-                  extra: {'projectId': project.id, 'clientId': project.clientId},
-                ),
-            icon: const Icon(Icons.add),
+            onPressed: isPremium
+                ? () => context.push(
+                      '/expenses/add',
+                      extra: {
+                        'projectId': project.id,
+                        'clientId': project.clientId,
+                      },
+                    )
+                : () => _showExpenseProPrompt(context),
+            icon: isPremium
+                ? const Icon(Icons.add)
+                : const Icon(Icons.workspace_premium, size: 18),
             label: const Text('Add Expense'),
+            style: isPremium
+                ? null
+                : FilledButton.styleFrom(
+                    backgroundColor: Colors.amber.shade700,
+                    foregroundColor: Colors.white,
+                  ),
           ),
         ),
       ],
+    );
+  }
+
+  void _showExpenseProPrompt(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      builder: (context) => SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(24, 8, 24, 32),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Center(
+                child: Container(
+                  width: 40,
+                  height: 4,
+                  decoration: BoxDecoration(
+                    color: Colors.grey.shade300,
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 24),
+              Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [Colors.amber.shade600, Colors.amber.shade800],
+                  ),
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(
+                  Icons.workspace_premium,
+                  color: Colors.white,
+                  size: 48,
+                ),
+              ),
+              const SizedBox(height: 24),
+              const Text(
+                'Upgrade to Pro',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                'Expense tracking is available for Pro users only',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: 14,
+                  color: Colors.grey.shade600,
+                ),
+              ),
+              const SizedBox(height: 32),
+              FilledButton.icon(
+                onPressed: () {
+                  context.pop();
+                  context.push('/premium');
+                },
+                icon: const Icon(Icons.workspace_premium),
+                label: const Text('Upgrade Now'),
+                style: FilledButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  textStyle: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 12),
+              TextButton(
+                onPressed: () => context.pop(),
+                child: const Text('Maybe Later'),
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 

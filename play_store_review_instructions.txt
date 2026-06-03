@@ -7,7 +7,9 @@ INSTRUCTIONS FOR REVIEWER:
 1. Download and install the app
 2. On the login screen, choose "Sign Up"
 3. Create a free account with any email and password (or use Google Sign-In)
-4. After signup, the reviewer will have full access to all app features
+4. After signup, the reviewer will see the onboarding flow (4 slides)
+5. Complete onboarding or tap "Skip" to reach the dashboard
+6. The reviewer will have full access to all app features
 
 OR use these pre-created test credentials:
 
@@ -15,16 +17,88 @@ Email: freelancerflow.test@gmail.com
 Password: TestPass123!
 
 NOTE: Reviewer may need to verify the email to access all features.
-If email verification is required, please use the "Continue with Google" option 
+If email verification is required, please use the "Continue with Google" option
 which bypasses email verification.
 
 FEATURES TO TEST:
-- d/Edit clients
-- Create projects with milestones
-- Log payments (Bank Transfer, PayPal, etc.)
-- Create invoices with line items
-- Generate PDF invoices
-- Dark/Light theme toggle
-- Profile settings
-Dashboard with stats and activity
-- Ad
+
+1. DASHBOARD
+   - View stats (total clients, projects, income, pending invoices)
+   - Activity feed with recent entries
+   - Active timer banner (shows running timer across screens)
+   - Quick action buttons
+
+2. CLIENTS
+   - Create/Edit clients with contact info, default hourly rate
+   - View client detail with projects, time entries, expenses tabs
+   - Search/filter client list
+
+3. PROJECTS
+   - Create projects with budget, deadline, status, currency
+   - Project detail with expandable header (status badge, budget, deadline, title, description)
+   - Collapsed header shows status badge + project title
+   - Milestones with completion tracking
+   - Tabs: Details, Time Entries, Expenses
+
+4. TIME TRACKING (v2)
+   - Start/Stop live timer from project detail screen
+   - Add manual time entries with description, project, hourly rate
+   - Hourly rate auto-fetches from client profile (highest priority) or user profile
+   - Global floating timer overlay (top center, 50% width, pulsing green dot)
+   - Tap overlay to navigate to time tracking screen
+   - Stop timer from overlay
+   - Weekly/Monthly/All time filters
+   - Total hours and billable amount per entry
+   - Edit/Delete entries
+
+5. EXPENSES (Pro feature)
+   - Add expenses with category, description, amount, receipt upload
+   - Auto-fills project + client when adding from project detail screen
+   - Receipt upload requires Pro subscription
+   - Expense summary per project/client
+   - Pro gate on Add Expense button (amber lock, upgrade prompt)
+   - Edit/Delete expenses
+
+6. INVOICES (Pro feature)
+   - Create invoices with line items (description, qty, rate)
+   - Auto-populates from unbilled time entries
+   - Set due date, notes, payment terms
+   - Mark as sent/paid/overdue
+   - Generate PDF invoices
+   - Pro gate on invoice creation
+
+7. PAYMENTS
+   - Log payments (Bank Transfer, PayPal, Credit Card, Cash, etc.)
+   - View payment history per client
+   - Payment summary stats
+
+8. NOTIFICATIONS
+   - Test notification button (free feature)
+   - Scheduled notifications for milestones (free feature)
+   - Payment reminders
+
+9. SETTINGS
+   - Profile settings (name, business info, currency, timezone)
+   - Default hourly rate
+   - Dark/Light theme toggle
+   - Notification preferences
+   - Premium subscription management
+
+10. PREMIUM (In-App Purchase)
+    - Upgrade to Pro via Google Play
+    - Restore purchases (with proper loading state)
+    - Cancel subscription (opens Google Play Store)
+    - Pro features: Expenses, Invoices, Receipt upload, Unbilled time filters
+
+11. UI/UX
+    - Blue professional theme with consistent color scheme
+    - Clean architecture with feature-first organization
+    - Responsive layout
+    - Loading states and error handling throughout
+
+KNOWN LIMITATIONS:
+- No server-side receipt validation (premium stored in local SharedPreferences)
+- No background WorkManager tasks for recurring invoice generation
+- Milestone scheduling helper exists but not wired to WorkManager
+- Notification tap navigation logs but does not navigate to specific screen
+- Pro status checked client-side only

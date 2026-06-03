@@ -582,6 +582,16 @@ $$ LANGUAGE plpgsql SECURITY DEFINER;
 
 
 -- ============================================================
+-- STEP X — Add onboarding flag to profiles
+-- ============================================================
+ALTER TABLE profiles
+  ADD COLUMN IF NOT EXISTS is_onboarding BOOLEAN NOT NULL DEFAULT true;
+
+-- Existing users skip onboarding
+UPDATE profiles SET is_onboarding = false WHERE is_onboarding = true;
+
+
+-- ============================================================
 -- DONE
 -- v1 → v2 migration complete
 -- ============================================================

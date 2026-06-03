@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../features/auth/presentation/splash_screen.dart';
 import '../../features/auth/presentation/login_screen.dart';
+import '../../features/auth/presentation/onboarding_screen.dart';
 import '../../features/dashboard/presentation/dashboard_screen.dart';
 import '../../features/clients/presentation/clients_screen.dart';
 import '../../features/clients/presentation/add_client_screen.dart';
@@ -61,14 +62,16 @@ GoRouter createRouter(SupabaseAuthNotifier authNotifier) {
     refreshListenable: authNotifier,
     redirect: (context, state) {
       final isLoggedIn = SupabaseConfig.client.auth.currentSession != null;
-      final isOnSplash = state.matchedLocation == '/splash';
-      final isOnLogin = state.matchedLocation == '/login';
+      final location = state.matchedLocation;
+      final isOnSplash = location == '/splash';
+      final isOnLogin = location == '/login';
+      final isPublic = isOnSplash || isOnLogin || location == '/onboarding';
 
-      if (!isLoggedIn && !isOnLogin && !isOnSplash) {
+      if (!isLoggedIn && !isPublic) {
         return '/login';
       }
 
-      if (isLoggedIn && (isOnLogin || isOnSplash)) {
+      if (isLoggedIn && isOnLogin) {
         return '/dashboard';
       }
 
@@ -90,6 +93,16 @@ GoRouter createRouter(SupabaseAuthNotifier authNotifier) {
         pageBuilder: (context, state) => CustomTransitionPage(
           key: state.pageKey,
           child: const LoginScreen(),
+          transitionsBuilder: (context, animation, secondaryAnimation, child) {
+            return FadeTransition(opacity: animation, child: child);
+          },
+        ),
+      ),
+      GoRoute(
+        path: '/onboarding',
+        pageBuilder: (context, state) => CustomTransitionPage(
+          key: state.pageKey,
+          child: const OnboardingScreen(),
           transitionsBuilder: (context, animation, secondaryAnimation, child) {
             return FadeTransition(opacity: animation, child: child);
           },

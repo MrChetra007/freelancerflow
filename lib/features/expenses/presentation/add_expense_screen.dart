@@ -20,8 +20,10 @@ import '../data/expense_provider.dart';
 
 class AddExpenseScreen extends ConsumerWidget {
   final Expense? expense;
+  final String? projectId;
+  final String? clientId;
 
-  const AddExpenseScreen({super.key, this.expense});
+  const AddExpenseScreen({super.key, this.expense, this.projectId, this.clientId});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -33,15 +35,17 @@ class AddExpenseScreen extends ConsumerWidget {
         ),
         title: Text(expense != null ? 'Edit Expense' : 'Add Expense'),
       ),
-      body: _ExpenseForm(expense: expense),
+      body: _ExpenseForm(expense: expense, projectId: projectId, clientId: clientId),
     );
   }
 }
 
 class _ExpenseForm extends ConsumerStatefulWidget {
   final Expense? expense;
+  final String? projectId;
+  final String? clientId;
 
-  const _ExpenseForm({this.expense});
+  const _ExpenseForm({this.expense, this.projectId, this.clientId});
 
   @override
   ConsumerState<_ExpenseForm> createState() => _ExpenseFormState();
@@ -74,6 +78,9 @@ class _ExpenseFormState extends ConsumerState<_ExpenseForm> {
       _receiptUrl = widget.expense!.receiptUrl;
       _selectedClientId = widget.expense!.clientId;
       _selectedProjectId = widget.expense!.projectId;
+    } else if (widget.projectId != null) {
+      _selectedProjectId = widget.projectId;
+      _selectedClientId = widget.clientId;
     }
   }
 

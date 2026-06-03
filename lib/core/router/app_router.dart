@@ -414,9 +414,12 @@ GoRouter createRouter(SupabaseAuthNotifier authNotifier) {
       GoRoute(
         path: '/expenses/add',
         pageBuilder: (context, state) {
+          final extra = state.extra as Map<String, dynamic>?;
+          final projectId = extra?['projectId'] as String?;
+          final clientId = extra?['clientId'] as String?;
           return CustomTransitionPage(
             key: state.pageKey,
-            child: AddExpenseScreen(),
+            child: AddExpenseScreen(projectId: projectId, clientId: clientId),
             transitionsBuilder:
                 (context, animation, secondaryAnimation, child) {
               return SlideTransition(

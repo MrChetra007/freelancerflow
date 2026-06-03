@@ -733,7 +733,10 @@ class _ProjectExpensesTab extends ConsumerWidget {
           ),
           child: FilledButton.icon(
             onPressed: () =>
-                context.push('/expenses/add', extra: {'projectId': project.id}),
+                context.push(
+                  '/expenses/add',
+                  extra: {'projectId': project.id, 'clientId': project.clientId},
+                ),
             icon: const Icon(Icons.add),
             label: const Text('Add Expense'),
           ),

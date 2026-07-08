@@ -1,7 +1,7 @@
 name: client_manager
 description: "FreelanceFlow - Freelance Client Manager"
 publish_to: "none"
-version: 1.0.0+5
+version: 1.0.0+6
 
 environment:
   sdk: ^3.11.4

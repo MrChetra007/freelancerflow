@@ -51,7 +51,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
     try {
       await SupabaseConfig.client.auth.signInWithOAuth(
         OAuthProvider.google,
-        redirectTo: 'com.freelanceflow.clientmanager://login-callback',
+        redirectTo: 'com.sozin.freelanceflow://login-callback',
         queryParams: {'access_type': 'offline'},
       );
     } catch (e) {

@@ -254,6 +254,7 @@ class _CreateInvoiceScreenState extends ConsumerState<CreateInvoiceScreen> {
       }
 
       if (mounted) {
+        ref.invalidate(invoicesProvider);
         context.pop();
       }
     } catch (e) {

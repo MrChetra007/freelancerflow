@@ -11,11 +11,16 @@ import '../../projects/domain/project.dart';
 import '../../settings/data/premium_provider.dart';
 import 'widgets/active_timer_banner.dart';
 
-class DashboardScreen extends ConsumerWidget {
+class DashboardScreen extends ConsumerStatefulWidget {
   const DashboardScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<DashboardScreen> createState() => _DashboardScreenState();
+}
+
+class _DashboardScreenState extends ConsumerState<DashboardScreen> {
+  @override
+  Widget build(BuildContext context) {
     final stats = ref.watch(dashboardStatsProvider);
     final isPremium = ref.watch(isPremiumProvider);
 
@@ -59,6 +64,7 @@ class DashboardScreen extends ConsumerWidget {
           ),
         ],
       ),
+      floatingActionButton: const _QuickActionsFab(),
       body: stats.when(
         data: (data) => RefreshIndicator(
           onRefresh: () async {
@@ -78,8 +84,6 @@ class DashboardScreen extends ConsumerWidget {
                 _buildMonthlyEarningsChartPlaceholder(context),
               const SizedBox(height: 24),
               _buildProjectStatusChart(context, data),
-              const SizedBox(height: 24),
-              _buildQuickActions(context),
             ],
           ),
         ),
@@ -677,43 +681,152 @@ class DashboardScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildQuickActions(BuildContext context) {
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Quick Actions',
-              style: Theme.of(
-                context,
-              ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 16),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: [
-                _QuickAction(
-                  icon: Icons.receipt_long_outlined,
-                  label: 'Expenses',
-                  onTap: () => context.push('/expenses'),
-                ),
-                _QuickAction(
-                  icon: Icons.timer_outlined,
-                  label: 'Time Tracking',
-                  onTap: () => context.push('/time-tracking'),
-                ),
-                _QuickAction(
-                  icon: Icons.repeat_outlined,
-                  label: 'Recurring',
-                  onTap: () => context.push('/recurring'),
-                ),
-              ],
-            ),
-          ],
+}
+
+class _QuickActionsFab extends StatefulWidget {
+  const _QuickActionsFab();
+
+  @override
+  State<_QuickActionsFab> createState() => _QuickActionsFabState();
+}
+
+class _QuickActionsFabState extends State<_QuickActionsFab>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _controller;
+  bool _isOpen = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 250),
+    );
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  void _toggle() {
+    setState(() {
+      _isOpen = !_isOpen;
+      if (_isOpen) {
+        _controller.forward();
+      } else {
+        _controller.reverse();
+      }
+    });
+  }
+
+  void _navigateAndClose(BuildContext context, String route) {
+    _toggle();
+    context.push(route);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.end,
+      children: [
+        _buildAction(
+          icon: Icons.repeat_outlined,
+          label: 'Recurring',
+          delay: 0.15,
+          onTap: () => _navigateAndClose(context, '/recurring'),
         ),
+        _buildAction(
+          icon: Icons.timer_outlined,
+          label: 'Time Tracking',
+          delay: 0.1,
+          onTap: () => _navigateAndClose(context, '/time-tracking'),
+        ),
+        _buildAction(
+          icon: Icons.receipt_long_outlined,
+          label: 'Expenses',
+          delay: 0.05,
+          onTap: () => _navigateAndClose(context, '/expenses'),
+        ),
+        const SizedBox(height: 12),
+        FloatingActionButton(
+          onPressed: _toggle,
+          shape: const CircleBorder(),
+          backgroundColor: AppColors.primary500,
+          child: AnimatedBuilder(
+            animation: _controller,
+            builder: (context, child) {
+              return Transform.rotate(
+                angle: _controller.value * 0.75,
+                child: Icon(
+                  _isOpen ? Icons.close : Icons.add_rounded,
+                  color: Colors.white,
+                ),
+              );
+            },
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildAction({
+    required IconData icon,
+    required String label,
+    required double delay,
+    required VoidCallback onTap,
+  }) {
+    final animation = Tween<Offset>(
+      begin: const Offset(0, 1),
+      end: Offset.zero,
+    ).animate(
+      CurvedAnimation(
+        parent: _controller,
+        curve: Interval(delay, delay + 0.15, curve: Curves.easeOut),
       ),
+    );
+
+    return AnimatedBuilder(
+      animation: animation,
+      builder: (context, child) {
+        return Transform.translate(
+          offset: Offset(0, 80 * (1 - animation.value.dy)),
+          child: Opacity(
+            opacity: animation.value.dy.clamp(0, 1),
+            child: Padding(
+              padding: const EdgeInsets.only(bottom: 8),
+              child: InkWell(
+                onTap: onTap,
+                borderRadius: BorderRadius.circular(24),
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).colorScheme.surface,
+                    borderRadius: BorderRadius.circular(24),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withValues(alpha: 0.15),
+                        blurRadius: 8,
+                        offset: const Offset(0, 2),
+                      ),
+                    ],
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(icon, color: AppColors.primary500, size: 20),
+                      const SizedBox(width: 8),
+                      Text(label, style: const TextStyle(fontSize: 13)),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
+        );
+      },
     );
   }
 }
@@ -775,43 +888,4 @@ class _StatCard extends StatelessWidget {
   }
 }
 
-class _QuickAction extends StatelessWidget {
-  final IconData icon;
-  final String label;
-  final VoidCallback onTap;
 
-  const _QuickAction({
-    required this.icon,
-    required this.label,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(8),
-      child: Padding(
-        padding: const EdgeInsets.all(8),
-        child: Column(
-          children: [
-            Container(
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: AppColors.primary500.withValues(alpha: 0.1),
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Icon(icon, color: AppColors.primary500, size: 24),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              label,
-              style: const TextStyle(fontSize: 12),
-              textAlign: TextAlign.center,
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}

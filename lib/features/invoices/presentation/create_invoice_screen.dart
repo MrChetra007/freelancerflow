@@ -563,7 +563,7 @@ class _CreateInvoiceScreenState extends ConsumerState<CreateInvoiceScreen> {
                         if (_isRecurring) ...[
                           const SizedBox(height: 16),
                           DropdownButtonFormField<RecurrenceFrequency>(
-                            value: _recurringFrequency,
+                            initialValue: _recurringFrequency,
                             decoration: const InputDecoration(
                               labelText: 'Frequency',
                               border: OutlineInputBorder(),
@@ -639,71 +639,152 @@ class _CreateInvoiceScreenState extends ConsumerState<CreateInvoiceScreen> {
     final item = _lineItems[index];
     return Card(
       margin: const EdgeInsets.only(bottom: 12),
-      child: Padding(
-        padding: const EdgeInsets.all(12),
-        child: Column(
+      clipBehavior: Clip.antiAlias,
+      child: IntrinsicHeight(
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Row(
-              children: [
-                Expanded(
-                  child: TextField(
-                    controller: item.descriptionController,
-                    decoration: InputDecoration(
-                      labelText: 'Description ${index + 1}',
-                      isDense: true,
-                    ),
-                    onChanged: (_) => setState(() {}),
-                  ),
-                ),
-                if (_lineItems.length > 1)
-                  IconButton(
-                    icon: const Icon(
-                      Icons.delete_outline,
-                      color: AppColors.error,
-                    ),
-                    onPressed: () => _removeLineItem(index),
-                  ),
-              ],
+            Container(
+              width: 4,
+              color: AppColors.primary300,
             ),
-            const SizedBox(height: 8),
-            Row(
-              children: [
-                Expanded(
-                  child: TextField(
-                    controller: item.quantityController,
-                    decoration: const InputDecoration(
-                      labelText: 'Qty',
-                      isDense: true,
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(12, 12, 8, 12),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 6,
+                            vertical: 2,
+                          ),
+                          decoration: BoxDecoration(
+                            color: AppColors.primary50,
+                            borderRadius: BorderRadius.circular(4),
+                          ),
+                          child: Text(
+                            '${index + 1}',
+                            style: const TextStyle(
+                              fontSize: 11,
+                              fontWeight: FontWeight.w600,
+                              color: AppColors.primary600,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: TextField(
+                            controller: item.descriptionController,
+                            decoration: const InputDecoration(
+                              hintText: 'Description',
+                              border: InputBorder.none,
+                              contentPadding: EdgeInsets.zero,
+                            ),
+                            style: const TextStyle(
+                              fontWeight: FontWeight.w500,
+                              fontSize: 15,
+                            ),
+                            onChanged: (_) => setState(() {}),
+                          ),
+                        ),
+                        if (_lineItems.length > 1)
+                          SizedBox(
+                            height: 24,
+                            width: 24,
+                            child: IconButton(
+                              padding: EdgeInsets.zero,
+                              icon: const Icon(
+                                Icons.remove_circle_outline,
+                                size: 20,
+                                color: AppColors.error,
+                              ),
+                              onPressed: () => _removeLineItem(index),
+                            ),
+                          ),
+                      ],
                     ),
-                    keyboardType: TextInputType.number,
-                    onChanged: (_) => setState(() {}),
-                  ),
-                ),
-                const SizedBox(width: 8),
-                Expanded(
-                  flex: 2,
-                  child: TextField(
-                    controller: item.unitPriceController,
-                    decoration: const InputDecoration(
-                      labelText: 'Unit Price',
-                      isDense: true,
-                      prefixText: '\$ ',
+                    const SizedBox(height: 10),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: TextField(
+                            controller: item.quantityController,
+                            decoration: InputDecoration(
+                              labelText: 'Qty',
+                              contentPadding: const EdgeInsets.symmetric(
+                                horizontal: 12,
+                                vertical: 12,
+                              ),
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                            ),
+                            keyboardType: TextInputType.number,
+                            style: const TextStyle(fontSize: 14),
+                            onChanged: (_) => setState(() {}),
+                          ),
+                        ),
+                        const SizedBox(width: 10),
+                        Expanded(
+                          flex: 2,
+                          child: TextField(
+                            controller: item.unitPriceController,
+                            decoration: InputDecoration(
+                              labelText: 'Unit Price',
+                              prefixText: '\$ ',
+                              contentPadding: const EdgeInsets.symmetric(
+                                horizontal: 12,
+                                vertical: 12,
+                              ),
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                            ),
+                            keyboardType: TextInputType.number,
+                            style: const TextStyle(fontSize: 14),
+                            onChanged: (_) => setState(() {}),
+                          ),
+                        ),
+                        const SizedBox(width: 10),
+                        Container(
+                          constraints: const BoxConstraints(minWidth: 80),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 14,
+                            vertical: 10,
+                          ),
+                          decoration: BoxDecoration(
+                            color: AppColors.primary500.withValues(alpha: 0.08),
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.end,
+                            children: [
+                              Text(
+                                'Total',
+                                style: TextStyle(
+                                  fontSize: 11,
+                                  color: AppColors.lightTextSecondary,
+                                ),
+                              ),
+                              Text(
+                                '\$${item.total.toStringAsFixed(2)}',
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.w700,
+                                  fontSize: 15,
+                                  color: AppColors.primary600,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
                     ),
-                    keyboardType: TextInputType.number,
-                    onChanged: (_) => setState(() {}),
-                  ),
+                  ],
                 ),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: InputDecorator(
-                    decoration: const InputDecoration(
-                      labelText: 'Total',
-                      isDense: true,
-                    ),
-                    child: Text('\$${item.total.toStringAsFixed(2)}'),
-                  ),
-                ),
-              ],
+              ),
             ),
           ],
         ),

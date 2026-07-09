@@ -6,13 +6,20 @@ import '../../../../core/widgets/animated_list_item.dart';
 import '../../../../core/widgets/loading_widget.dart';
 import '../../../../core/widgets/pro_gate.dart';
 import '../../../../core/utils/haptic_utils.dart';
-import '../../../../features/settings/data/premium_provider.dart';
 import '../data/invoices_provider.dart';
 import '../domain/invoice.dart';
 import 'widgets/invoice_card.dart';
 
 class InvoicesScreen extends ConsumerWidget {
   const InvoicesScreen({super.key});
+
+  static const _statusFilters = <InvoiceStatus?>[
+    null,
+    InvoiceStatus.draft,
+    InvoiceStatus.sent,
+    InvoiceStatus.paid,
+    InvoiceStatus.overdue,
+  ];
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -33,7 +40,7 @@ class InvoicesScreen extends ConsumerWidget {
       body: Column(
         children: [
           Padding(
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
             child: TextField(
               decoration: InputDecoration(
                 hintText: 'Search invoices...',
@@ -50,26 +57,49 @@ class InvoicesScreen extends ConsumerWidget {
                   ref.read(invoiceSearchQueryProvider.notifier).state = value,
             ),
           ),
-          if (filter != null)
-            Padding(
+          const SizedBox(height: 12),
+          SizedBox(
+            height: 36,
+            child: ListView(
+              scrollDirection: Axis.horizontal,
               padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: Row(
-                children: [
-                  Chip(
-                    label: Text(_getStatusLabel(filter)),
-                    deleteIcon: const Icon(Icons.close, size: 18),
-                    onDeleted: () =>
-                        ref.read(invoiceStatusFilterProvider.notifier).state =
-                            null,
+              children: _statusFilters.map((s) {
+                final isActive = filter == s;
+                final label = s == null ? 'All' : _getStatusLabel(s);
+                return Padding(
+                  padding: const EdgeInsets.only(right: 8),
+                  child: FilterChip(
+                    label: Text(label),
+                    selected: isActive,
+                    onSelected: (_) => ref
+                        .read(invoiceStatusFilterProvider.notifier)
+                        .state = s,
+                    selectedColor: AppColors.primary500.withValues(alpha: 0.15),
+                    checkmarkColor: AppColors.primary500,
+                    labelStyle: TextStyle(
+                      color: isActive ? AppColors.primary500 : null,
+                      fontWeight: isActive ? FontWeight.w600 : null,
+                    ),
+                    side: BorderSide(
+                      color: isActive
+                          ? AppColors.primary500
+                          : AppColors.lightBorder,
+                    ),
                   ),
-                ],
-              ),
+                );
+              }).toList(),
             ),
+          ),
+          const SizedBox(height: 8),
           Expanded(
             child: invoices.when(
               data: (list) {
                 if (list.isEmpty) {
-                  return _buildEmptyState(context, filter != null || searchQuery.isNotEmpty, searchQuery.isNotEmpty);
+                  return _buildEmptyState(
+                    context,
+                    filter != null || searchQuery.isNotEmpty,
+                    searchQuery.isNotEmpty,
+                  );
                 }
                 return RefreshIndicator(
                   onRefresh: () =>
@@ -98,7 +128,7 @@ class InvoicesScreen extends ConsumerWidget {
                   ),
                 );
               },
-              loading: () => const Center(child: LoadingDots()),
+              loading: () => const _InvoiceListShimmer(),
               error: (e, _) => ErrorDisplay(
                 message: e.toString(),
                 onRetry: () => ref.invalidate(invoicesProvider),
@@ -118,14 +148,17 @@ class InvoicesScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildEmptyState(BuildContext context, bool isFiltered, bool isSearching) {
+  Widget _buildEmptyState(
+      BuildContext context, bool isFiltered, bool isSearching) {
     final isSearchOrFilter = isSearching || isFiltered;
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Icon(
-            isSearchOrFilter ? Icons.search_off : Icons.receipt_long_outlined,
+            isSearchOrFilter
+                ? Icons.search_off
+                : Icons.receipt_long_outlined,
             size: 64,
             color: AppColors.lightTextSecondary,
           ),
@@ -136,10 +169,12 @@ class InvoicesScreen extends ConsumerWidget {
           ),
           const SizedBox(height: 8),
           Text(
-            isSearchOrFilter ? 'Try a different search term' : 'Create your first invoice',
+            isSearchOrFilter
+                ? 'Try a different search term'
+                : 'Create your first invoice',
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-              color: AppColors.lightTextSecondary,
-            ),
+                  color: AppColors.lightTextSecondary,
+                ),
           ),
         ],
       ),
@@ -240,6 +275,31 @@ class InvoicesScreen extends ConsumerWidget {
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _InvoiceListShimmer extends StatelessWidget {
+  const _InvoiceListShimmer();
+
+  @override
+  Widget build(BuildContext context) {
+    return ListView.builder(
+      padding: const EdgeInsets.all(16),
+      itemCount: 5,
+      itemBuilder: (context, index) => Padding(
+        padding: const EdgeInsets.only(bottom: 12),
+        child: LoadingShimmer(
+          isLoading: true,
+          child: Container(
+            height: 100,
+            decoration: BoxDecoration(
+              color: Colors.grey.shade300,
+              borderRadius: BorderRadius.circular(12),
+            ),
+          ),
+        ),
       ),
     );
   }

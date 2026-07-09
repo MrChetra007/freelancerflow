@@ -5,6 +5,7 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../core/utils/currency_formatter.dart';
 import '../../../../core/utils/date_formatter.dart';
 import '../../../../core/utils/pdf_generator.dart';
+import '../../../../core/widgets/loading_widget.dart';
 import '../../../../features/settings/data/premium_provider.dart';
 import 'package:client_manager/features/clients/data/clients_provider.dart';
 import '../data/invoices_provider.dart';
@@ -162,14 +163,23 @@ class _InvoiceDetailScreenState extends ConsumerState<InvoiceDetailScreen> {
     if (_isLoading) {
       return Scaffold(
         appBar: AppBar(title: const Text('Invoice')),
-        body: const Center(child: CircularProgressIndicator()),
+        body: const _InvoiceDetailShimmer(),
       );
     }
 
     if (_invoice == null) {
       return Scaffold(
         appBar: AppBar(title: const Text('Invoice')),
-        body: const Center(child: Text('Invoice not found')),
+        body: const Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(Icons.receipt_long_outlined, size: 64, color: Colors.grey),
+              SizedBox(height: 16),
+              Text('Invoice not found'),
+            ],
+          ),
+        ),
       );
     }
 
@@ -301,27 +311,56 @@ class _InvoiceDetailScreenState extends ConsumerState<InvoiceDetailScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              'Bill To',
-              style: TextStyle(
-                color: AppColors.lightTextSecondary,
-                fontSize: 12,
-              ),
+            Row(
+              children: [
+                CircleAvatar(
+                  radius: 20,
+                  backgroundColor: AppColors.primary50,
+                  child: Text(
+                    (_client?.name ?? '?')[0].toUpperCase(),
+                    style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                      color: AppColors.primary600,
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        _client?.name ?? 'Unknown',
+                        style: const TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16,
+                        ),
+                      ),
+                      if (_client?.company != null)
+                        Text(
+                          _client!.company!,
+                          style: TextStyle(
+                            color: AppColors.lightTextSecondary,
+                            fontSize: 13,
+                          ),
+                        ),
+                    ],
+                  ),
+                ),
+              ],
             ),
-            const SizedBox(height: 8),
-            Text(
-              _client?.name ?? 'Unknown',
-              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-            ),
-            if (_client?.company != null) ...[
-              const SizedBox(height: 4),
-              Text(_client!.company!),
-            ],
             if (_client?.email != null) ...[
-              const SizedBox(height: 4),
-              Text(
-                _client!.email!,
-                style: TextStyle(color: AppColors.lightTextSecondary),
+              const Divider(height: 24),
+              Row(
+                children: [
+                  Icon(Icons.email_outlined,
+                      size: 16, color: AppColors.lightTextSecondary),
+                  const SizedBox(width: 8),
+                  Text(
+                    _client!.email!,
+                    style: TextStyle(color: AppColors.lightTextSecondary),
+                  ),
+                ],
               ),
             ],
           ],
@@ -337,40 +376,54 @@ class _InvoiceDetailScreenState extends ConsumerState<InvoiceDetailScreen> {
         child: Row(
           children: [
             Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+              child: Row(
                 children: [
-                  Text(
-                    'Issue Date',
-                    style: TextStyle(
-                      color: AppColors.lightTextSecondary,
-                      fontSize: 12,
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    DateFormatter.formatDate(_invoice!.issueDate),
-                    style: const TextStyle(fontWeight: FontWeight.w500),
+                  Icon(Icons.calendar_today,
+                      size: 16, color: AppColors.primary500),
+                  const SizedBox(width: 8),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Issue Date',
+                        style: TextStyle(
+                          color: AppColors.lightTextSecondary,
+                          fontSize: 12,
+                        ),
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        DateFormatter.formatDate(_invoice!.issueDate),
+                        style: const TextStyle(fontWeight: FontWeight.w600),
+                      ),
+                    ],
                   ),
                 ],
               ),
             ),
             if (_invoice!.dueDate != null)
               Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+                child: Row(
                   children: [
-                    Text(
-                      'Due Date',
-                      style: TextStyle(
-                        color: AppColors.lightTextSecondary,
-                        fontSize: 12,
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      DateFormatter.formatDate(_invoice!.dueDate!),
-                      style: const TextStyle(fontWeight: FontWeight.w500),
+                    Icon(Icons.event,
+                        size: 16, color: AppColors.statusOverdue),
+                    const SizedBox(width: 8),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Due Date',
+                          style: TextStyle(
+                            color: AppColors.lightTextSecondary,
+                            fontSize: 12,
+                          ),
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          DateFormatter.formatDate(_invoice!.dueDate!),
+                          style: const TextStyle(fontWeight: FontWeight.w600),
+                        ),
+                      ],
                     ),
                   ],
                 ),
@@ -394,38 +447,60 @@ class _InvoiceDetailScreenState extends ConsumerState<InvoiceDetailScreen> {
                 context,
               ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
             ),
-            const SizedBox(height: 12),
+            const Divider(height: 20),
             ...List.generate(_items.length, (index) {
               final item = _items[index];
-              return Padding(
-                padding: const EdgeInsets.only(bottom: 12),
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            item.description,
-                            style: const TextStyle(fontWeight: FontWeight.w500),
-                          ),
-                          Text(
-                            '${item.quantity} x ${CurrencyFormatter.format(item.unitPrice, _invoice!.currency)}',
-                            style: TextStyle(
-                              color: AppColors.lightTextSecondary,
-                              fontSize: 12,
-                            ),
-                          ),
-                        ],
+              final isLast = index == _items.length - 1;
+              return Column(
+                children: [
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Container(
+                        width: 3,
+                        height: 48,
+                        decoration: BoxDecoration(
+                          color: AppColors.primary200,
+                          borderRadius: BorderRadius.circular(2),
+                        ),
                       ),
-                    ),
-                    Text(
-                      CurrencyFormatter.format(item.total, _invoice!.currency),
-                      style: const TextStyle(fontWeight: FontWeight.w500),
-                    ),
-                  ],
-                ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              item.description,
+                              style: const TextStyle(
+                                fontWeight: FontWeight.w500,
+                                fontSize: 14,
+                              ),
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              '${item.quantity} x ${CurrencyFormatter.format(item.unitPrice, _invoice!.currency)}',
+                              style: TextStyle(
+                                color: AppColors.lightTextSecondary,
+                                fontSize: 12,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      Text(
+                        CurrencyFormatter.format(
+                            item.total, _invoice!.currency),
+                        style: const TextStyle(
+                          fontWeight: FontWeight.w600,
+                          fontSize: 14,
+                        ),
+                      ),
+                    ],
+                  ),
+                  if (!isLast) const SizedBox(height: 12),
+                  if (!isLast) const Divider(height: 1),
+                  if (!isLast) const SizedBox(height: 12),
+                ],
               );
             }),
           ],
@@ -436,6 +511,7 @@ class _InvoiceDetailScreenState extends ConsumerState<InvoiceDetailScreen> {
 
   Widget _buildTotalsCard() {
     return Card(
+      color: AppColors.primary500.withValues(alpha: 0.03),
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
@@ -487,7 +563,7 @@ class _InvoiceDetailScreenState extends ConsumerState<InvoiceDetailScreen> {
             style: TextStyle(
               fontWeight: bold ? FontWeight.bold : FontWeight.normal,
               fontSize: bold ? 16 : 14,
-              color: color,
+              color: color ?? (bold ? AppColors.primary500 : null),
             ),
           ),
         ],
@@ -502,15 +578,49 @@ class _InvoiceDetailScreenState extends ConsumerState<InvoiceDetailScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              'Notes',
-              style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                color: AppColors.lightTextSecondary,
-              ),
+            Row(
+              children: [
+                Icon(Icons.notes,
+                    size: 16, color: AppColors.lightTextSecondary),
+                const SizedBox(width: 8),
+                Text(
+                  'Notes',
+                  style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                    color: AppColors.lightTextSecondary,
+                  ),
+                ),
+              ],
             ),
             const SizedBox(height: 8),
-            Text(_invoice!.notes!),
+            Text(_invoice!.notes!, style: const TextStyle(height: 1.5)),
           ],
+        ),
+      ),
+    );
+  }
+}
+
+class _InvoiceDetailShimmer extends StatelessWidget {
+  const _InvoiceDetailShimmer();
+
+  @override
+  Widget build(BuildContext context) {
+    return ListView(
+      padding: const EdgeInsets.all(16),
+      children: List.generate(
+        4,
+        (_) => Padding(
+          padding: const EdgeInsets.only(bottom: 16),
+          child: LoadingShimmer(
+            isLoading: true,
+            child: Container(
+              height: 100,
+              decoration: BoxDecoration(
+                color: Colors.grey.shade300,
+                borderRadius: BorderRadius.circular(12),
+              ),
+            ),
+          ),
         ),
       ),
     );
